@@ -56,6 +56,78 @@ var normalizeMapping = function(mapping) {
 }
 
 
+
+
+
+
+
+
+
+
+// Requested feature demo
+var IndexedTask = base.Entity.configure({
+  mapping: [
+    {
+      // PartitionKey Always encodedstring
+      type:             Entity.types.PartitionKey,
+      property:         'revision'
+    }, {
+      // RowKey is always an encodedstring
+      type:             Entity.types.CompositeRowKey,
+      properties: [
+        'repositoryName',
+        'branchName',
+        'hash'
+      ]
+    }, {
+      // Row key that is a constant
+      type:             Entity.types.RowKeyConstant
+      constant:         'TaskGraph' // Constant row-key value
+    }, {
+      // Array using multiple azure table keys to allow for bigger size
+      type:             Entity.types.List,
+      // First part of the array is stored in the key "requires:0"
+      prefix:           'requires',
+      // The array is exposed to the user as  "requires"
+      property:         'requires'
+
+      // Note is not possible to compare against an list
+
+    }, {
+      // A map from string to strings
+      type:             Entity.types.Map,
+      // Prefix for all keys
+      prefix:           'tag',
+      // property holding an object that is stored as prefixed keys
+      property:         'tags'
+
+      // It is possible to query on a map... not exactly sure how though :)
+    }
+  ]
+});
+
+
+
+
+
+
+
+/** Construct schema from mapping */
+var Schema = function(version, mapping, migrate) {
+
+};
+
+/** Serialize data for storage in azure table storage */
+Schema.prototype.encode = function(data) {
+  this.mapping.
+};
+
+/** Deserialize raw entity from azure table storage */
+Schema.prototype.decode = function(entity) {
+
+};
+
+
 /** Base class of all entity */
 var Entity = function(entity) {
   // Set __etag
