@@ -8,6 +8,327 @@ var Promise         = require('promise');
 var debug           = require('debug')('base:entity');
 var azureTable      = require('azure-table-node');
 
+/** Base class of all entity */
+var Entity = function(entity) {
+  // Set __etag
+  this.__etag = entity.__etag || null;
+
+  // Create shadow object
+  this.__shadow = {};
+
+  // TODO: Fix this
+  _.forIn(this.__mapping, function(entry, key) {
+    this.__shadow[entry.property] = entry.deserialize(entity[key]);
+  }, this);
+};
+
+
+// Export Entity
+module.exports = Entity;
+
+
+
+
+// Export DataType
+Entity.DataType = DataType;
+
+
+// Built-in type handlers
+Entity.types = {};
+
+
+/** String Entity type */
+Entity.types.String = function(property) {
+  DataType.call(this, property);
+};
+
+Entity.types.String.prototype.serialize = function(target, value) {
+  assert(typeof(value) === 'string', "Serializing property '%s' expected a " +
+         "string got: %j", this.property, value);
+  target[this.property] = value;
+};
+
+Entity.types.String.prototype.hash = function(value) {
+  assert(typeof(value) === 'string', "Hashing property '%s' expected a " +
+         "string, instead got: %j", this.property, value);
+  return value;
+};
+
+Entity.types.String.prototype.deserialize = function(source) {
+  var value = source[this.property];
+  assert(typeof(value) === 'string', "Loading property '%s' expected " +
+                                     "string for %j", this.property, source);
+  return value;
+};
+
+
+/** Number Entity type */
+Entity.types.Number = function(property) {
+  DataType.call(this, property);
+};
+
+Entity.types.Number.prototype.serialize = function(target, value) {
+  assert(typeof(value) === 'number', "Serializing property '%s' expected a " +
+         "number got: %j", this.property, value);
+  target[this.property] = value;
+};
+
+Entity.types.Number.prototype.hash = function(value) {
+  assert(typeof(value) === 'number', "Hashing property '%s' expected a " +
+         "number, instead got: %j", this.property, value);
+  return '' + value;  // Convert to string
+};
+
+Entity.types.Number.prototype.deserialize = function(source) {
+  var value = source[this.property];
+  assert(typeof(value) === 'number', "Loading property '%s' expected " +
+                                     "number for %j", this.property, source);
+  return value;
+};
+
+
+
+
+
+
+/**
+ * Configure a subclass of `this` (`Entity` or subclass thereof) with following
+ * options:
+ * {
+ *   credentials: {
+ *     accountName:    "...",              // Azure account name
+ *     accountKey:     "...",              // Azure account key
+ *   },
+ *   tableName:        "AzureTableName",   // Azure table name
+ *   mapping:          [...]               // Property mapping.
+ * }
+ *
+ * When creating a subclass of `Entity` using this method, you must provide all
+ * options before you try to initialize instances of the subclass. You may
+ * create a subclass hierarchy and provide options one at the time. More details
+ * below.
+ *
+ * When creating a subclass using `configure` all the class properties and
+ * class members (read static functions like `Entity.configure`) will also be
+ * inherited. So it is possible to do as follows:
+ *
+ * ```js
+ * // Create an abstract user
+ * var AbstractUser = Entity.configure({
+ *   mapping: [
+ *     {key: 'PartitionKey', property: 'userId', type: 'string'},
+ *     ...
+ *   ]
+ * });
+ *
+ * AbstractUser.load = function(userId) {
+ *   // Hard code in the RowKey, because we only index by `userId`
+ *   return Entity.load.call(this, userId, 'user-definition');
+ * };
+
+ * // Create one UserTyp
+ * var UserType1 = AbstractUser.configure({
+ *   credentials:    {...},
+ *   tableName:      "UserTable1"
+ * });
+
+ * // Create another UserType with a separate table
+ * var UserType2 = AbstractUser.configure({
+ *   credentials:    {...},
+ *   tableName:      "UserTable2"
+ * });
+ * ```
+ *
+ * Typically, `Entity.configure` will be used in a module to create a subclass
+ * of Entity with neat auxiliary static class methods and useful members, then
+ * this abstract type will again be subclassed and configured with connection
+ * credentials and table name. This allows for multiple tables with the same
+ * abstract definition.
+ */
+Entity.configure = function(options) {
+  // Identify the parent class, that is always `this` so we can use it on
+  // subclasses
+  var Parent = this;
+
+  // Create a subclass of Parent
+  var subClass = function(entity) {
+    // Always pass down the entity we're initializing from
+    Parent.call(this, entity);
+  };
+  util.inherits(subClass, Parent);
+
+  // Inherit class methods too (static members in C++)
+  _.assign(subClass, Parent);
+
+
+  // If credentials are provided validate them and add an azure table client
+  if (options.credentials) {
+    assert(options.credentials,             "Azure credentials must be given");
+    assert(options.credentials.accountName, "Missing accountName");
+    assert(options.credentials.accountKey ||
+           options.credentials.sas,         "Missing accountKey or sas");
+    // Add accountUrl, if not already present, there is really no reason to
+    // not just compute... That's what the Microsoft libraries does anyways
+    var credentials = _.defaults({}, options.credentials, {
+      accountUrl:  "https://" + options.credentials.accountName +
+                   ".table.core.windows.net/"
+    });
+    assert(/^https:\/\//.test(credentials.accountUrl),
+                                              "Don't use non-HTTPS accountUrl");
+    subClass.prototype._azClient = azureTable.createClient(credentials);
+  }
+
+  // If tableName is provide validate and add it
+  if (options.tableName) {
+    assert(typeof(options.tableName) === 'string', "tableName isn't a string");
+    subClass.prototype._azTableName = options.tableName;
+  }
+
+  // If mapping is given assign it
+  if (options.mapping) {
+    subClass.prototype.__mapping = normalizeMapping(options.mapping);
+    // Define access properties
+    _.forIn(subClass.prototype.__mapping, function(entry) {
+      if (entry.hidden) {
+        return;
+      }
+      // Define property for accessing underlying shadow object
+      Object.defineProperty(subClass.prototype, entry.property, {
+        enumerable: true,
+        get:        function() {return this.__shadow[entry.property]; }
+      });
+    });
+  }
+
+  // Return subClass
+  return subClass;
+};
+
+
+/**
+ * Create an entity on azure table with property and mapping.
+ * Returns a promise for an instance of `this` (typically an Entity subclass)
+ */
+Entity.create = function(properties) {
+  var Class = this;
+  assert(properties,  "Properties is required");
+  assert(Class,       "Entity.create must be bound to an Entity subclass");
+  assert(Class.prototype._azClient,     "Azure credentials not configured");
+  assert(Class.prototype._azTableName,  "Azure tableName not configured");
+  assert(Class.prototype.__mapping,     "Property mapping not configured");
+
+  // Return a promise that we inserted the entity
+  return new Promise(function(accept, reject) {
+    // Construct entity from properties
+    var entity = {};
+    _.forIn(Class.prototype.__mapping, function(entry, key) {
+      entity[key] = entry.serialize(properties[entry.property]);
+    });
+
+    // Insert entity
+    Class.prototype._azClient.insertEntity(Class.prototype._azTableName,
+                                           entity, function(err, etag) {
+      // Reject if we have an error
+      if (err) {
+        debug("Failed to insert entity: %j", entity);
+        return reject(err);
+      }
+
+      // Add etag to entity
+      entity.__etag = etag;
+
+      // Return entity that we inserted
+      debug("Inserted entity: %j", entity);
+      accept(entity);
+    });
+  }).then(function(entity) {
+    // Construct Entity subclass using Class
+    return new Class(entity);
+  });
+};
+
+/**
+ * Load Entity subclass from azure given PartitionKey and RowKey,
+ * This method return a promise for the subclass instance.
+ */
+Entity.load = function(partitionKey, rowKey) {
+  var Class = this;
+  assert(partitionKey !== undefined &&
+         partitionKey !== null,         "PartitionKey is required");
+  assert(rowKey !== undefined &&
+         rowKey !== null,               "RowKey is required");
+  assert(Class,           "Entity.create must be bound to an Entity subclass");
+  var client    = Class.prototype._azClient;
+  var tableName = Class.prototype._azTableName;
+  var mapping   = Class.prototype.__mapping;
+  assert(client,    "Azure credentials not configured");
+  assert(tableName, "Azure tableName not configured");
+  assert(mapping,   "Property mapping not configured");
+
+  // Serialize partitionKey and rowKey
+  partitionKey  = mapping.PartitionKey.serialize(partitionKey);
+  rowKey        = mapping.RowKey.serialize(rowKey);
+  return new Promise(function(accept, reject) {
+    client.getEntity(tableName, partitionKey, rowKey, function(err, entity) {
+      // Reject if there is an error
+      if (err) {
+        return reject(err);
+      }
+
+      // Accept constructed entity, we'll wrap below, to catch exceptions
+      accept(entity);
+    });
+  }).then(function(entity) {
+    // Construct and return Entity subclass using constructor
+    return new Class(entity);
+  });
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Data types registered
 var _dataTypes = {};
 
@@ -55,12 +376,93 @@ var normalizeMapping = function(mapping) {
   return result;
 }
 
+/*
+Considerations:
+  - Support constant RK and PK
+  - Hash PK and store values separately
+  - Composite keys
+  - Escape PK and RK
+  - Support multi-key data-types
+    - querying support
+  - Support binary encoding of JSON
+  - Support binary values (Buffers)
+
+Required:
+  - slugid
+  - date
+  - json
+  - number
+  - string
+
+Disallow:
+ - Property names:
+    - PartitionKey    (system key)
+    - RowKey          (system key)
+    - Timestamp       (system key)
+    - Version         (entities key)
+    - not match /^[a-zA-Z_-][a-zA-Z0-9_-]*$/
+      (anything that is not a proper identifier)
+    - any key starting with '__'
+ - CompositeKey/StringKey over 1024 character after encoding
+   (throw exception when key is created)
+
+*/
 
 
 
+var ArtifactV1 = base.Entity.configure({
+  version:        1,
+  partitionKey:   base.Entity.CompositeKey('taskId', 'runId'),
+  rowKey:         base.Entity.HashKey('name'),
+  properties: {
+    taskId:       base.Entity.types.SlugIdSet,
+    runId:        base.Entity.types.String,
+    name:         base.Entity.types.String,
+    storageType:  base.Entity.types.String,
+    contentType:  base.Entity.types.String,
+    details:      base.Entity.types.JSON,
+    expires:      base.Entity.types.String
+  }
+});
+
+var ArtifactV2 = base.Entity.configure({
+  version:        1,
+  partitionKey:   base.Entity.CompositeKey('taskId', 'runId'),
+  rowKey:         base.Entity.HashKey('name'),
+  properties: {
+    taskId:       base.Entity.types.SlugId,
+    runId:        base.Entity.types.Number,
+    name:         base.Entity.types.String,
+    storageType:  base.Entity.types.String,
+    contentType:  base.Entity.types.String,
+    details:      base.Entity.types.JSON,
+    expires:      base.Entity.types.Date
+  },
+  migrate: function(item) {
+    return {
+      taskId:       item.taskId,
+      runId:        parseInt(item.runId),
+      name:         item.name,
+      storageType:  item.storageType,
+      contentType:  item.contentType,
+      details:      item.details,
+      expires:      new Date(item.expires)
+    };
+  }
+});
 
 
 
+var Namespace = base.Entity.configure({
+  version:          1,
+  partitionKey:     base.Entity.HashKey('parent'),
+  rowKey:           base.Entity.StringKey('name'),
+  properties: {
+    parent:         base.Entity.types.String,
+    name:           base.Entity.types.String,
+    expires:        base.Entity.types.Date
+  }
+});
 
 
 
@@ -939,6 +1341,3 @@ Entity.deleteTable = function(ignoreErrors) {
   });
 };
 
-
-// Export Entity
-module.exports = Entity;
