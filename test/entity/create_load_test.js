@@ -53,8 +53,6 @@ suite("Entity (create/load)", function() {
   test("ItemV2 = ItemV1.configure", function() {
     ItemV2 = ItemV1.configure({
       version:          2,
-      partitionKey:     base.Entity.keys.StringKey('id'),
-      rowKey:           base.Entity.keys.StringKey('name'),
       properties: {
         id:             base.Entity.types.String,
         name:           base.Entity.types.String,
