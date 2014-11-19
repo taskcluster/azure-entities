@@ -1,4 +1,4 @@
-suite("Entity (BlobType)", function() {
+suite("Entity (JSONType)", function() {
   var assert  = require('assert');
   var slugid  = require('slugid');
   var _       = require('lodash');
@@ -16,92 +16,101 @@ suite("Entity (BlobType)", function() {
     properties: {
       id:             base.Entity.types.String,
       name:           base.Entity.types.String,
-      data:           base.Entity.types.Blob
+      data:           base.Entity.types.JSON
     }
   }).setup({
     credentials:  cfg.get('azure'),
     tableName:    cfg.get('azureTestTableName')
   });
 
-  var compareBuffers = function(b1, b2) {
-    assert(Buffer.isBuffer(b1));
-    assert(Buffer.isBuffer(b2));
-    if (b1.length !== b2.length) {
-      return false;
+  // Construct a large string
+  var randomString = function(kbytes) {
+    var s = "abcefsfcccsrcsdfsdfsfrfdefdwedwiedowijdwoeidnwoifneoifnweodnwoid";
+    s = s + s; // 128
+    s = s + s; // 256
+    s = s + s; // 512
+    s = s + s; // 1024
+    var arr = [];
+    for(var i = 0; i < kbytes; i++) {
+      arr.push(s);
     }
-    var n = b1.length;
-    for (var i = 0; i < n; i++) {
-      if (b1[i] !== b2[i]) {
-        return false;
-      }
-    }
-    return true;
-  }
+    return arr.join('');
+  };
 
-  test("small blob", function() {
-    var id  = slugid.v4();
-    var buf = new Buffer([0, 1, 2, 3]);
+  test("largeString helper", function() {
+    var text  = randomString(64);
+    assert(text.length === 1024 * 64);
+  });
+
+  test("small JSON object", function() {
+    var id    = slugid.v4();
+    var obj   = {text: "Hello World", number: 42};
     return Item.create({
       id:     id,
       name:   'my-test-item',
-      data:   buf
+      data:   obj
     }).then(function(itemA) {
       return Item.load({
         id:     id,
         name:   'my-test-item'
       }).then(function(itemB) {
-        assert(compareBuffers(itemA.data, itemB.data));
+        assert(_.isEqual(itemA.data, itemB.data));
+        assert(_.isEqual(itemA.data, obj));
       });
     });
   });
 
-  test("large blob (64k)", function() {
-    var id  = slugid.v4();
-    var buf = crypto.pseudoRandomBytes(64 * 1024);
+
+  test("large JSON object (62k)", function() {
+    var id    = slugid.v4();
+    var obj   = {text: randomString(62), number: 42};
     return Item.create({
       id:     id,
       name:   'my-test-item',
-      data:   buf
+      data:   obj
     }).then(function(itemA) {
       return Item.load({
         id:     id,
         name:   'my-test-item'
       }).then(function(itemB) {
-        assert(compareBuffers(itemA.data, itemB.data));
+        assert(_.isEqual(itemA.data, itemB.data));
+        assert(_.isEqual(itemA.data, obj));
       });
     });
   });
 
-  test("large blob (128k)", function() {
-    var id  = slugid.v4();
-    var buf = crypto.pseudoRandomBytes(128 * 1024);
+  test("large JSON object (126k)", function() {
+    var id    = slugid.v4();
+    var obj   = {text: randomString(126), number: 42};
     return Item.create({
       id:     id,
       name:   'my-test-item',
-      data:   buf
+      data:   obj
     }).then(function(itemA) {
       return Item.load({
         id:     id,
         name:   'my-test-item'
       }).then(function(itemB) {
-        assert(compareBuffers(itemA.data, itemB.data));
+        assert(_.isEqual(itemA.data, itemB.data));
+        assert(_.isEqual(itemA.data, obj));
       });
     });
   });
 
-  test("large blob (256k)", function() {
-    var id  = slugid.v4();7
-    var buf = crypto.pseudoRandomBytes(256 * 1024);
+  test("large JSON object (255k)", function() {
+    var id    = slugid.v4();
+    var obj   = {text: randomString(255), number: 42};
     return Item.create({
       id:     id,
       name:   'my-test-item',
-      data:   buf
+      data:   obj
     }).then(function(itemA) {
       return Item.load({
         id:     id,
         name:   'my-test-item'
       }).then(function(itemB) {
-        assert(compareBuffers(itemA.data, itemB.data));
+        assert(_.isEqual(itemA.data, itemB.data));
+        assert(_.isEqual(itemA.data, obj));
       });
     });
   });
