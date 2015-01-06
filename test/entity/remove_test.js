@@ -19,7 +19,7 @@ suite("Entity (remove)", function() {
     }
   }).setup({
     credentials:  cfg.get('azure'),
-    tableName:    cfg.get('azureTestTableName')
+    table:        cfg.get('azureTestTableName')
   });
 
 

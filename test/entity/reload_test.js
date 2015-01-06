@@ -19,7 +19,7 @@ suite("Entity (reload)", function() {
     }
   }).setup({
     credentials:  cfg.get('azure'),
-    tableName:    cfg.get('azureTestTableName')
+    table:        cfg.get('azureTestTableName')
   });
 
   test("Item.create, item.modify, item.reload", function() {

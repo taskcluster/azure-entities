@@ -22,7 +22,7 @@ suite("Entity (CompositeKey)", function() {
     }
   }).setup({
     credentials:  cfg.get('azure'),
-    tableName:    cfg.get('azureTestTableName')
+    table:        cfg.get('azureTestTableName')
   });
 
   test("Item.create, Item.load", function() {

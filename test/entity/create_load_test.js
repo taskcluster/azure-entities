@@ -27,7 +27,7 @@ suite("Entity (create/load)", function() {
   test("Item = ItemV1.setup", function() {
     Item = ItemV1.setup({
       credentials:  cfg.get('azure'),
-      tableName:    cfg.get('azureTestTableName')
+      table:        cfg.get('azureTestTableName')
     });
   });
 
@@ -73,7 +73,7 @@ suite("Entity (create/load)", function() {
   test("Item = ItemV2.setup", function() {
     Item = ItemV2.setup({
       credentials:  cfg.get('azure'),
-      tableName:    cfg.get('azureTestTableName')
+      table:        cfg.get('azureTestTableName')
     });
   });
 

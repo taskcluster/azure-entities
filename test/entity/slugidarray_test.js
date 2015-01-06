@@ -20,7 +20,7 @@ suite("Entity (SlugIdArrayType)", function() {
     }
   }).setup({
     credentials:  cfg.get('azure'),
-    tableName:    cfg.get('azureTestTableName')
+    table:        cfg.get('azureTestTableName')
   });
 
   test("SlugIdArray.push", function() {

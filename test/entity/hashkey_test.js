@@ -22,7 +22,7 @@ suite("Entity (HashKey)", function() {
     }
   }).setup({
     credentials:  cfg.get('azure'),
-    tableName:    cfg.get('azureTestTableName')
+    table:        cfg.get('azureTestTableName')
   });
 
   test("Item.create, HashKey.exact (test against static data)", function() {

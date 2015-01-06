@@ -20,7 +20,7 @@ suite("Entity (JSONType)", function() {
     }
   }).setup({
     credentials:  cfg.get('azure'),
-    tableName:    cfg.get('azureTestTableName')
+    table:        cfg.get('azureTestTableName')
   });
 
   // Construct a large string

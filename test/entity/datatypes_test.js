@@ -22,7 +22,7 @@ suite("Entity (Common DataTypes)", function() {
         }
       }).setup({
         credentials:  cfg.get('azure'),
-        tableName:    cfg.get('azureTestTableName')
+        table:        cfg.get('azureTestTableName')
       });
 
       var id    = slugid.v4();

@@ -20,7 +20,7 @@ suite("Entity (ConstantKey)", function() {
       }
     }).setup({
       credentials:  cfg.get('azure'),
-      tableName:    cfg.get('azureTestTableName')
+      table:        cfg.get('azureTestTableName')
     });
 
     return Item.create({
@@ -45,7 +45,7 @@ suite("Entity (ConstantKey)", function() {
       }
     }).setup({
       credentials:  cfg.get('azure'),
-      tableName:    cfg.get('azureTestTableName')
+      table:        cfg.get('azureTestTableName')
     });
 
     var id = slugid.v4();

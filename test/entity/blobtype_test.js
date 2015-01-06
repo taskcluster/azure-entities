@@ -20,7 +20,7 @@ suite("Entity (BlobType)", function() {
     }
   }).setup({
     credentials:  cfg.get('azure'),
-    tableName:    cfg.get('azureTestTableName')
+    table:        cfg.get('azureTestTableName')
   });
 
   var compareBuffers = function(b1, b2) {

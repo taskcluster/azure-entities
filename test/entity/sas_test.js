@@ -41,7 +41,7 @@ suite("Entity (Shared-Access-Signatures)", function() {
       accountName:    cfg.get('azure:accountName'),
       sas:            sas
     },
-    tableName:        cfg.get('azureTestTableName')
+    table:            cfg.get('azureTestTableName')
   });
 
   test("Item.create, item.modify, item.reload", function() {
