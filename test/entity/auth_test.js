@@ -1,4 +1,4 @@
-suite("Entity (create/load)", function() {
+suite("Entity (SAS from auth.taskcluster.net)", function() {
   var assert          = require('assert');
   var slugid          = require('slugid');
   var _               = require('lodash');
@@ -18,6 +18,8 @@ suite("Entity (create/load)", function() {
   });
 
   // Declare a method we can test parameterized scopes with
+  var returnExpiredSAS = false;
+  var callCount = 0;
   api.declare({
     method:     'get',
     route:      '/azure/:account/table/:table/read-write',
@@ -27,6 +29,7 @@ suite("Entity (create/load)", function() {
     title:        "Test SAS End-Point",
     description:  "Get SAS for testing",
   }, function(req, res) {
+    callCount += 1;
     var account = req.params.account;
     var table   = req.params.table;
     if (!req.satisfies({account: account, table: table})) {
@@ -42,16 +45,21 @@ suite("Entity (create/load)", function() {
       ].join('')
     });
     var client = azureTable.createClient(credentials);
+    var expiry = new Date(Date.now() + 15 * 60 * 1000);
     var sas = client.generateSAS(
       table,
       'raud',
-      new Date(Date.now() + 15 * 60 * 1000),
+      expiry,
       {
         start:  new Date(Date.now() - 15 * 60 * 1000)
       }
     );
+    // Return and old expiry, this causes a refresh on the next call
+    if (returnExpiredSAS) {
+      expiry = new Date(Date.now() - 15 * 60 * 1000);
+    }
     res.status(200).json({
-      expiry:   new Date(Date.now() + 15 * 60 * 1000).toJSON(),
+      expiry:   expiry.toJSON(),
       sas:      sas
     });
   });
@@ -139,22 +147,53 @@ suite("Entity (create/load)", function() {
     });
   });
 
-  var id = slugid.v4();
 
-  test("Item.create", function() {
+  test("Item.create && Item.load", function() {
+    var id = slugid.v4();
+    callCount = 0;
+    returnExpiredSAS = false; // We should be able to reuse the SAS
     return Item.create({
       id:     id,
       name:   'my-test-item',
       count:  1
+    }).then(function() {
+      return Item.load({
+        id:     id,
+        name:   'my-test-item',
+      }).then(function(item) {
+        assert(item.count === 1);
+      });
+    }).then(function() {
+      assert(callCount === 1, "We should only have called once!");
     });
   });
 
-  test("Item.load", function() {
-    return Item.load({
+  test("Expiry < now => refreshed SAS", function() {
+    callCount = 0;
+    returnExpiredSAS = true;  // This means we call for each operation
+    var id = slugid.v4();
+    var Item2 = ItemV1.setup({
+      account:      'taskclusterdev',
+      table:        cfg.get('azureTestTableName'),
+      credentials:  {
+        clientId:         'authed-client',
+        accessToken:      'test-token'
+      },
+      authBaseUrl:  'http://localhost:23244'
+    });
+    return Item2.create({
       id:     id,
       name:   'my-test-item',
-    }).then(function(item) {
-      assert(item.count === 1);
+      count:  1
+    }).then(function() {
+      return Item2.load({
+        id:     id,
+        name:   'my-test-item',
+      }).then(function(item) {
+        assert(item.count === 1);
+      });
+    }).then(function() {
+      assert(callCount === 2, "We should only have called once!");
     });
   });
 });
