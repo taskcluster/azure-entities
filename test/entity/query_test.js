@@ -109,6 +109,8 @@ suite("Entity (query)", function() {
     });
   });
 
+  return;
+
   test("Query a partition (with handler)", function() {
     var sum = 0;
     return Item.query({id: id}, {
