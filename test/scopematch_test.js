@@ -49,13 +49,13 @@ suite("scopeMatch", function() {
     mktest([], [['foo:bar']], false));
   test("bare star",
     mktest(["*"], [['foo:bar', 'bar:bing']], true));
+  test("empty conjunction in scopesets",
+    mktest(["foo:bar"], [[]], true));
   test("non-string scopesets",
     mktest(["foo:bar"], {}, 'exception'));
   test("non-string scopeset",
     mktest(["foo:bar"], [{}], 'exception'));
   test("empty disjunction in scopesets",
     mktest(["foo:bar"], [], false));
-  test("empty conjunction in scopesets",
-    mktest(["foo:bar"], [[]], 'exception'));
 });
 
