@@ -21,7 +21,7 @@ suite("Entity (EncryptedBlobType)", function() {
   }).setup({
     credentials:      cfg.get('azure'),
     table:            cfg.get('azureTestTableName'),
-    encryptionKey:    'CNcj2aOozdo7Pn+HEkAIixwninIwKnbYc6JPS9mNxZk='
+    cryptoKey:        'CNcj2aOozdo7Pn+HEkAIixwninIwKnbYc6JPS9mNxZk='
   });
 
   var compareBuffers = function(b1, b2) {

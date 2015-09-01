@@ -166,7 +166,7 @@ suite("Entity (create/load/modify DataTypes)", function() {
       }).setup({
         credentials:      cfg.get('azure'),
         table:            cfg.get('azureTestTableName'),
-        encryptionKey:    'Iiit3Y+b4m7z7YOmKA2iCbZDGyEmy6Xn42QapzTU67w='
+        cryptoKey:        'Iiit3Y+b4m7z7YOmKA2iCbZDGyEmy6Xn42QapzTU67w='
       });
 
       var id = slugid.v4();
@@ -211,7 +211,7 @@ suite("Entity (create/load/modify DataTypes)", function() {
         credentials:      cfg.get('azure'),
         table:            cfg.get('azureTestTableName'),
         signingKey:       'my-super-secret',
-        encryptionKey:    'Iiit3Y+b4m7z7YOmKA2iCbZDGyEmy6Xn42QapzTU67w='
+        cryptoKey:        'Iiit3Y+b4m7z7YOmKA2iCbZDGyEmy6Xn42QapzTU67w='
       });
 
       var id = slugid.v4();

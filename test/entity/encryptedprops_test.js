@@ -31,15 +31,54 @@ suite("Entity (encrypted properties)", function() {
     Item = ItemV1.setup({
       credentials:      cfg.get('azure'),
       table:            cfg.get('azureTestTableName'),
-      encryptionKey:    ENCRYPTION_KEY
+      cryptoKey:        ENCRYPTION_KEY
     });
   });
 
-  test("ItemV1.setup (requires encryptionKey)", function() {
+  test("ItemV1.setup (requires cryptoKey)", function() {
     try {
       ItemV1.setup({
         credentials:  cfg.get('azure'),
         table:        cfg.get('azureTestTableName')
+      });
+    } catch (err) {
+      return; // Expected error
+    }
+    assert(false, "Expected an error!");
+  });
+
+  test("ItemV1.setup (cryptoKey < 32 bytes doesn't work)", function() {
+    try {
+      ItemV1.setup({
+        credentials:  cfg.get('azure'),
+        table:        cfg.get('azureTestTableName'),
+        cryptoKey:    crypto.randomBytes(31).toString('base64')
+      });
+    } catch (err) {
+      return; // Expected error
+    }
+    assert(false, "Expected an error!");
+  });
+
+  test("ItemV1.setup (cryptoKey > 32 bytes doesn't work)", function() {
+    try {
+      ItemV1.setup({
+        credentials:  cfg.get('azure'),
+        table:        cfg.get('azureTestTableName'),
+        cryptoKey:    crypto.randomBytes(33).toString('base64')
+      });
+    } catch (err) {
+      return; // Expected error
+    }
+    assert(false, "Expected an error!");
+  });
+
+  test("ItemV1.setup (requires cryptoKey in base64)", function() {
+    try {
+      ItemV1.setup({
+        credentials:  cfg.get('azure'),
+        table:        cfg.get('azureTestTableName'),  // Notice: ! below
+        cryptoKey:    'CNcj2aOozdo7Pn+HEkAIixwninIwKnbYc6JPS9mNxZ!='
       });
     } catch (err) {
       return; // Expected error
@@ -87,11 +126,11 @@ suite("Entity (encrypted properties)", function() {
     });
   });
 
-  test("Item.load (invalid encryptionKey)", function() {
+  test("Item.load (invalid cryptoKey)", function() {
     var BadKeyItem = ItemV1.setup({
       credentials:    cfg.get('azure'),
       table:          cfg.get('azureTestTableName'),
-      encryptionKey:  crypto.randomBytes(32).toString('base64')
+      cryptoKey:      crypto.randomBytes(32).toString('base64')
     });
     return BadKeyItem.load({
       id:     id
@@ -126,11 +165,11 @@ suite("Entity (encrypted properties)", function() {
     Item2 = ItemV2.setup({
       credentials:    cfg.get('azure'),
       table:          cfg.get('azureTestTableName'),
-      encryptionKey:  ENCRYPTION_KEY
+      cryptoKey:      ENCRYPTION_KEY
     });
   });
 
-  test("ItemV2.setup (requires encryptionKey)", function() {
+  test("ItemV2.setup (requires cryptoKey)", function() {
     try {
       ItemV2.setup({
         credentials:  cfg.get('azure'),
@@ -151,11 +190,11 @@ suite("Entity (encrypted properties)", function() {
     });
   });
 
-  test("Item2.load (invalid encryptionKey)", function() {
+  test("Item2.load (invalid cryptoKey)", function() {
     var BadKeyItem2 = ItemV2.setup({
       credentials:    cfg.get('azure'),
       table:          cfg.get('azureTestTableName'),
-      encryptionKey:  crypto.randomBytes(32).toString('base64')
+      cryptoKey:      crypto.randomBytes(32).toString('base64')
     });
     return BadKeyItem2.load({
       id:     id
@@ -219,7 +258,7 @@ suite("Entity (encrypted properties)", function() {
     Item3 = ItemV3.setup({
       credentials:    cfg.get('azure'),
       table:          cfg.get('azureTestTableName'),
-      encryptionKey:  ENCRYPTION_KEY
+      cryptoKey:      ENCRYPTION_KEY
     });
   });
 
@@ -249,11 +288,11 @@ suite("Entity (encrypted properties)", function() {
     });
   });
 
-  test("Item3.load (invalid encryptionKey)", function() {
+  test("Item3.load (invalid cryptoKey)", function() {
     var BadKeyItem3 = ItemV3.setup({
       credentials:    cfg.get('azure'),
       table:          cfg.get('azureTestTableName'),
-      encryptionKey:  crypto.randomBytes(32).toString('base64')
+      cryptoKey:      crypto.randomBytes(32).toString('base64')
     });
     return BadKeyItem3.load({
       id:     id
