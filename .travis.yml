@@ -3,10 +3,8 @@ env:
   - DEBUG='* -superagent -express:* -mocha:*'
 language: node_js
 node_js:
-- '0.11'
-services:
-- rabbitmq
+- '0.12'
 script: npm test
 before_install:
-- openssl aes-256-cbc -K $encrypted_505377a1c128_key -iv $encrypted_505377a1c128_iv
-  -in taskcluster-base-test.conf.json.enc -out taskcluster-base-test.conf.json -d
+- openssl aes-256-cbc -K $encrypted_478906b014c3_key -iv $encrypted_478906b014c3_iv
+  -in azure-entity-test.conf.json.enc -out azure-entity-test.conf.json -d

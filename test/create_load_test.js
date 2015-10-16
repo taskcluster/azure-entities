@@ -135,6 +135,8 @@ suite("Entity (create/load)", function() {
     });
   });
 
+  var ItemV2; // Tisk, tisk, intertest dependency!
+
   test("ItemV2 = ItemV1.configure", function() {
     ItemV2 = ItemV1.configure({
       version:          2,

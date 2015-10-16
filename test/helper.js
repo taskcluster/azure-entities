@@ -1,4 +1,4 @@
-var base    = require('../../');
+var base    = require('taskcluster-base');
 
 /** Load configuration */
 var loadConfig = function() {
@@ -10,7 +10,7 @@ var loadConfig = function() {
       'azureTestTableName',
       'influxdb_connectionString'
     ],
-    filename:               'taskcluster-base-test'
+    filename:               'azure-entity-test'
   });
 
   // Check that we have configuration or abort

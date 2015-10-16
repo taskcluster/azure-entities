@@ -19,12 +19,14 @@
     "babel-runtime": "^5.8.25",
     "buffertools": "2.1.2",
     "debug": "2.0.0",
+    "express": "^4.13.3",
     "fast-azure-storage": "^0.1.2",
     "json-stable-stringify": "1.0.0",
     "lodash": "2.4.1",
     "promise": "6.1.0",
     "slugid": "1.0.3",
-    "taskcluster-client": "0.22.6"
+    "taskcluster-client": "0.22.6",
+    "taskcluster-lib-stats": "^0.8.7"
   },
   "devDependencies": {
     "babel-compile": "0.0.3",
