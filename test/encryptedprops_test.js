@@ -1,9 +1,10 @@
+var subject = require("../lib/entity")
 suite("Entity (encrypted properties)", function() {
   var assert  = require('assert');
   var slugid  = require('slugid');
   var _       = require('lodash');
   var Promise = require('promise');
-  var base    = require('../../');
+  var base    = require("taskcluster-base")
   var debug   = require('debug')('base:test:entity:encryptedProps');
   var crypto  = require('crypto');
 
@@ -15,13 +16,13 @@ suite("Entity (encrypted properties)", function() {
 
   var ItemV1;
   test("ItemV1 = Entity.configure", function() {
-    ItemV1 = base.Entity.configure({
+    ItemV1 = subject.configure({
       version:          1,
-      partitionKey:     base.Entity.keys.StringKey('id'),
-      rowKey:           base.Entity.keys.ConstantKey('enc-props-test'),
+      partitionKey:     subject.keys.StringKey('id'),
+      rowKey:           subject.keys.ConstantKey('enc-props-test'),
       properties: {
-        id:             base.Entity.types.String,
-        count:          base.Entity.types.EncryptedJSON
+        id:             subject.types.String,
+        count:          subject.types.EncryptedJSON
       }
     });
   });
@@ -146,9 +147,9 @@ suite("Entity (encrypted properties)", function() {
     ItemV2 = ItemV1.configure({
       version:          2,
       properties: {
-        id:             base.Entity.types.String,
-        count:          base.Entity.types.Number,
-        reason:         base.Entity.types.String
+        id:             subject.types.String,
+        count:          subject.types.Number,
+        reason:         subject.types.String
       },
       migrate: function(item) {
         return {
@@ -241,8 +242,8 @@ suite("Entity (encrypted properties)", function() {
     ItemV3 = ItemV2.configure({
       version:          3,
       properties: {
-        id:             base.Entity.types.String,
-        count:          base.Entity.types.EncryptedJSON
+        id:             subject.types.String,
+        count:          subject.types.EncryptedJSON
       },
       migrate: function(item) {
         return {

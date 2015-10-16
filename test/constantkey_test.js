@@ -1,9 +1,10 @@
+var subject = require("../lib/entity")
 suite("Entity (ConstantKey)", function() {
   var assert  = require('assert');
   var slugid  = require('slugid');
   var _       = require('lodash');
   var Promise = require('promise');
-  var base    = require('../../');
+  var base    = require("taskcluster-base")
   var crypto  = require('crypto');
   var debug   = require('debug')('base:test:entity:compositekey');
 
@@ -11,12 +12,12 @@ suite("Entity (ConstantKey)", function() {
   var cfg = helper.loadConfig();
 
   test("Item.create, Item.load (without properties)", function() {
-    var Item = base.Entity.configure({
+    var Item = subject.configure({
       version:          1,
-      partitionKey:     base.Entity.keys.ConstantKey(slugid.v4()),
-      rowKey:           base.Entity.keys.ConstantKey(slugid.v4()),
+      partitionKey:     subject.keys.ConstantKey(slugid.v4()),
+      rowKey:           subject.keys.ConstantKey(slugid.v4()),
       properties: {
-        data:           base.Entity.types.Number
+        data:           subject.types.Number
       }
     }).setup({
       credentials:  cfg.get('azure'),
@@ -34,14 +35,14 @@ suite("Entity (ConstantKey)", function() {
   });
 
   test("Item.create, Item.load (combined with CompositeKey)", function() {
-    var Item = base.Entity.configure({
+    var Item = subject.configure({
       version:          1,
-      partitionKey:     base.Entity.keys.CompositeKey('taskId', 'runId'),
-      rowKey:           base.Entity.keys.ConstantKey("task-info"),
+      partitionKey:     subject.keys.CompositeKey('taskId', 'runId'),
+      rowKey:           subject.keys.ConstantKey("task-info"),
       properties: {
-        taskId:         base.Entity.types.SlugId,
-        runId:          base.Entity.types.Number,
-        data:           base.Entity.types.Number
+        taskId:         subject.types.SlugId,
+        runId:          subject.types.Number,
+        data:           subject.types.Number
       }
     }).setup({
       credentials:  cfg.get('azure'),

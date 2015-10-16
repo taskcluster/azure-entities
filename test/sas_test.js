@@ -1,9 +1,10 @@
+var subject = require("../lib/entity")
 suite("Entity (Shared-Access-Signatures)", function() {
   var assert      = require('assert');
   var slugid      = require('slugid');
   var _           = require('lodash');
   var Promise     = require('promise');
-  var base        = require('../../');
+  var base        = require("taskcluster-base")
   var azureTable  = require('azure-table-node');
 
   var helper      = require('./helper');
@@ -27,14 +28,14 @@ suite("Entity (Shared-Access-Signatures)", function() {
     }
   );
 
-  var Item = base.Entity.configure({
+  var Item = subject.configure({
     version:          1,
-    partitionKey:     base.Entity.keys.StringKey('id'),
-    rowKey:           base.Entity.keys.StringKey('name'),
+    partitionKey:     subject.keys.StringKey('id'),
+    rowKey:           subject.keys.StringKey('name'),
     properties: {
-      id:             base.Entity.types.String,
-      name:           base.Entity.types.String,
-      count:          base.Entity.types.Number
+      id:             subject.types.String,
+      name:           subject.types.String,
+      count:          subject.types.Number
     }
   }).setup({
     credentials: {

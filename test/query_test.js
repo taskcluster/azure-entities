@@ -1,30 +1,31 @@
+var subject = require("../lib/entity")
 suite("Entity (query)", function() {
   var assert  = require('assert');
   var slugid  = require('slugid');
   var _       = require('lodash');
   var Promise = require('promise');
-  var base    = require('../../');
+  var base    = require("taskcluster-base")
   var debug   = require('debug')('base:test:entity:query');
 
   var helper  = require('./helper');
   var cfg = helper.loadConfig();
 
-  var Item = base.Entity.configure({
+  var Item = subject.configure({
     version:          1,
-    partitionKey:     base.Entity.keys.StringKey('id'),
-    rowKey:           base.Entity.keys.StringKey('name'),
+    partitionKey:     subject.keys.StringKey('id'),
+    rowKey:           subject.keys.StringKey('name'),
     properties: {
-      id:             base.Entity.types.String,
-      name:           base.Entity.types.String,
-      count:          base.Entity.types.Number,
-      tag:            base.Entity.types.String,
-      time:           base.Entity.types.Date
+      id:             subject.types.String,
+      name:           subject.types.String,
+      count:          subject.types.Number,
+      tag:            subject.types.String,
+      time:           subject.types.Date
     }
   }).setup({
     credentials:  cfg.get('azure'),
     table:        cfg.get('azureTestTableName'),
     drain:        new base.stats.NullDrain(),
-    component:    'taskcluster-base-test',
+    component:    '"taskcluster-base"-test',
     process:      'mocha'
   });
 
@@ -70,7 +71,7 @@ suite("Entity (query)", function() {
 
   test("Query a partition (with Entity.op.equal)", function() {
     return Item.query({
-      id:     base.Entity.op.equal(id)
+      id:     subject.op.equal(id)
     }).then(function(data) {
       assert(data.entries.length === 3);
       var sum = 0;
@@ -194,7 +195,7 @@ suite("Entity (query)", function() {
     var sum = 0;
     return Item.query({
       id:       id,
-      time:     base.Entity.op.lessThan(new Date(1))
+      time:     subject.op.lessThan(new Date(1))
     }).then(function(data) {
       assert(data.entries.length === 1);
       assert(data.entries[0].name == 'item1');
@@ -205,7 +206,7 @@ suite("Entity (query)", function() {
     var sum = 0;
     return Item.query({
       id:       id,
-      time:     base.Entity.op.lessThan(new Date(100))
+      time:     subject.op.lessThan(new Date(100))
     }).then(function(data) {
       assert(data.entries.length === 2);
     });
@@ -215,7 +216,7 @@ suite("Entity (query)", function() {
     var sum = 0;
     return Item.query({
       id:       id,
-      time:     base.Entity.op.greaterThan(new Date(100))
+      time:     subject.op.greaterThan(new Date(100))
     }).then(function(data) {
       assert(data.entries.length === 1);
       assert(data.entries[0].name == 'item3');
@@ -225,7 +226,7 @@ suite("Entity (query)", function() {
   test("Filter by count < 3", function() {
     return Item.query({
       id:       id,
-      count:    base.Entity.op.lessThan(3)
+      count:    subject.op.lessThan(3)
     }).then(function(data) {
       assert(data.entries.length === 2);
       data.entries.forEach(function(item) {

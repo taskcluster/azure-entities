@@ -1,24 +1,25 @@
+var subject = require("../lib/entity")
 suite("Entity (HashKey)", function() {
   var assert  = require('assert');
   var slugid  = require('slugid');
   var _       = require('lodash');
   var Promise = require('promise');
-  var base    = require('../../');
+  var base    = require("taskcluster-base")
   var crypto  = require('crypto');
   var debug   = require('debug')('base:test:entity:hashkey');
 
   var helper  = require('./helper');
   var cfg = helper.loadConfig();
 
-  var Item = base.Entity.configure({
+  var Item = subject.configure({
     version:          1,
-    partitionKey:     base.Entity.keys.HashKey('id', 'data'),
-    rowKey:           base.Entity.keys.HashKey('text1', 'text2'),
+    partitionKey:     subject.keys.HashKey('id', 'data'),
+    rowKey:           subject.keys.HashKey('text1', 'text2'),
     properties: {
-      text1:          base.Entity.types.Text,
-      text2:          base.Entity.types.String,
-      id:             base.Entity.types.SlugId,
-      data:           base.Entity.types.JSON
+      text1:          subject.types.Text,
+      text2:          subject.types.String,
+      id:             subject.types.SlugId,
+      data:           subject.types.JSON
     }
   }).setup({
     credentials:  cfg.get('azure'),

@@ -1,9 +1,10 @@
+var subject = require("../lib/entity")
 suite("Entity (create/load/modify DataTypes)", function() {
   var assert  = require('assert');
   var slugid  = require('slugid');
   var _       = require('lodash');
   var Promise = require('promise');
-  var base    = require('../../');
+  var base    = require("taskcluster-base")
   var crypto  = require('crypto');
 
   var helper  = require('./helper');
@@ -13,13 +14,13 @@ suite("Entity (create/load/modify DataTypes)", function() {
     assert(!_.isEqual(sample1, sample2), "Samples should not be equal!");
     if (!encryptedTestOnly) {
       test(name, function() {
-        var Item = base.Entity.configure({
+        var Item = subject.configure({
           version:          1,
-          partitionKey:     base.Entity.keys.StringKey('id'),
-          rowKey:           base.Entity.keys.StringKey('name'),
+          partitionKey:     subject.keys.StringKey('id'),
+          rowKey:           subject.keys.StringKey('name'),
           properties: {
-            id:             base.Entity.types.String,
-            name:           base.Entity.types.String,
+            id:             subject.types.String,
+            name:           subject.types.String,
             data:           type
           }
         }).setup({
@@ -57,13 +58,13 @@ suite("Entity (create/load/modify DataTypes)", function() {
       });
 
       test(name + ' (signEntities)', function() {
-        var Item = base.Entity.configure({
+        var Item = subject.configure({
           version:          1,
-          partitionKey:     base.Entity.keys.StringKey('id'),
-          rowKey:           base.Entity.keys.ConstantKey('signing-test-item'),
+          partitionKey:     subject.keys.StringKey('id'),
+          rowKey:           subject.keys.ConstantKey('signing-test-item'),
           signEntities:     true,
           properties: {
-            id:             base.Entity.types.String,
+            id:             subject.types.String,
             data:           type
           }
         }).setup({
@@ -98,13 +99,13 @@ suite("Entity (create/load/modify DataTypes)", function() {
       });
 
       test(name + ' (signEntities detect invalid key)', function() {
-        var ItemClass = base.Entity.configure({
+        var ItemClass = subject.configure({
           version:          1,
-          partitionKey:     base.Entity.keys.StringKey('id'),
-          rowKey:           base.Entity.keys.ConstantKey('signing-test-item'),
+          partitionKey:     subject.keys.StringKey('id'),
+          rowKey:           subject.keys.ConstantKey('signing-test-item'),
           signEntities:     true,
           properties: {
-            id:             base.Entity.types.String,
+            id:             subject.types.String,
             data:           type
           }
         })
@@ -154,13 +155,13 @@ suite("Entity (create/load/modify DataTypes)", function() {
     }
 
     test(name + ' (w. EncryptedBlob)', function() {
-      var Item = base.Entity.configure({
+      var Item = subject.configure({
         version:          1,
-        partitionKey:     base.Entity.keys.StringKey('id'),
-        rowKey:           base.Entity.keys.ConstantKey('my-signing-test-item'),
+        partitionKey:     subject.keys.StringKey('id'),
+        rowKey:           subject.keys.ConstantKey('my-signing-test-item'),
         properties: {
-          id:             base.Entity.types.String,
-          blob:           base.Entity.types.EncryptedBlob,
+          id:             subject.types.String,
+          blob:           subject.types.EncryptedBlob,
           data:           type
         }
       }).setup({
@@ -197,14 +198,14 @@ suite("Entity (create/load/modify DataTypes)", function() {
     });
 
     test(name + ' (w. EncryptedBlob + signEntities)', function() {
-      var Item = base.Entity.configure({
+      var Item = subject.configure({
         version:          1,
-        partitionKey:     base.Entity.keys.StringKey('id'),
-        rowKey:           base.Entity.keys.ConstantKey('my-signing-test-item'),
+        partitionKey:     subject.keys.StringKey('id'),
+        rowKey:           subject.keys.ConstantKey('my-signing-test-item'),
         signEntities:     true,
         properties: {
-          id:             base.Entity.types.String,
-          blob:           base.Entity.types.EncryptedBlob,
+          id:             subject.types.String,
+          blob:           subject.types.EncryptedBlob,
           data:           type
         }
       }).setup({
@@ -244,49 +245,49 @@ suite("Entity (create/load/modify DataTypes)", function() {
 
   testType(
     'Entity.types.String',
-    base.Entity.types.String,
+    subject.types.String,
     "Hello World",
     "Hello World Again"
   );
   testType(
     'Entity.types.Number (float)',
-    base.Entity.types.Number,
+    subject.types.Number,
     42.3,
     56.7
   );
   testType(
     'Entity.types.Number (large)',
-    base.Entity.types.Number,
+    subject.types.Number,
     12147483648,
     13147483648
   );
   testType(
     'Entity.types.Number (int)',
-    base.Entity.types.Number,
+    subject.types.Number,
     45,
     1256
   );
   testType(
     'Entity.types.Date',
-    base.Entity.types.Date,
+    subject.types.Date,
     new Date(),
     new Date('2015-09-01T03:47:24.883Z')
   );
   testType(
     'Entity.types.UUID',
-    base.Entity.types.UUID,
+    subject.types.UUID,
     'f47ac10b-58cc-4372-a567-0e02b2c3d479', // v4 uuid
     '37175f00-505c-11e5-ad72-69c56eeb1d01'  // v1 uuid
   );
   testType(
     'Entity.types.SlugId',
-    base.Entity.types.SlugId,
+    subject.types.SlugId,
     'nvItOmAyRiOvSSWCAHkobQ',
     'NgmMmc_oQZ-dC4nPzWI1Ug'
   );
   testType(
     'Entity.types.JSON',
-    base.Entity.types.JSON,
+    subject.types.JSON,
     {
       subobject: {number: 42},
       array: [1,2,3,4, "string"]
@@ -297,13 +298,13 @@ suite("Entity (create/load/modify DataTypes)", function() {
   );
   testType(
     'Entity.types.Blob',
-    base.Entity.types.Blob,
+    subject.types.Blob,
     crypto.randomBytes(10 * 1000),
     crypto.randomBytes(100 * 1000)
   );
   testType(
     'Entity.types.Text',
-    base.Entity.types.Text,
+    subject.types.Text,
     "Hello World\n could be a very long string",
     crypto.randomBytes(100 * 1000).toString('base64')
   );
@@ -311,7 +312,7 @@ suite("Entity (create/load/modify DataTypes)", function() {
   // this EntityType.
   testType(
     'Entity.types.EncryptedJSON',
-    base.Entity.types.EncryptedJSON,
+    subject.types.EncryptedJSON,
     {
       subobject: {number: 42},
       array: [1,2,3,4, "string"]
@@ -323,14 +324,14 @@ suite("Entity (create/load/modify DataTypes)", function() {
   );
   testType(
     'Entity.types.EncryptedText',
-    base.Entity.types.EncryptedText,
+    subject.types.EncryptedText,
     "Hello World\n could be a very long string",
     crypto.randomBytes(100 * 1000).toString('base64'),
     true
   );
   testType(
     'Entity.types.EncryptedBlob',
-    base.Entity.types.EncryptedBlob,
+    subject.types.EncryptedBlob,
     crypto.randomBytes(10 * 1000),
     crypto.randomBytes(100 * 1000),
     true

@@ -1,22 +1,23 @@
+var subject = require("../lib/entity")
 suite("Entity (migration validate-keys)", function() {
-  var base    = require('../../');
+  var base    = require("taskcluster-base")
   var assert  = require('assert');
 
   test("Can migrate", function() {
-    base.Entity.configure({
+    subject.configure({
       version:        1,
-      partitionKey:   base.Entity.keys.StringKey('pk'),
-      rowKey:         base.Entity.keys.StringKey('rk'),
+      partitionKey:   subject.keys.StringKey('pk'),
+      rowKey:         subject.keys.StringKey('rk'),
       properties: {
-        pk:           base.Entity.types.String,
-        rk:           base.Entity.types.Number
+        pk:           subject.types.String,
+        rk:           subject.types.Number
       }
     }).configure({
       version:        2,
       properties: {
-        pk:           base.Entity.types.String,
-        rk:           base.Entity.types.Number,
-        value:        base.Entity.types.String
+        pk:           subject.types.String,
+        rk:           subject.types.Number,
+        value:        subject.types.String
       },
       migrate: function(item) {
         item.value = "none";
@@ -26,21 +27,21 @@ suite("Entity (migration validate-keys)", function() {
   });
 
   test("Can migrate (with context)", function() {
-    base.Entity.configure({
+    subject.configure({
       version:        1,
-      partitionKey:   base.Entity.keys.StringKey('pk'),
-      rowKey:         base.Entity.keys.StringKey('rk'),
+      partitionKey:   subject.keys.StringKey('pk'),
+      rowKey:         subject.keys.StringKey('rk'),
       properties: {
-        pk:           base.Entity.types.String,
-        rk:           base.Entity.types.Number
+        pk:           subject.types.String,
+        rk:           subject.types.Number
       },
       context:        ['myKey', 'anotherKey']
     }).configure({
       version:        2,
       properties: {
-        pk:           base.Entity.types.String,
-        rk:           base.Entity.types.Number,
-        value:        base.Entity.types.String
+        pk:           subject.types.String,
+        rk:           subject.types.Number,
+        value:        subject.types.String
       },
       context:        ['anotherKey'], // Should overwrite old context
       migrate: function(item) {
@@ -52,13 +53,13 @@ suite("Entity (migration validate-keys)", function() {
 
   test("Can't define key with missing property", function() {
     assert.throws(function() {
-      base.Entity.configure({
+      subject.configure({
         version:        1,
-        partitionKey:   base.Entity.keys.StringKey('pk'),
-        rowKey:         base.Entity.keys.StringKey('rk'),
+        partitionKey:   subject.keys.StringKey('pk'),
+        rowKey:         subject.keys.StringKey('rk'),
         properties: {
-          value:        base.Entity.types.String,
-          rk:           base.Entity.types.Number
+          value:        subject.types.String,
+          rk:           subject.types.Number
         }
       });
     }, "Expected an error");
@@ -66,21 +67,21 @@ suite("Entity (migration validate-keys)", function() {
 
   test("Can't migrate key properties (redefinition)", function() {
     assert.throws(function() {
-      base.Entity.configure({
+      subject.configure({
         version:        1,
-        partitionKey:   base.Entity.keys.StringKey('pk'),
-        rowKey:         base.Entity.keys.StringKey('rk'),
+        partitionKey:   subject.keys.StringKey('pk'),
+        rowKey:         subject.keys.StringKey('rk'),
         properties: {
-          pk:           base.Entity.types.String,
-          rk:           base.Entity.types.Number
+          pk:           subject.types.String,
+          rk:           subject.types.Number
         }
       }).configure({
         version:        2,
-        partitionKey:   base.Entity.keys.StringKey('value'),
+        partitionKey:   subject.keys.StringKey('value'),
         properties: {
-          pk:           base.Entity.types.String,
-          rk:           base.Entity.types.Number,
-          value:        base.Entity.types.String
+          pk:           subject.types.String,
+          rk:           subject.types.Number,
+          value:        subject.types.String
         },
         migrate: function(item) {
           item.value = "none";
@@ -92,19 +93,19 @@ suite("Entity (migration validate-keys)", function() {
 
   test("Can't migrate key properties (rename)", function() {
     assert.throws(function() {
-      base.Entity.configure({
+      subject.configure({
         version:        1,
-        partitionKey:   base.Entity.keys.StringKey('pk'),
-        rowKey:         base.Entity.keys.StringKey('rk'),
+        partitionKey:   subject.keys.StringKey('pk'),
+        rowKey:         subject.keys.StringKey('rk'),
         properties: {
-          pk:           base.Entity.types.String,
-          rk:           base.Entity.types.Number
+          pk:           subject.types.String,
+          rk:           subject.types.Number
         }
       }).configure({
         version:        2,
         properties: {
-          pk2:          base.Entity.types.String,
-          rk:           base.Entity.types.Number
+          pk2:          subject.types.String,
+          rk:           subject.types.Number
         },
         migrate: function(item) {
           return {
@@ -118,19 +119,19 @@ suite("Entity (migration validate-keys)", function() {
 
   test("Can't migrate key properties (types)", function() {
     assert.throws(function() {
-      base.Entity.configure({
+      subject.configure({
         version:        1,
-        partitionKey:   base.Entity.keys.StringKey('pk'),
-        rowKey:         base.Entity.keys.StringKey('rk'),
+        partitionKey:   subject.keys.StringKey('pk'),
+        rowKey:         subject.keys.StringKey('rk'),
         properties: {
-          pk:           base.Entity.types.String,
-          rk:           base.Entity.types.Number
+          pk:           subject.types.String,
+          rk:           subject.types.Number
         }
       }).configure({
         version:        2,
         properties: {
-          pk:           base.Entity.types.Number,
-          rk:           base.Entity.types.Number
+          pk:           subject.types.Number,
+          rk:           subject.types.Number
         },
         migrate: function(item) {
           return {
@@ -144,13 +145,13 @@ suite("Entity (migration validate-keys)", function() {
 
   test("Can't start with version 2", function() {
     assert.throws(function() {
-      base.Entity.configure({
+      subject.configure({
         version:        2,
-        partitionKey:   base.Entity.keys.StringKey('pk'),
-        rowKey:         base.Entity.keys.StringKey('rk'),
+        partitionKey:   subject.keys.StringKey('pk'),
+        rowKey:         subject.keys.StringKey('rk'),
         properties: {
-          pk:           base.Entity.types.String,
-          rk:           base.Entity.types.Number
+          pk:           subject.types.String,
+          rk:           subject.types.Number
         }
       });
     }, "Expected an error");
@@ -158,19 +159,19 @@ suite("Entity (migration validate-keys)", function() {
 
   test("Can't migrate with version + 2", function() {
     assert.throws(function() {
-      base.Entity.configure({
+      subject.configure({
         version:        1,
-        partitionKey:   base.Entity.keys.StringKey('pk'),
-        rowKey:         base.Entity.keys.StringKey('rk'),
+        partitionKey:   subject.keys.StringKey('pk'),
+        rowKey:         subject.keys.StringKey('rk'),
         properties: {
-          pk:           base.Entity.types.String,
-          rk:           base.Entity.types.Number
+          pk:           subject.types.String,
+          rk:           subject.types.Number
         }
       }).configure({
         version:        3,
         properties: {
-          pk:           base.Entity.types.String,
-          rk:           base.Entity.types.Number
+          pk:           subject.types.String,
+          rk:           subject.types.Number
         },
         migrate: function(item) {
           return {

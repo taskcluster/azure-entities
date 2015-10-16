@@ -1,23 +1,24 @@
+var subject = require("../lib/entity")
 suite("Entity (context)", function() {
   var assert  = require('assert');
   var slugid  = require('slugid');
   var _       = require('lodash');
   var Promise = require('promise');
-  var base    = require('../../');
+  var base    = require("taskcluster-base")
   var debug   = require('debug')('base:test:entity:context');
 
   var helper  = require('./helper');
   var cfg = helper.loadConfig();
 
   test("Entity.configure().setup()", function() {
-    base.Entity.configure({
+    subject.configure({
       version:          1,
-      partitionKey:     base.Entity.keys.StringKey('id'),
-      rowKey:           base.Entity.keys.StringKey('name'),
+      partitionKey:     subject.keys.StringKey('id'),
+      rowKey:           subject.keys.StringKey('name'),
       properties: {
-        id:             base.Entity.types.String,
-        name:           base.Entity.types.String,
-        count:          base.Entity.types.Number
+        id:             subject.types.String,
+        name:           subject.types.String,
+        count:          subject.types.Number
       }
     }).setup({
       credentials:  cfg.get('azure'),
@@ -26,14 +27,14 @@ suite("Entity (context)", function() {
   });
 
   test("Entity.configure().setup() with context", function() {
-    base.Entity.configure({
+    subject.configure({
       version:          1,
-      partitionKey:     base.Entity.keys.StringKey('id'),
-      rowKey:           base.Entity.keys.StringKey('name'),
+      partitionKey:     subject.keys.StringKey('id'),
+      rowKey:           subject.keys.StringKey('name'),
       properties: {
-        id:             base.Entity.types.String,
-        name:           base.Entity.types.String,
-        count:          base.Entity.types.Number
+        id:             subject.types.String,
+        name:           subject.types.String,
+        count:          subject.types.Number
       },
       context:          ['config']
     }).setup({
@@ -46,14 +47,14 @@ suite("Entity (context)", function() {
   });
 
   test("Entity.create() with context", function() {
-    var Item = base.Entity.configure({
+    var Item = subject.configure({
       version:          1,
-      partitionKey:     base.Entity.keys.StringKey('id'),
-      rowKey:           base.Entity.keys.StringKey('name'),
+      partitionKey:     subject.keys.StringKey('id'),
+      rowKey:           subject.keys.StringKey('name'),
       properties: {
-        id:             base.Entity.types.String,
-        name:           base.Entity.types.String,
-        count:          base.Entity.types.Number
+        id:             subject.types.String,
+        name:           subject.types.String,
+        count:          subject.types.Number
       },
       context:          ['config', 'maxCount']
     }).setup({
@@ -77,23 +78,23 @@ suite("Entity (context)", function() {
   });
 
   test("Entity migration with context", function() {
-    var Item = base.Entity.configure({
+    var Item = subject.configure({
       version:          1,
-      partitionKey:     base.Entity.keys.StringKey('id'),
-      rowKey:           base.Entity.keys.StringKey('name'),
+      partitionKey:     subject.keys.StringKey('id'),
+      rowKey:           subject.keys.StringKey('name'),
       properties: {
-        id:             base.Entity.types.String,
-        name:           base.Entity.types.String,
-        count:          base.Entity.types.Number
+        id:             subject.types.String,
+        name:           subject.types.String,
+        count:          subject.types.Number
       },
       context:          ['config', 'maxCount']
     }).configure({
       version:          2,
       properties: {
-        id:             base.Entity.types.String,
-        name:           base.Entity.types.String,
-        count:          base.Entity.types.Number,
-        reason:         base.Entity.types.String
+        id:             subject.types.String,
+        name:           subject.types.String,
+        count:          subject.types.Number,
+        reason:         subject.types.String
       },
       context:          ['maxCount'],
       migrate: function(item) {
@@ -125,14 +126,14 @@ suite("Entity (context)", function() {
 
   test("Entity.configure().setup() with undeclared context", function() {
     try {
-      base.Entity.configure({
+      subject.configure({
         version:          1,
-        partitionKey:     base.Entity.keys.StringKey('id'),
-        rowKey:           base.Entity.keys.StringKey('name'),
+        partitionKey:     subject.keys.StringKey('id'),
+        rowKey:           subject.keys.StringKey('name'),
         properties: {
-          id:             base.Entity.types.String,
-          name:           base.Entity.types.String,
-          count:          base.Entity.types.Number
+          id:             subject.types.String,
+          name:           subject.types.String,
+          count:          subject.types.Number
         },
         context:          ['config']
       }).setup({
@@ -152,14 +153,14 @@ suite("Entity (context)", function() {
 
   test("Entity.configure().setup() with missing context", function() {
     try {
-      base.Entity.configure({
+      subject.configure({
         version:          1,
-        partitionKey:     base.Entity.keys.StringKey('id'),
-        rowKey:           base.Entity.keys.StringKey('name'),
+        partitionKey:     subject.keys.StringKey('id'),
+        rowKey:           subject.keys.StringKey('name'),
         properties: {
-          id:             base.Entity.types.String,
-          name:           base.Entity.types.String,
-          count:          base.Entity.types.Number
+          id:             subject.types.String,
+          name:           subject.types.String,
+          count:          subject.types.Number
         },
         context:          ['config']
       }).setup({

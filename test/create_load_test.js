@@ -1,9 +1,10 @@
+var subject = require("../lib/entity")
 suite("Entity (create/load)", function() {
   var assert  = require('assert');
   var slugid  = require('slugid');
   var _       = require('lodash');
   var Promise = require('promise');
-  var base    = require('../../');
+  var base    = require("taskcluster-base")
   var debug   = require('debug')('base:test:entity:create_load');
 
   var helper  = require('./helper');
@@ -11,14 +12,14 @@ suite("Entity (create/load)", function() {
 
   var ItemV1;
   test("ItemV1 = Entity.configure", function() {
-    ItemV1 = base.Entity.configure({
+    ItemV1 = subject.configure({
       version:          1,
-      partitionKey:     base.Entity.keys.StringKey('id'),
-      rowKey:           base.Entity.keys.StringKey('name'),
+      partitionKey:     subject.keys.StringKey('id'),
+      rowKey:           subject.keys.StringKey('name'),
       properties: {
-        id:             base.Entity.types.String,
-        name:           base.Entity.types.String,
-        count:          base.Entity.types.Number
+        id:             subject.types.String,
+        name:           subject.types.String,
+        count:          subject.types.Number
       }
     });
   });
@@ -138,10 +139,10 @@ suite("Entity (create/load)", function() {
     ItemV2 = ItemV1.configure({
       version:          2,
       properties: {
-        id:             base.Entity.types.String,
-        name:           base.Entity.types.String,
-        count:          base.Entity.types.Number,
-        reason:         base.Entity.types.String
+        id:             subject.types.String,
+        name:           subject.types.String,
+        count:          subject.types.Number,
+        reason:         subject.types.String
       },
       migrate: function(item) {
         return {
@@ -160,7 +161,7 @@ suite("Entity (create/load)", function() {
       credentials:  cfg.get('azure'),
       table:        cfg.get('azureTestTableName'),
       drain:        drain,
-      component:    'taskcluster-base-test',
+      component:    '"taskcluster-base"-test',
       process:      'mocha'
     });
     assert(drain.pendingPoints() === 0, "Shouldn't have stats yet!");

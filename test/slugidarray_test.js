@@ -1,22 +1,23 @@
+var subject = require("../lib/entity")
 suite("Entity (SlugIdArrayType)", function() {
   var assert  = require('assert');
   var slugid  = require('slugid');
   var _       = require('lodash');
   var Promise = require('promise');
-  var base    = require('../../');
+  var base    = require("taskcluster-base")
   var crypto  = require('crypto');
 
   var helper  = require('./helper');
   var cfg = helper.loadConfig();
 
-  var Item = base.Entity.configure({
+  var Item = subject.configure({
     version:          1,
-    partitionKey:     base.Entity.keys.StringKey('id'),
-    rowKey:           base.Entity.keys.StringKey('name'),
+    partitionKey:     subject.keys.StringKey('id'),
+    rowKey:           subject.keys.StringKey('name'),
     properties: {
-      id:             base.Entity.types.String,
-      name:           base.Entity.types.String,
-      data:           base.Entity.types.SlugIdArray
+      id:             subject.types.String,
+      name:           subject.types.String,
+      data:           subject.types.SlugIdArray
     }
   }).setup({
     credentials:  cfg.get('azure'),
@@ -24,27 +25,27 @@ suite("Entity (SlugIdArrayType)", function() {
   });
 
   test("SlugIdArray.push", function() {
-    var arr = base.Entity.types.SlugIdArray.create();
+    var arr = subject.types.SlugIdArray.create();
     var id = slugid.v4();
     arr.push(id);
   });
 
   test("SlugIdArray.push (with 1k ids)", function() {
-    var arr = base.Entity.types.SlugIdArray.create();
+    var arr = subject.types.SlugIdArray.create();
     for(var i = 0; i < 1000; i++) {
       arr.push(slugid.v4());
     }
   });
 
   test("SlugIdArray.indexOf", function() {
-    var arr = base.Entity.types.SlugIdArray.create();
+    var arr = subject.types.SlugIdArray.create();
     var id = slugid.v4();
     arr.push(id);
     assert(arr.indexOf(id) !== -1);
   });
 
   test("SlugIdArray.indexOf (with 1k ids)", function() {
-    var arr = base.Entity.types.SlugIdArray.create();
+    var arr = subject.types.SlugIdArray.create();
     var list = [];
     for(var i = 0; i < 1000; i++) {
       var id = slugid.v4();
@@ -62,7 +63,7 @@ suite("Entity (SlugIdArrayType)", function() {
   });
 
   test("SlugIdArray.remove", function() {
-    var arr = base.Entity.types.SlugIdArray.create();
+    var arr = subject.types.SlugIdArray.create();
     var list = [];
     for(var i = 0; i < 1000; i++) {
       var id = slugid.v4();
@@ -78,7 +79,7 @@ suite("Entity (SlugIdArrayType)", function() {
   });
 
   test("SlugIdArray.clone", function() {
-    var arr = base.Entity.types.SlugIdArray.create();
+    var arr = subject.types.SlugIdArray.create();
     for(var i = 0; i < 200; i++) {
       arr.push(slugid.v4());
     }
@@ -98,8 +99,8 @@ suite("Entity (SlugIdArrayType)", function() {
   });
 
   test("SlugIdArray.equals (with 1k ids)", function() {
-    var arr = base.Entity.types.SlugIdArray.create();
-    var arr2 = base.Entity.types.SlugIdArray.create();
+    var arr = subject.types.SlugIdArray.create();
+    var arr2 = subject.types.SlugIdArray.create();
     for(var i = 0; i < 1000; i++) {
       var id = slugid.v4();
       arr.push(id);
@@ -110,7 +111,7 @@ suite("Entity (SlugIdArrayType)", function() {
 
   // Generate random slugIdArrays
   var randomSlugIdArray = function(length) {
-    var arr = base.Entity.types.SlugIdArray.create();
+    var arr = subject.types.SlugIdArray.create();
     for (var i = 0; i < length; i++) {
       arr.push(slugid.v4());
     }
