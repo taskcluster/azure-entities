@@ -28,6 +28,9 @@
     "taskcluster-client": "0.22.6",
     "taskcluster-lib-stats": "^0.8.7"
   },
+  "peerDependencies": {
+    "taskcluster-lib-stats": "~0.8"
+  },
   "devDependencies": {
     "babel-compile": "0.0.3",
     "mocha": "2.0.1",
