@@ -6,7 +6,6 @@ var slugid          = require('slugid');
 var _               = require('lodash');
 var Promise         = require('promise');
 var debug           = require('debug')('base:entity');
-var azureTable      = require('azure-table-node');
 var azure           = require('fast-azure-storage');
 var taskcluster     = require('taskcluster-client');
 var https           = require('https');
