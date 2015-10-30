@@ -15,7 +15,6 @@
     "url": "https://github.com/taskcluster/azure-entities.git"
   },
   "dependencies": {
-    "azure-table-node": "1.4.1",
     "babel-runtime": "^5.8.25",
     "buffertools": "2.1.2",
     "debug": "2.0.0",
@@ -29,6 +28,7 @@
     "taskcluster-lib-stats": "^0.8.7"
   },
   "devDependencies": {
+    "azure-table-node": "1.4.1",
     "babel-compile": "0.0.3",
     "mocha": "2.0.1",
     "taskcluster-base": "^0.8.6",
