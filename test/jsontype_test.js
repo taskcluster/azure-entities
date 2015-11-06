@@ -1,14 +1,12 @@
 var subject = require("../lib/entity")
-suite("Entity (JSONType)", function() {
-  var assert  = require('assert');
-  var slugid  = require('slugid');
-  var _       = require('lodash');
-  var Promise = require('promise');
-  var base    = require("taskcluster-base")
-  var crypto  = require('crypto');
+var assert  = require('assert');
+var slugid  = require('slugid');
+var _       = require('lodash');
+var Promise = require('promise');
+var crypto  = require('crypto');
+var helper  = require('./helper');
 
-  var helper  = require('./helper');
-  var cfg = helper.loadConfig();
+suite("Entity (JSONType)", function() {
 
   var Item = subject.configure({
     version:          1,
@@ -20,8 +18,8 @@ suite("Entity (JSONType)", function() {
       data:           subject.types.JSON
     }
   }).setup({
-    credentials:  cfg.get('azure'),
-    table:        cfg.get('azureTestTableName')
+    credentials:  helper.cfg.azure,
+    table:        helper.cfg.tableName
   });
 
   // Construct a large string

@@ -1,13 +1,11 @@
 var subject = require("../lib/entity")
-suite("Entity (reload)", function() {
-  var assert  = require('assert');
-  var slugid  = require('slugid');
-  var _       = require('lodash');
-  var Promise = require('promise');
-  var base    = require("taskcluster-base")
+var assert  = require('assert');
+var slugid  = require('slugid');
+var _       = require('lodash');
+var Promise = require('promise');
+var helper  = require('./helper');
 
-  var helper  = require('./helper');
-  var cfg = helper.loadConfig();
+suite("Entity (reload)", function() {
 
   var Item = subject.configure({
     version:          1,
@@ -19,8 +17,8 @@ suite("Entity (reload)", function() {
       count:          subject.types.Number
     }
   }).setup({
-    credentials:  cfg.get('azure'),
-    table:        cfg.get('azureTestTableName')
+    credentials:  helper.cfg.azure,
+    table:        helper.cfg.tableName
   });
 
   test("Item.create, item.reload", function() {

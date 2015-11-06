@@ -1,15 +1,13 @@
 var subject = require("../lib/entity")
-suite("Entity (HashKey)", function() {
-  var assert  = require('assert');
-  var slugid  = require('slugid');
-  var _       = require('lodash');
-  var Promise = require('promise');
-  var base    = require("taskcluster-base")
-  var crypto  = require('crypto');
-  var debug   = require('debug')('base:test:entity:hashkey');
+var assert  = require('assert');
+var slugid  = require('slugid');
+var _       = require('lodash');
+var Promise = require('promise');
+var crypto  = require('crypto');
+var debug   = require('debug')('test:entity:hashkey');
+var helper  = require('./helper');
 
-  var helper  = require('./helper');
-  var cfg = helper.loadConfig();
+suite("Entity (HashKey)", function() {
 
   var Item = subject.configure({
     version:          1,
@@ -22,8 +20,8 @@ suite("Entity (HashKey)", function() {
       data:           subject.types.JSON
     }
   }).setup({
-    credentials:  cfg.get('azure'),
-    table:        cfg.get('azureTestTableName')
+      credentials:  helper.cfg.azure,
+      table:        helper.cfg.tableName
   });
 
   test("Item.create, HashKey.exact (test against static data)", function() {

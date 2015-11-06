@@ -1,15 +1,13 @@
 var subject = require("../lib/entity")
-suite("Entity (encrypted properties)", function() {
-  var assert  = require('assert');
-  var slugid  = require('slugid');
-  var _       = require('lodash');
-  var Promise = require('promise');
-  var base    = require("taskcluster-base")
-  var debug   = require('debug')('base:test:entity:encryptedProps');
-  var crypto  = require('crypto');
+var assert  = require('assert');
+var slugid  = require('slugid');
+var _       = require('lodash');
+var Promise = require('promise');
+var debug   = require('debug')('test:entity:encryptedProps');
+var crypto  = require('crypto');
+var helper  = require('./helper');
 
-  var helper  = require('./helper');
-  var cfg = helper.loadConfig();
+suite("Entity (encrypted properties)", function() {
 
   // Generate key for test
   var ENCRYPTION_KEY = crypto.randomBytes(32).toString('base64');
@@ -30,17 +28,17 @@ suite("Entity (encrypted properties)", function() {
   var Item;
   test("Item = ItemV1.setup", function() {
     Item = ItemV1.setup({
-      credentials:      cfg.get('azure'),
-      table:            cfg.get('azureTestTableName'),
-      cryptoKey:        ENCRYPTION_KEY
+      credentials:  helper.cfg.azure,
+      table:        helper.cfg.tableName,
+      cryptoKey:    ENCRYPTION_KEY
     });
   });
 
   test("ItemV1.setup (requires cryptoKey)", function() {
     try {
       ItemV1.setup({
-        credentials:  cfg.get('azure'),
-        table:        cfg.get('azureTestTableName')
+        credentials:  helper.cfg.azure,
+        table:        helper.cfg.tableName
       });
     } catch (err) {
       return; // Expected error
@@ -51,8 +49,8 @@ suite("Entity (encrypted properties)", function() {
   test("ItemV1.setup (cryptoKey < 32 bytes doesn't work)", function() {
     try {
       ItemV1.setup({
-        credentials:  cfg.get('azure'),
-        table:        cfg.get('azureTestTableName'),
+        credentials:  helper.cfg.azure,
+        table:        helper.cfg.tableName,
         cryptoKey:    crypto.randomBytes(31).toString('base64')
       });
     } catch (err) {
@@ -64,8 +62,8 @@ suite("Entity (encrypted properties)", function() {
   test("ItemV1.setup (cryptoKey > 32 bytes doesn't work)", function() {
     try {
       ItemV1.setup({
-        credentials:  cfg.get('azure'),
-        table:        cfg.get('azureTestTableName'),
+        credentials:  helper.cfg.azure,
+        table:        helper.cfg.tableName,
         cryptoKey:    crypto.randomBytes(33).toString('base64')
       });
     } catch (err) {
@@ -77,8 +75,9 @@ suite("Entity (encrypted properties)", function() {
   test("ItemV1.setup (requires cryptoKey in base64)", function() {
     try {
       ItemV1.setup({
-        credentials:  cfg.get('azure'),
-        table:        cfg.get('azureTestTableName'),  // Notice: ! below
+        credentials:  helper.cfg.azure,
+        table:        helper.cfg.tableName,
+        // Notice: ! below
         cryptoKey:    'CNcj2aOozdo7Pn+HEkAIixwninIwKnbYc6JPS9mNxZ!='
       });
     } catch (err) {
@@ -129,9 +128,9 @@ suite("Entity (encrypted properties)", function() {
 
   test("Item.load (invalid cryptoKey)", function() {
     var BadKeyItem = ItemV1.setup({
-      credentials:    cfg.get('azure'),
-      table:          cfg.get('azureTestTableName'),
-      cryptoKey:      crypto.randomBytes(32).toString('base64')
+      credentials:  helper.cfg.azure,
+      table:        helper.cfg.tableName,
+      cryptoKey:    crypto.randomBytes(32).toString('base64')
     });
     return BadKeyItem.load({
       id:     id
@@ -164,17 +163,17 @@ suite("Entity (encrypted properties)", function() {
   var Item2;
   test("Item2 = ItemV2.setup", function() {
     Item2 = ItemV2.setup({
-      credentials:    cfg.get('azure'),
-      table:          cfg.get('azureTestTableName'),
-      cryptoKey:      ENCRYPTION_KEY
+      credentials:  helper.cfg.azure,
+      table:        helper.cfg.tableName,
+      cryptoKey:    ENCRYPTION_KEY
     });
   });
 
   test("ItemV2.setup (requires cryptoKey)", function() {
     try {
       ItemV2.setup({
-        credentials:  cfg.get('azure'),
-        table:        cfg.get('azureTestTableName')
+        credentials:  helper.cfg.azure,
+        table:        helper.cfg.tableName
       });
     } catch (err) {
       return; // Expected error
@@ -193,9 +192,9 @@ suite("Entity (encrypted properties)", function() {
 
   test("Item2.load (invalid cryptoKey)", function() {
     var BadKeyItem2 = ItemV2.setup({
-      credentials:    cfg.get('azure'),
-      table:          cfg.get('azureTestTableName'),
-      cryptoKey:      crypto.randomBytes(32).toString('base64')
+      credentials:  helper.cfg.azure,
+      table:        helper.cfg.tableName,
+      cryptoKey:    crypto.randomBytes(32).toString('base64')
     });
     return BadKeyItem2.load({
       id:     id
@@ -257,9 +256,9 @@ suite("Entity (encrypted properties)", function() {
   var Item3;
   test("Item3 = ItemV3.setup", function() {
     Item3 = ItemV3.setup({
-      credentials:    cfg.get('azure'),
-      table:          cfg.get('azureTestTableName'),
-      cryptoKey:      ENCRYPTION_KEY
+      credentials:  helper.cfg.azure,
+      table:        helper.cfg.tableName,
+      cryptoKey:    ENCRYPTION_KEY
     });
   });
 
@@ -291,9 +290,9 @@ suite("Entity (encrypted properties)", function() {
 
   test("Item3.load (invalid cryptoKey)", function() {
     var BadKeyItem3 = ItemV3.setup({
-      credentials:    cfg.get('azure'),
-      table:          cfg.get('azureTestTableName'),
-      cryptoKey:      crypto.randomBytes(32).toString('base64')
+      credentials:  helper.cfg.azure,
+      table:        helper.cfg.tableName,
+      cryptoKey:    crypto.randomBytes(32).toString('base64')
     });
     return BadKeyItem3.load({
       id:     id

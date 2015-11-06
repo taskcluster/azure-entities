@@ -1,7 +1,7 @@
 var subject = require("../lib/entity")
+var assert  = require('assert');
+
 suite("Entity (migration validate-keys)", function() {
-  var base    = require("taskcluster-base")
-  var assert  = require('assert');
 
   test("Can migrate", function() {
     subject.configure({

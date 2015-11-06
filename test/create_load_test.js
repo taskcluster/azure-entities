@@ -1,15 +1,13 @@
 var subject = require("../lib/entity")
+var helper  = require('./helper');
+var assert  = require('assert');
+var slugid  = require('slugid');
+var _       = require('lodash');
+var Promise = require('promise');
+var stats   = require("taskcluster-lib-stats");
+var debug   = require('debug')('test:entity:create_load');
+
 suite("Entity (create/load)", function() {
-  var assert  = require('assert');
-  var slugid  = require('slugid');
-  var _       = require('lodash');
-  var Promise = require('promise');
-  var base    = require("taskcluster-base")
-  var debug   = require('debug')('base:test:entity:create_load');
-
-  var helper  = require('./helper');
-  var cfg = helper.loadConfig();
-
   var ItemV1;
   test("ItemV1 = Entity.configure", function() {
     ItemV1 = subject.configure({
@@ -27,8 +25,8 @@ suite("Entity (create/load)", function() {
   var Item;
   test("Item = ItemV1.setup", function() {
     Item = ItemV1.setup({
-      credentials:  cfg.get('azure'),
-      table:        cfg.get('azureTestTableName')
+      credentials:  helper.cfg.azure,
+      table:        helper.cfg.tableName
     });
   });
 
@@ -158,10 +156,10 @@ suite("Entity (create/load)", function() {
   });
 
   test("Item = ItemV2.setup with NullDrain for stats", function() {
-    var drain = new base.stats.NullDrain();
+    var drain = new stats.NullDrain();
     Item = ItemV2.setup({
-      credentials:  cfg.get('azure'),
-      table:        cfg.get('azureTestTableName'),
+      credentials:  helper.cfg.azure,
+      table:        helper.cfg.tableName,
       drain:        drain,
       component:    '"taskcluster-base"-test',
       process:      'mocha'
