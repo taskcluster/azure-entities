@@ -27,6 +27,9 @@
     "taskcluster-client": "0.22.6",
     "taskcluster-lib-stats": "^0.8.7"
   },
+  "peerDependencies": {
+    "taskcluster-lib-stats": "~0.8"
+  },
   "devDependencies": {
     "azure-table-node": "1.4.1",
     "babel-compile": "0.0.3",

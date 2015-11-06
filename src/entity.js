@@ -9,7 +9,7 @@ var debug           = require('debug')('base:entity');
 var azure           = require('fast-azure-storage');
 var taskcluster     = require('taskcluster-client');
 var https           = require('https');
-var series          = require('taskcluster-lib-stats/lib/series');
+var series          = require('./series');
 var crypto          = require('crypto');
 
 // ** Coding Style **
