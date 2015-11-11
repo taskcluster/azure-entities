@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "typed-env-config": "^0.10.0",
-    "taskcluster-base": "0.8.6",
+    "taskcluster-base": "0.8.8",
     "azure-table-node": "1.4.1",
     "babel-compile": "0.0.3",
     "mocha": "2.0.1",
