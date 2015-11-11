@@ -1,16 +1,15 @@
 var subject = require("../lib/entity")
+var assert      = require('assert');
+var slugid      = require('slugid');
+var _           = require('lodash');
+var Promise     = require('promise');
+var azureTable  = require('azure-table-node');
+var helper      = require('./helper');
+
 suite("Entity (Shared-Access-Signatures)", function() {
-  var assert      = require('assert');
-  var slugid      = require('slugid');
-  var _           = require('lodash');
-  var Promise     = require('promise');
-  var base        = require("taskcluster-base")
-  var azureTable  = require('azure-table-node');
 
-  var helper      = require('./helper');
-  var cfg = helper.loadConfig();
+  var credentials = helper.cfg.azure;
 
-  var credentials = cfg.get('azure');
   credentials = _.defaults({}, credentials, {
     accountUrl: [
       "https://",
@@ -20,7 +19,7 @@ suite("Entity (Shared-Access-Signatures)", function() {
   });
   var client = azureTable.createClient(credentials);
   var sas = client.generateSAS(
-    cfg.get('azureTestTableName'),
+    helper.cfg.tableName,
     'raud',
     new Date(Date.now() + 15 * 60 * 1000),
     {
@@ -39,10 +38,10 @@ suite("Entity (Shared-Access-Signatures)", function() {
     }
   }).setup({
     credentials: {
-      accountName:    cfg.get('azure:accountName'),
+      accountName:    helper.cfg.azure.accountName,
       sas:            sas
     },
-    table:            cfg.get('azureTestTableName')
+    table:            helper.cfg.tableName
   });
 
   test("Item.create, item.modify, item.reload", function() {

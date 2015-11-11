@@ -1,14 +1,12 @@
 var subject = require("../lib/entity")
-suite("Entity (create/load/modify DataTypes)", function() {
-  var assert  = require('assert');
-  var slugid  = require('slugid');
-  var _       = require('lodash');
-  var Promise = require('promise');
-  var base    = require("taskcluster-base")
-  var crypto  = require('crypto');
+var assert  = require('assert');
+var slugid  = require('slugid');
+var _       = require('lodash');
+var Promise = require('promise');
+var crypto  = require('crypto');
+var helper  = require('./helper');
 
-  var helper  = require('./helper');
-  var cfg = helper.loadConfig();
+suite("Entity (create/load/modify DataTypes)", function() {
 
   var testType = function(name, type, sample1, sample2, encryptedTestOnly) {
     assert(!_.isEqual(sample1, sample2), "Samples should not be equal!");
@@ -24,8 +22,8 @@ suite("Entity (create/load/modify DataTypes)", function() {
             data:           type
           }
         }).setup({
-          credentials:  cfg.get('azure'),
-          table:        cfg.get('azureTestTableName')
+          credentials:  helper.cfg.azure,
+          table:        helper.cfg.tableName
         });
 
         var id = slugid.v4();
@@ -68,9 +66,9 @@ suite("Entity (create/load/modify DataTypes)", function() {
             data:           type
           }
         }).setup({
-          credentials:      cfg.get('azure'),
-          table:            cfg.get('azureTestTableName'),
-          signingKey:       'my-super-secret'
+          credentials:  helper.cfg.azure,
+          table:        helper.cfg.tableName,
+          signingKey:   'my-super-secret'
         });
         var id = slugid.v4();
         return Item.create({
@@ -110,14 +108,14 @@ suite("Entity (create/load/modify DataTypes)", function() {
           }
         })
         var Item1 = ItemClass.setup({
-          credentials:      cfg.get('azure'),
-          table:            cfg.get('azureTestTableName'),
-          signingKey:       'my-super-secret'
+          credentials:  helper.cfg.azure,
+          table:        helper.cfg.tableName,
+          signingKey:   'my-super-secret'
         });
         var Item2 = ItemClass.setup({
-          credentials:      cfg.get('azure'),
-          table:            cfg.get('azureTestTableName'),
-          signingKey:       'my-super-wrong-secret'
+          credentials:  helper.cfg.azure,
+          table:        helper.cfg.tableName,
+          signingKey:   'my-super-wrong-secret'
         });
         var id = slugid.v4();
         return Item1.create({
@@ -165,9 +163,9 @@ suite("Entity (create/load/modify DataTypes)", function() {
           data:           type
         }
       }).setup({
-        credentials:      cfg.get('azure'),
-        table:            cfg.get('azureTestTableName'),
-        cryptoKey:        'Iiit3Y+b4m7z7YOmKA2iCbZDGyEmy6Xn42QapzTU67w='
+        credentials:  helper.cfg.azure,
+        table:        helper.cfg.tableName,
+        cryptoKey:    'Iiit3Y+b4m7z7YOmKA2iCbZDGyEmy6Xn42QapzTU67w='
       });
 
       var id = slugid.v4();
@@ -209,10 +207,10 @@ suite("Entity (create/load/modify DataTypes)", function() {
           data:           type
         }
       }).setup({
-        credentials:      cfg.get('azure'),
-        table:            cfg.get('azureTestTableName'),
-        signingKey:       'my-super-secret',
-        cryptoKey:        'Iiit3Y+b4m7z7YOmKA2iCbZDGyEmy6Xn42QapzTU67w='
+        credentials:  helper.cfg.azure,
+        table:        helper.cfg.tableName,
+        signingKey:   'my-super-secret',
+        cryptoKey:    'Iiit3Y+b4m7z7YOmKA2iCbZDGyEmy6Xn42QapzTU67w='
       });
 
       var id = slugid.v4();

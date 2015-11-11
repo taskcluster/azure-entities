@@ -1,17 +1,15 @@
-var subject = require("../lib/entity")
+var subject         = require("../lib/entity");
+var assert          = require('assert');
+var slugid          = require('slugid');
+var _               = require('lodash');
+var Promise         = require('promise');
+var base            = require('taskcluster-base');
+var debug           = require('debug')('test:entity:auth');
+var express         = require('express');
+var azureTable      = require('azure-table-node');
+var helper          = require('./helper');
+
 suite("Entity (SAS from auth.taskcluster.net)", function() {
-  var assert          = require('assert');
-  var slugid          = require('slugid');
-  var _               = require('lodash');
-  var Promise         = require('promise');
-  var base            = require("taskcluster-base")
-  var debug           = require('debug')('base:test:entity:auth');
-  var express         = require('express');
-  var azureTable      = require('azure-table-node');
-
-  var helper  = require('./helper');
-  var cfg = helper.loadConfig();
-
   // Create test api
   var api = new base.API({
     title:        "Test TC-Auth",
@@ -36,7 +34,7 @@ suite("Entity (SAS from auth.taskcluster.net)", function() {
     if (!req.satisfies({account: account, table: table})) {
       return;
     }
-    var credentials = cfg.get('azure');
+    var credentials = helper.cfg.azure;
     assert(account === credentials.accountName, "Must used test account!");
     credentials = _.defaults({}, credentials, {
       accountUrl: [
@@ -138,8 +136,8 @@ suite("Entity (SAS from auth.taskcluster.net)", function() {
   var Item;
   test("Item = ItemV1.setup", function() {
     Item = ItemV1.setup({
-      account:      cfg.get('azure:accountName'),
-      table:        cfg.get('azureTestTableName'),
+      account:      helper.cfg.azure.accountName,
+      table:        helper.cfg.tableName,
       credentials:  {
         clientId:         'authed-client',
         accessToken:      'test-token'
@@ -174,8 +172,8 @@ suite("Entity (SAS from auth.taskcluster.net)", function() {
     returnExpiredSAS = true;  // This means we call for each operation
     var id = slugid.v4();
     var Item2 = ItemV1.setup({
-      account:      cfg.get('azure:accountName'),
-      table:        cfg.get('azureTestTableName'),
+      account:      helper.cfg.azure.accountName,
+      table:        helper.cfg.tableName,
       credentials:  {
         clientId:         'authed-client',
         accessToken:      'test-token'
@@ -205,8 +203,8 @@ suite("Entity (SAS from auth.taskcluster.net)", function() {
     callCount = 0;
     returnExpiredSAS = false;  // This means we call for each operation
     var Item3 = ItemV1.setup({
-      account:      cfg.get('azure:accountName'),
-      table:        cfg.get('azureTestTableName'),
+      account:      helper.cfg.azure.accountName,
+      table:        helper.cfg.tableName,
       credentials:  {
         clientId:         'authed-client',
         accessToken:      'test-token'

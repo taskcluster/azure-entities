@@ -1,15 +1,13 @@
 var subject = require("../lib/entity")
+var assert  = require('assert');
+var slugid  = require('slugid');
+var _       = require('lodash');
+var Promise = require('promise');
+var stats   = require("taskcluster-lib-stats");
+var debug   = require('debug')('test:entity:query');
+var helper  = require('./helper');
+
 suite("Entity (query)", function() {
-  var assert  = require('assert');
-  var slugid  = require('slugid');
-  var _       = require('lodash');
-  var Promise = require('promise');
-  var base    = require("taskcluster-base")
-  var debug   = require('debug')('base:test:entity:query');
-
-  var helper  = require('./helper');
-  var cfg = helper.loadConfig();
-
   var Item = subject.configure({
     version:          1,
     partitionKey:     subject.keys.StringKey('id'),
@@ -22,9 +20,9 @@ suite("Entity (query)", function() {
       time:           subject.types.Date
     }
   }).setup({
-    credentials:  cfg.get('azure'),
-    table:        cfg.get('azureTestTableName'),
-    drain:        new base.stats.NullDrain(),
+    credentials:  helper.cfg.azure,
+    table:        helper.cfg.tableName,
+    drain:        new stats.NullDrain(),
     component:    '"taskcluster-base"-test',
     process:      'mocha'
   });

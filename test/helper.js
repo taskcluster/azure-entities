@@ -1,28 +1,3 @@
-var base    = require('taskcluster-base');
+var config = require('typed-env-config');
 
-/** Load configuration */
-var loadConfig = function() {
-  // Load test configuration
-  var cfg = base.config({
-    envs: [
-      'azure_accountName',
-      'azure_accountKey',
-      'azureTestTableName',
-      'influxdb_connectionString'
-    ],
-    filename:               'azure-entity-test'
-  });
-
-  // Check that we have configuration or abort
-  if (!cfg.get('azureTestTableName') ||
-      !cfg.get('azure') ||
-      !cfg.get('influxdb:connectionString')) {
-    throw new Error("Config is missing");
-  }
-
-  return cfg;
-};
-
-// Export loadConfig
-exports.loadConfig = loadConfig;
-
+exports.cfg = config();

@@ -1,15 +1,12 @@
 var subject = require("../lib/entity")
+var assert  = require('assert');
+var slugid  = require('slugid');
+var _       = require('lodash');
+var Promise = require('promise');
+var crypto  = require('crypto');
+var helper  = require('./helper');
+
 suite("Entity (EncryptedBlobType)", function() {
-  var assert  = require('assert');
-  var slugid  = require('slugid');
-  var _       = require('lodash');
-  var Promise = require('promise');
-  var base    = require("taskcluster-base")
-  var crypto  = require('crypto');
-
-  var helper  = require('./helper');
-  var cfg = helper.loadConfig();
-
   var Item = subject.configure({
     version:          1,
     partitionKey:     subject.keys.StringKey('id'),
@@ -20,9 +17,9 @@ suite("Entity (EncryptedBlobType)", function() {
       data:           subject.types.EncryptedBlob
     }
   }).setup({
-    credentials:      cfg.get('azure'),
-    table:            cfg.get('azureTestTableName'),
-    cryptoKey:        'CNcj2aOozdo7Pn+HEkAIixwninIwKnbYc6JPS9mNxZk='
+    credentials:  helper.cfg.azure,
+    table:        helper.cfg.tableName,
+    cryptoKey:    'CNcj2aOozdo7Pn+HEkAIixwninIwKnbYc6JPS9mNxZk='
   });
 
   var compareBuffers = function(b1, b2) {

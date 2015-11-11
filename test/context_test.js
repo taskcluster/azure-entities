@@ -1,14 +1,12 @@
 var subject = require("../lib/entity")
-suite("Entity (context)", function() {
-  var assert  = require('assert');
-  var slugid  = require('slugid');
-  var _       = require('lodash');
-  var Promise = require('promise');
-  var base    = require("taskcluster-base")
-  var debug   = require('debug')('base:test:entity:context');
+var assert  = require('assert');
+var slugid  = require('slugid');
+var _       = require('lodash');
+var Promise = require('promise');
+var debug   = require('debug')('test:entity:context');
+var helper  = require('./helper');
 
-  var helper  = require('./helper');
-  var cfg = helper.loadConfig();
+suite("Entity (context)", function() {
 
   test("Entity.configure().setup()", function() {
     subject.configure({
@@ -21,8 +19,8 @@ suite("Entity (context)", function() {
         count:          subject.types.Number
       }
     }).setup({
-      credentials:  cfg.get('azure'),
-      table:        cfg.get('azureTestTableName')
+      credentials:  helper.cfg.azure,
+      table:        helper.cfg.tableName
     });
   });
 
@@ -38,8 +36,8 @@ suite("Entity (context)", function() {
       },
       context:          ['config']
     }).setup({
-      credentials:  cfg.get('azure'),
-      table:        cfg.get('azureTestTableName'),
+      credentials:  helper.cfg.azure,
+      table:        helper.cfg.tableName,
       context: {
         config:     "My config object"
       }
@@ -58,8 +56,8 @@ suite("Entity (context)", function() {
       },
       context:          ['config', 'maxCount']
     }).setup({
-      credentials:  cfg.get('azure'),
-      table:        cfg.get('azureTestTableName'),
+      credentials:  helper.cfg.azure,
+      table:        helper.cfg.tableName,
       context: {
         config:     "My config object",
         maxCount:   10
@@ -106,8 +104,8 @@ suite("Entity (context)", function() {
         };
       }
     }).setup({
-      credentials:  cfg.get('azure'),
-      table:        cfg.get('azureTestTableName'),
+      credentials:  helper.cfg.azure,
+      table:        helper.cfg.tableName,
       context: {
         maxCount:  11
       }
@@ -137,8 +135,8 @@ suite("Entity (context)", function() {
         },
         context:          ['config']
       }).setup({
-        credentials:  cfg.get('azure'),
-        table:        cfg.get('azureTestTableName'),
+        credentials:  helper.cfg.azure,
+        table:        helper.cfg.tableName,
         context: {
           config:         "My config object",
           undeclaredKey:  19
@@ -164,8 +162,8 @@ suite("Entity (context)", function() {
         },
         context:          ['config']
       }).setup({
-        credentials:  cfg.get('azure'),
-        table:        cfg.get('azureTestTableName'),
+        credentials:  helper.cfg.azure,
+        table:        helper.cfg.tableName,
         context:      {}
       });
     }

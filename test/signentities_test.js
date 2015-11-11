@@ -1,14 +1,12 @@
 var subject = require("../lib/entity")
-suite("Entity (signEntities)", function() {
-  var assert  = require('assert');
-  var slugid  = require('slugid');
-  var _       = require('lodash');
-  var Promise = require('promise');
-  var base    = require("taskcluster-base")
-  var debug   = require('debug')('base:test:entity:signEntities');
+var assert  = require('assert');
+var slugid  = require('slugid');
+var _       = require('lodash');
+var Promise = require('promise');
+var debug   = require('debug')('test:entity:signEntities');
+var helper  = require('./helper');
 
-  var helper  = require('./helper');
-  var cfg = helper.loadConfig();
+suite("Entity (signEntities)", function() {
 
   var ItemV1;
   test("ItemV1 = Entity.configure", function() {
@@ -28,8 +26,8 @@ suite("Entity (signEntities)", function() {
   var Item;
   test("Item = ItemV1.setup", function() {
     Item = ItemV1.setup({
-      credentials:  cfg.get('azure'),
-      table:        cfg.get('azureTestTableName'),
+      credentials:  helper.cfg.azure,
+      table:        helper.cfg.tableName,
       signingKey:   'no-way-you-can-guess-this'
     });
   });
@@ -37,8 +35,8 @@ suite("Entity (signEntities)", function() {
   test("ItemV1.setup (requires signingKey)", function() {
     try {
       ItemV1.setup({
-        credentials:  cfg.get('azure'),
-        table:        cfg.get('azureTestTableName')
+        credentials:  helper.cfg.azure,
+        table:        helper.cfg.tableName
       });
     } catch (err) {
       return; // Expected error
@@ -92,8 +90,8 @@ suite("Entity (signEntities)", function() {
 
   test("Item.load (invalid signature)", function() {
     var BadKeyItem = ItemV1.setup({
-      credentials:  cfg.get('azure'),
-      table:        cfg.get('azureTestTableName'),
+      credentials:  helper.cfg.azure,
+      table:        helper.cfg.tableName,
       signingKey:   'wrong-secret'
     });
     return BadKeyItem.load({
@@ -131,8 +129,8 @@ suite("Entity (signEntities)", function() {
   var Item2;
   test("Item2 = ItemV2.setup", function() {
     Item2 = ItemV2.setup({
-      credentials:  cfg.get('azure'),
-      table:        cfg.get('azureTestTableName'),
+      credentials:  helper.cfg.azure,
+      table:        helper.cfg.tableName,
       signingKey:   'no-way-you-can-guess-this'
     });
   });
@@ -140,8 +138,8 @@ suite("Entity (signEntities)", function() {
   test("ItemV2.setup (requires signingKey)", function() {
     try {
       ItemV2.setup({
-        credentials:  cfg.get('azure'),
-        table:        cfg.get('azureTestTableName')
+        credentials:  helper.cfg.azure,
+        table:        helper.cfg.tableName
       });
     } catch (err) {
       return; // Expected error
@@ -161,8 +159,8 @@ suite("Entity (signEntities)", function() {
 
   test("Item2.load (invalid signature)", function() {
     var BadKeyItem2 = ItemV2.setup({
-      credentials:  cfg.get('azure'),
-      table:        cfg.get('azureTestTableName'),
+      credentials:  helper.cfg.azure,
+      table:        helper.cfg.tableName,
       signingKey:   'wrong-secret'
     });
     return BadKeyItem2.load({
@@ -254,8 +252,8 @@ suite("Entity (signEntities)", function() {
   var Item3;
   test("Item3 = ItemV3.setup", function() {
     Item3 = ItemV3.setup({
-      credentials:  cfg.get('azure'),
-      table:        cfg.get('azureTestTableName'),
+      credentials:  helper.cfg.azure,
+      table:        helper.cfg.tableName,
       signingKey:   'no-way-you-can-guess-this'
     });
   });
@@ -290,8 +288,8 @@ suite("Entity (signEntities)", function() {
 
   test("Item3.load (invalid signature)", function() {
     var BadKeyItem3 = ItemV3.setup({
-      credentials:  cfg.get('azure'),
-      table:        cfg.get('azureTestTableName'),
+      credentials:  helper.cfg.azure,
+      table:        helper.cfg.tableName,
       signingKey:   'wrong-secret'
     });
     return BadKeyItem3.load({

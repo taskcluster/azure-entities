@@ -1,0 +1,5 @@
+defaults:
+  tableName:      'azureEntityTests'
+  azure:
+    accountName:  !env AZURE_ACCOUNT_NAME
+    accountKey:   !env AZURE_ACCOUNT_KEY
