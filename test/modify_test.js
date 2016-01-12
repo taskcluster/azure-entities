@@ -6,22 +6,10 @@ var Promise = require('promise');
 var debug   = require('debug')('test:entity:create_load');
 var helper  = require('./helper');
 
-suite("Entity (modify)", function() {
-
-  var Item = subject.configure({
-    version:          1,
-    partitionKey:     subject.keys.StringKey('id'),
-    rowKey:           subject.keys.StringKey('name'),
-    properties: {
-      id:             subject.types.String,
-      name:           subject.types.String,
-      count:          subject.types.Number
-    }
-  }).setup({
-    credentials:  helper.cfg.azure,
-    table:        helper.cfg.tableName
+var makeTests = function(Item) {
+  setup(function() {
+    return Item.ensureTable();
   });
-
 
   test("Item.create, Item.modify, Item.load", function() {
     var id = slugid.v4();
@@ -165,5 +153,32 @@ suite("Entity (modify)", function() {
       assert(item.id === id);
       assert(item.count === 6);
     });
+  });
+};
+
+suite("Entity (modify)", function() {
+  var Item = subject.configure({
+    version:          1,
+    partitionKey:     subject.keys.StringKey('id'),
+    rowKey:           subject.keys.StringKey('name'),
+    properties: {
+      id:             subject.types.String,
+      name:           subject.types.String,
+      count:          subject.types.Number
+    }
+  });
+
+  suite("(against Azure)", function() {
+    makeTests(Item.setup({
+      credentials:  helper.cfg.azure,
+      table:        helper.cfg.tableName
+    }));
+  });
+
+  suite("(in memory)", function() {
+    makeTests(Item.setup({
+      inMemory: true,
+      table:    'items'
+    }));
   });
 });
