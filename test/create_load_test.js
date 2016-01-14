@@ -7,7 +7,74 @@ var Promise = require('promise');
 var stats   = require("taskcluster-lib-stats");
 var debug   = require('debug')('test:entity:create_load');
 
-var makeTests = function(Item, Item2, drain) {
+var ItemV1 = subject.configure({
+  version:          1,
+  partitionKey:     subject.keys.StringKey('id'),
+  rowKey:           subject.keys.StringKey('name'),
+  properties: {
+    id:             subject.types.String,
+    name:           subject.types.String,
+    count:          subject.types.Number
+  }
+});
+
+var ItemV2 = ItemV1.configure({
+  version:          2,
+  properties: {
+    id:             subject.types.String,
+    name:           subject.types.String,
+    count:          subject.types.Number,
+    reason:         subject.types.String
+  },
+  migrate: function(item) {
+    return {
+      id:           item.id,
+      name:         item.name,
+      count:        item.count,
+      reason:       "no-reason"
+    };
+  }
+});
+
+helper.contextualSuites("Entity (create/load)", [
+  {
+    context: "azure",
+    options: function() {
+      var drain = new stats.NullDrain();
+      return {
+        drain: drain,
+        Item: ItemV1.setup({
+          credentials:  helper.cfg.azure,
+          table:        helper.cfg.tableName
+        }),
+        Item2: ItemV2.setup({
+          credentials:  helper.cfg.azure,
+          table:        helper.cfg.tableName,
+          drain:        drain,
+          component:    '"taskcluster-base"-test',
+          process:      'mocha'
+        }),
+      };
+    },
+  }, {
+    context: "inMemory",
+    options: function() {
+      return {
+        Item: ItemV1.setup({
+            inMemory: true,
+            table:    'items'
+        }),
+        Item2: ItemV2.setup({
+          inMemory: true,
+          table:    'items'
+        }),
+      };
+    },
+  }
+], function(context, options) {
+  var Item  = options.Item,
+      Item2 = options.Item2,
+      drain = options.drain;
   var id = slugid.v4();
 
   test("Item.ensureTable", function() {
@@ -113,7 +180,7 @@ var makeTests = function(Item, Item2, drain) {
     });
   });
 
-  if (drain) {
+  if (context == "Azure") { // inMemory doesn't do stats
     test("Item2.load writes stats", function() {
       assert(drain.pendingPoints() === 0, "Shouldn't have stats yet!");
       return Item2.load({
@@ -135,68 +202,5 @@ var makeTests = function(Item, Item2, drain) {
       assert(item.count === 1);
       assert(item.reason === "no-reason");
     });
-  });
-};
-
-suite("Entity (create/load)", function() {
-  var ItemV1 = subject.configure({
-    version:          1,
-    partitionKey:     subject.keys.StringKey('id'),
-    rowKey:           subject.keys.StringKey('name'),
-    properties: {
-      id:             subject.types.String,
-      name:           subject.types.String,
-      count:          subject.types.Number
-    }
-  });
-
-  var ItemV2 = ItemV1.configure({
-    version:          2,
-    properties: {
-      id:             subject.types.String,
-      name:           subject.types.String,
-      count:          subject.types.Number,
-      reason:         subject.types.String
-    },
-    migrate: function(item) {
-      return {
-        id:           item.id,
-        name:         item.name,
-        count:        item.count,
-        reason:       "no-reason"
-      };
-    }
-  });
-
-  suite("(against Azure)", function() {
-    var Item = ItemV1.setup({
-      credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName
-    });
-  
-    var drain = new stats.NullDrain();
-    var Item2 = ItemV2.setup({
-      credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName,
-      drain:        drain,
-      component:    '"taskcluster-base"-test',
-      process:      'mocha'
-    });
-
-    makeTests(Item, Item2, drain);
-  });
-
-  suite("(in memory)", function() {
-    var Item = ItemV1.setup({
-        inMemory: true,
-        table:    'items'
-    });
-  
-    var Item2 = ItemV2.setup({
-        inMemory: true,
-        table:    'items'
-    });
-
-    makeTests(Item, Item2, null);
   });
 });
