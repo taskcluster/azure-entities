@@ -63,6 +63,12 @@ var makeKey = function(partitionKey, rowKey) {
   return partitionKey.replace(/!/g, '!!') + '!' + rowKey.replace(/!/g, '!!');
 };
 
+var ts = 1;
+var updateTimestamp = function(entity) {
+  entity['Timestamp'] = ts++;
+  entity['Timestamp@odata.type'] = 'Edm.Int32';
+}
+
 /**
  * Create table.
  *
@@ -177,6 +183,7 @@ InMemoryWrapper.prototype.insertEntity = function(entity) {
   if (key in tables[this.table]) {
     return Promise.reject(makeError(409, 'EntityAlreadyExists'));
   }
+  updateTimestamp(entity);
   tables[this.table][key] = entity;
   return Promise.resolve(entityEtag(entity));
 };
