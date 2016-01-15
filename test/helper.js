@@ -9,3 +9,29 @@ exports.contextualSuites = function(name, contexts, suiteFunc) {
     suite(name + " (" + ctx.context + ")", function() { suiteFunc(ctx.context, options) });
   });
 };
+
+exports.makeContexts = function(Item) {
+  return [
+    {
+      context: "Azure",
+      options: function() {
+        return {
+          Item: Item.setup({
+            credentials:  exports.cfg.azure,
+            table:        exports.cfg.tableName
+          })
+        };
+      }
+    }, {
+      context: "In-Memory",
+      options: function() {
+        return {
+          Item: Item.setup({
+            inMemory: true,
+            table:    'items'
+          })
+        };
+      }
+    }
+  ];
+}

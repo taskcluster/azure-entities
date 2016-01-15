@@ -17,29 +17,8 @@ var Item = subject.configure({
   }
 });
 
-helper.contextualSuites("Entity (modify)", [
-  {
-    context: "Azure",
-    options: function() {
-      return {
-        Item: Item.setup({
-          credentials:  helper.cfg.azure,
-          table:        helper.cfg.tableName
-        })
-      };
-    }
-  }, {
-    context: "Azure",
-    options: function() {
-      return {
-        Item: Item.setup({
-          inMemory: true,
-          table:    'items'
-        })
-      };
-    }
-  }
-], function(context, options) {
+helper.contextualSuites("Entity (modify)", helper.makeContexts(Item),
+function(context, options) {
   var Item = options.Item;
 
   setup(function() {
