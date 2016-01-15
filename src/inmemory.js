@@ -54,7 +54,9 @@ InMemoryWrapper.prototype.createTable = function() {
  * @return {Promise} A promise that the table was marked for deletion.
  */
 InMemoryWrapper.prototype.deleteTable = function() {
-  // TODO: 404?
+  if (!tables[this.table]) {
+    return Promise.reject(makeError(404, 'ResourceNotFound'));
+  }
   delete tables[this.table];
   return Promise.resolve();
 };
@@ -80,6 +82,9 @@ InMemoryWrapper.prototype.deleteTable = function() {
 InMemoryWrapper.prototype.getEntity = function(partitionKey, rowKey, options) {
   // TODO: options
   var key = makeKey(partitionKey, rowKey);
+  if (!tables[this.table]) {
+    return Promise.reject(makeError(404, 'ResourceNotFound'));
+  }
   if (key in tables[this.table]) {
     var res = _.clone(tables[this.table][makeKey(partitionKey, rowKey)]);
     res['odata.etag'] = entityEtag(res);
@@ -138,6 +143,9 @@ InMemoryWrapper.prototype.queryEntities = function() {
  */
 InMemoryWrapper.prototype.insertEntity = function(entity) {
   var key = makeKey(entity.PartitionKey, entity.RowKey);
+  if (!tables[this.table]) {
+    return Promise.reject(makeError(404, 'ResourceNotFound'));
+  }
   if (key in tables[this.table]) {
     return Promise.reject(makeError(409, 'EntityAlreadyExists'));
   }
@@ -193,6 +201,9 @@ InMemoryWrapper.prototype.insertEntity = function(entity) {
  */
 InMemoryWrapper.prototype.updateEntity = function(entity, options) {
   var key = makeKey(entity.PartitionKey, entity.RowKey);
+  if (!tables[this.table]) {
+    return Promise.reject(makeError(404, 'ResourceNotFound'));
+  }
   if (key in tables[this.table]) {
     if (options.eTag != '*') {
       if (options.eTag && options.eTag != entityEtag(tables[this.table][key])) {
