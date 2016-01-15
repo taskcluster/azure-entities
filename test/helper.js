@@ -5,7 +5,10 @@ exports.cfg = config();
 
 exports.contextualSuites = function(name, contexts, suiteFunc) {
   _.forEach(contexts, function(ctx) {
-    var options = ctx.options();
+    var options = ctx.options;
+    if (typeof options === "function") {
+      options = options();
+    }
     suite(name + " (" + ctx.context + ")", function() { suiteFunc(ctx.context, options) });
   });
 };
