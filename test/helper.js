@@ -13,26 +13,26 @@ exports.contextualSuites = function(name, contexts, suiteFunc) {
   });
 };
 
-exports.makeContexts = function(Item) {
+exports.makeContexts = function(Item, setupOptions) {
   return [
     {
       context: "Azure",
       options: function() {
         return {
-          Item: Item.setup({
+          Item: Item.setup(_.defaults({}, setupOptions, {
             credentials:  exports.cfg.azure,
             table:        exports.cfg.tableName
-          })
+          }))
         };
       }
     }, {
       context: "In-Memory",
       options: function() {
         return {
-          Item: Item.setup({
+          Item: Item.setup(_.defaults({}, setupOptions, {
             inMemory: true,
             table:    'items'
-          })
+          }))
         };
       }
     }
