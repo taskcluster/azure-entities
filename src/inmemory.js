@@ -1,9 +1,12 @@
 /**
- * In-memory version of the `__aux` wrapper used in entity.js
+ * In-memory version of the `__aux` wrapper used in entity.js.  This
+ * is basically implementing the bits of fast-azure-entities that we
+ * use in azure-entities.
  */
 
-var _      = require('lodash');
-var crypto = require('crypto');
+var _         = require('lodash');
+var crypto    = require('crypto');
+var stringify = require('json-stable-stringify');
 
 // the in-memory data; stored globally as this is a better model for
 // Azure than storing each table as an instance or class property
@@ -15,12 +18,37 @@ var InMemoryWrapper = function InMemoryWrapper(table) {
 
 /* Internal utilities */
 
+var odataPrefix = /^odata\./;
+var odataSuffix = /@odata\.type$/;
 var entityEtag = function(entity) {
+  // always filter out odata.* metadata
+  entity = _.omit(entity, function(v, k) { return odataPrefix.test(k); });
+
+  // include an entity type for each attribute
+  _.forIn(entity, function(v, k) {
+    if (odataSuffix.test(k)) {
+      return;
+    }
+    var odata_type = k + '@odata.type';
+    if (entity[odata_type]) {
+      return;
+    }
+    if (typeof v === "boolean") {
+      entity[odata_type] = 'Edm.Boolean';
+    } else if (typeof v === "number") {
+      if (/\./.test(v)) {
+        entity[odata_type] = "Edm.Double";
+      } else {
+        entity[odata_type] = "Edm.Int32";
+      }
+    } else {
+      entity[odata_type] = "Edm.String";
+    }
+  });
+
+  // hash the resulting object to make the etag
   var sha1 = crypto.createHash('sha1');
-  // filter out metadata
-  var odata = /^odata\.|@odata/;
-  entity = _.omit(entity, function(v, k) { return odata.test(k); });
-  sha1.update(JSON.stringify(entity));
+  sha1.update(stringify(entity));
   return sha1.digest('hex');
 };
 
