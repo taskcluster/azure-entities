@@ -76,8 +76,10 @@ var updateTimestamp = function(entity) {
  * @return {Promise} A promise that the table was created.
  */
 InMemoryWrapper.prototype.createTable = function() {
+  if (tables[this.table]) {
+    return Promise.reject(makeError(409, 'TableAlreadyExists'));
+  }
   tables[this.table] = {};
-  // TODO: EntityAlready Exists?
   return Promise.resolve();
 };
 
