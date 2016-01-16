@@ -266,7 +266,45 @@ InMemoryWrapper.prototype.updateEntity = function(entity, options) {
   return Promise.resolve(entityEtag(entity));
 };
 
-InMemoryWrapper.prototype.deleteEntity = function() {
+/**
+ * Delete entity identified by `partitionKey` and `rowKey`.
+ * Options are **required** for this method and takes form as follows:
+ * ```js
+ * {
+ *   eTag:   '...' || '*'   // ETag to delete, or '*' to ignore ETag
+ * }
+ * ```
+ *
+ * Note, `options.eTag` is `'*'` will delete the entity regardless of its ETag.
+ *
+ * @method deleteEntity
+ * @param {string} table - Name of table to delete entity from.
+ * @param {string} partitionKey - Partition key of entity to delete.
+ * @param {string} rowKey - Row key of entity to delete.
+ * @param {object} options - Options on the following form:
+ * ```js
+ * {
+ *   eTag:   '...' || '*'   // ETag to delete, or '*' to ignore ETag
+ * }
+ * ```
+ * @returns {Promise} A promise that the entity was deleted.
+ */
+InMemoryWrapper.prototype.deleteEntity = function(partitionKey, rowKey, options) {
+  var key = makeKey(partitionKey, rowKey);
+  if (!tables[this.table]) {
+    return Promise.reject(makeError(404, 'ResourceNotFound'));
+  }
+  var table = tables[this.table];
+  if (!table[key]) {
+    return Promise.reject(makeError(404, 'ResourceNotFound'));
+  }
+  if (options.eTag != '*') {
+    if (options.eTag != entityEtag(table[key])) {
+      return Promise.reject(makeError(412, 'UpdateConditionNotSatisfied'));
+    }
+  }
+  delete table[key];
+  return Promise.resolve();
 };
 
 module.exports = InMemoryWrapper;

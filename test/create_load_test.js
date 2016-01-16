@@ -38,7 +38,7 @@ var ItemV2 = ItemV1.configure({
 
 helper.contextualSuites("Entity (create/load)", [
   {
-    context: "azure",
+    context: "Azure",
     options: function() {
       var drain = new stats.NullDrain();
       return {
@@ -57,7 +57,7 @@ helper.contextualSuites("Entity (create/load)", [
       };
     },
   }, {
-    context: "inMemory",
+    context: "In-Memory",
     options: function() {
       return {
         Item: ItemV1.setup({
