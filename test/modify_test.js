@@ -155,6 +155,11 @@ function(context, options) {
       return Promise.all(items.map(function(item) {
         return item.modify(function() {
           this.count += 1;
+          // finish the modify functions in random time
+          var res = new Promise(function(resolve, reject) {
+            setTimeout(resolve, Math.floor(Math.random() * 100));
+          });
+          return res;
         });
       }));
     }).then(function() {
