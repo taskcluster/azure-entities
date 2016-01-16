@@ -9,7 +9,9 @@ exports.contextualSuites = function(name, contexts, suiteFunc) {
     if (typeof options === "function") {
       options = options();
     }
-    suite(name + " (" + ctx.context + ")", function() { suiteFunc(ctx.context, options) });
+    suite(name + " (" + ctx.context + ")", function() {
+      suiteFunc.bind(this)(ctx.context, options);
+    });
   });
 };
 

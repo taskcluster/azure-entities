@@ -7,7 +7,27 @@ var stats   = require("taskcluster-lib-stats");
 var debug   = require('debug')('test:entity:query');
 var helper  = require('./helper');
 
-suite("Entity (query)", function() {
+helper.contextualSuites("Entity (query)", [
+  {
+    context: "Azure",
+    options: {
+      credentials:  helper.cfg.azure,
+      table:        helper.cfg.tableName,
+    },
+  }, {
+    context: "In-Memory",
+    options: {
+      inMemory: true,
+      table: "items",
+    }
+  },
+], function(context, options) {
+
+  // TODO
+  if (context == "In-Memory") {
+    this.pending = true;
+  }
+
   var Item = subject.configure({
     version:          1,
     partitionKey:     subject.keys.StringKey('id'),
@@ -19,12 +39,13 @@ suite("Entity (query)", function() {
       tag:            subject.types.String,
       time:           subject.types.Date
     }
-  }).setup({
-    credentials:  helper.cfg.azure,
-    table:        helper.cfg.tableName,
-    drain:        new stats.NullDrain(),
+  }).setup(_.defaults({}, options, {
     component:    '"taskcluster-base"-test',
     process:      'mocha'
+  }));
+
+  setup(function() {
+    return Item.ensureTable();
   });
 
   var id = slugid.v4();
