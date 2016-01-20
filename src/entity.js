@@ -11,7 +11,8 @@ var taskcluster     = require('taskcluster-client');
 var https           = require('https');
 var series          = require('./series');
 var crypto          = require('crypto');
-var InMemoryWrapper; // lazy-loaded
+var entityfilters   = require('./entityfilters');
+var inmemory;       // lazy-loaded
 
 // ** Coding Style **
 // To ease reading of this component we recommend the following code guidelines:
@@ -127,6 +128,7 @@ Entity.prototype.__hasEncrypted = false;      // Some type has encryption
 // Define properties set in setup
 Entity.prototype.__client       = undefined;  // Azure table client
 Entity.prototype.__aux          = undefined;  // Azure table client wrapper
+Entity.prototype.__appendFilter = undefined;  // Filter builder
 Entity.prototype.__table        = undefined;  // Azure table name
 Entity.prototype.__signingKey   = undefined;  // Secret key for signing entities
 Entity.prototype.__cryptoKey    = undefined;  // Key for encrypted properties
@@ -339,9 +341,10 @@ Entity.configure = function(options) {
   // In particular it will give issues access properties when new versions
   // are introduced. Mainly that empty properties will exist.
   assert(
-    subClass.prototype.__client === undefined &&
-    subClass.prototype.__aux    === undefined &&
-    subClass.prototype.__table  === undefined,
+    subClass.prototype.__client        === undefined &&
+    subClass.prototype.__aux           === undefined &&
+    subClass.prototype.__filterBuilder === undefined &&
+    subClass.prototype.__table         === undefined,
     "This `Entity` subclass is already setup!"
   );
 
@@ -634,10 +637,11 @@ Entity.setup = function(options) {
   // Don't allow setup to run twice, there is no reasons for this. In particular
   // it could give issues with access properties
   assert(
-    subClass.prototype.__client     === undefined &&
-    subClass.prototype.__aux        === undefined &&
-    subClass.prototype.__table      === undefined &&
-    subClass.prototype.__signingKey === undefined,
+    subClass.prototype.__client        === undefined &&
+    subClass.prototype.__aux           === undefined &&
+    subClass.prototype.__filterBuilder === undefined &&
+    subClass.prototype.__table         === undefined &&
+    subClass.prototype.__signingKey    === undefined,
     "This `Entity` subclass is already setup!"
   );
 
@@ -696,11 +700,12 @@ Entity.setup = function(options) {
   }
 
   if (options.inMemory) {
-    if (!InMemoryWrapper) {
-      InMemoryWrapper = require('./inmemory'); // lazy-loaded
+    if (!inmemory) {
+      inmemory = require('./inmemory'); // lazy-loaded
     }
     subClass.prototype.__table = options.table;
-    subClass.prototype.__aux = new InMemoryWrapper(options.table);
+    subClass.prototype.__filterBuilder = inmemory.appendFilter;
+    subClass.prototype.__aux = new inmemory.InMemoryWrapper(options.table);
   } else {
     // Set azure table name
     subClass.prototype.__table = options.table;
@@ -748,6 +753,9 @@ Entity.setup = function(options) {
 
     // Store reference to azure table client
     subClass.prototype.__client = client;
+
+    // set the filter builder
+    subClass.prototype.__filterBuilder = entityfilters.appendFilter;
 
     // Create table client wrapper, to record statistics and bind table name
     subClass.prototype.__aux = {};
@@ -1246,22 +1254,20 @@ Entity.scan = function(conditions, options) {
   }
 
   // Create a $filter string builder to abstract away joining with 'and'
-  var filter = '';
-  var filterBuilder = function(condition) {
-    if (filter === '') {
-      filter = condition;
-    } else if (condition !== '') {
-      filter += ' and ' + condition;
-    }
-  };
+  var filter = null;
+  var appendFilter = ClassProps.__filterBuilder;
 
   // If we have partitionKey and rowKey we should add them to the query
   var azOps = azure.Table.Operators;
   if (partitionKey !== undefined) {
-    filterBuilder('PartitionKey eq ' + azOps.string(partitionKey));
+    filter = appendFilter(filter,
+            new Entity.types.String("PartitionKey"),
+            Entity.op.equal(partitionKey));
   }
   if (rowKey !== undefined) {
-    filterBuilder('RowKey eq ' + azOps.string(rowKey));
+    filter = appendFilter(filter,
+            new Entity.types.String("RowKey"),
+            Entity.op.equal(rowKey));
   }
 
   // Construct query from conditions using operators
@@ -1285,8 +1291,7 @@ Entity.scan = function(conditions, options) {
       op = Entity.op.equal(op);
     }
 
-    // Let the type construct the filter
-    type.filter(op, filterBuilder);
+    filter = appendFilter(filter, type, op);
   });
 
   // Fetch results with operational continuation token

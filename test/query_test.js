@@ -23,11 +23,6 @@ helper.contextualSuites("Entity (query)", [
   },
 ], function(context, options) {
 
-  // TODO
-  if (context == "In-Memory") {
-    this.pending = true;
-  }
-
   var Item = subject.configure({
     version:          1,
     partitionKey:     subject.keys.StringKey('id'),

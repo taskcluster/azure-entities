@@ -5,6 +5,7 @@
  */
 
 var _         = require('lodash');
+var assert    = require('assert');
 var crypto    = require('crypto');
 var stringify = require('json-stable-stringify');
 
@@ -116,7 +117,10 @@ InMemoryWrapper.prototype.deleteTable = function() {
  * details.
  */
 InMemoryWrapper.prototype.getEntity = function(partitionKey, rowKey, options) {
-  // TODO: options
+  options = options || {};
+  // NOTE: azure-entities never uses these features:
+  assert(!options.filter, "filter is not supported for getEntity");
+  assert(!options.select, "select is not supported for getEntity");
   var key = makeKey(partitionKey, rowKey);
   if (!tables[this.table]) {
     return Promise.reject(makeError(404, 'ResourceNotFound'));
@@ -132,18 +136,18 @@ InMemoryWrapper.prototype.getEntity = function(partitionKey, rowKey, options) {
 /**
  * Query entities.
  *
- * @method queryEntitites
+ * @method queryEntities
  * @param {object} options - Options on the following form:
  * ```js
  * {
  *   // Query options:
- *   select:            ['key1', ...],  // Keys to $select (defaults to all)
- *   filter:            'key1 eq true', // $filter string, see Table.filter
- *   top:               1000,           // Max number of entities to return
+ *   select:            ['key1', ...], // Keys to $select (defaults to all)
+ *   filter:            ....,          // $filter object -- DIFFERS FROM fast-azure-storage!
+ *   top:               1000,          // Max number of entities to return
  *
  *   // Paging options:
- *   nextPartitionKey:  '...',          // nextPartitionKey from previous result
- *   nextRowKey:        '...'           // nextRowKey from previous result
+ *   nextPartitionKey:  '...',         // nextPartitionKey from previous result
+ *   nextRowKey:        '...'          // nextRowKey from previous result
  * }
  * ```
  * @return {Promise} A promise for an object on the form:
@@ -160,8 +164,53 @@ InMemoryWrapper.prototype.getEntity = function(partitionKey, rowKey, options) {
  * }
  * ```
  */
-InMemoryWrapper.prototype.queryEntities = function() {
-  // TODO
+InMemoryWrapper.prototype.queryEntities = function(options) {
+  options = options || {};
+  assert(!options.select, "select is not supported for queryEntities");
+
+  if (!tables[this.table]) {
+    return Promise.reject(makeError(404, 'ResourceNotFound'));
+  }
+  
+  var filterFunctionFor = function(filter) {
+    return function(entity) {
+      return _.every(filter, function(condition) {
+        return condition.type.compare(entity, condition.op);
+      });
+    };
+  };
+
+  var entities = _.values(tables[this.table]);
+
+  if (options.filter) {
+    entities = _.filter(entities, filterFunctionFor(options.filter));
+  }
+
+  if (options.nextRowKey || options.nextPartitionKey) {
+    var rowKey = options.nextRowKey,
+        partitionKey = options.nextPartitionKey;
+    while (entities.length > 0 &&
+           (entities[0].PartitionKey != partitionKey ||
+            entities[0].RowKey != rowKey)) {
+      entities.shift();
+    }
+  }
+
+  var nextPartitionKey, nextRowKey;
+  if (options.top) {
+    if (entities.length > options.top) {
+      nextPartitionKey = entities[options.top].PartitionKey;
+      nextRowKey = entities[options.top].RowKey;
+    }
+    entities = entities.slice(0, options.top);
+  }
+
+  // Apply pagination
+  return Promise.resolve({
+    entities: entities,
+    nextPartitionKey: nextPartitionKey,
+    nextRowKey: nextRowKey,
+  });
 };
 
 /**
@@ -307,4 +356,12 @@ InMemoryWrapper.prototype.deleteEntity = function(partitionKey, rowKey, options)
   return Promise.resolve();
 };
 
-module.exports = InMemoryWrapper;
+exports.InMemoryWrapper = InMemoryWrapper;
+
+exports.appendFilter = function(filter, type, op) {
+  // just keep the type and op for later analysis, rather than building
+  // a string
+  filter = filter || [];
+  filter.push({type: type, op: op});
+  return filter;
+};
