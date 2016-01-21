@@ -18,6 +18,16 @@ Op.prototype.operator = null;
 /** This is an ordered or unordered comparison */
 Op.prototype.ordered = null;
 
+/********************* In-Memory *********************/
+
+var comparisonFuncs = {}
+comparisonFuncs[azTableOps.Equal] =              function(x, y) { return x == y; };
+comparisonFuncs[azTableOps.NotEqual] =           function(x, y) { return x != y; };
+comparisonFuncs[azTableOps.GreaterThan] =        function(x, y) { return x > y; };
+comparisonFuncs[azTableOps.GreaterThanOrEqual] = function(x, y) { return x >= y; };
+comparisonFuncs[azTableOps.LessThan] =           function(x, y) { return x < y; };
+comparisonFuncs[azTableOps.LessThanOrEqual] =    function(x, y) { return x <= y; };
+
 /******************** Ordering Relations ********************/
 
 // Ordering relations
@@ -37,6 +47,7 @@ ORDER_RELATIONS.forEach(function(operator) {
   util.inherits(Class, Op);
   Class.prototype.operator = operator;
   Class.prototype.ordered = true;
+  Class.prototype.compare = comparisonFuncs[operator];
   // Define function to create class instance
   Op[operator] = function(operand) {
     assert(operand !== undefined, "operand is required");
@@ -61,6 +72,7 @@ EQUIVALENCE_RELATIONS.forEach(function(operator) {
   util.inherits(Class, Op);
   Class.prototype.operator = operator;
   Class.prototype.ordered = false;
+  Class.prototype.compare = comparisonFuncs[operator];
   // Define function to create class instance
   Op[operator] = function(operand) {
     assert(operand !== undefined, "operand is required");

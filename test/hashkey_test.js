@@ -7,21 +7,24 @@ var crypto  = require('crypto');
 var debug   = require('debug')('test:entity:hashkey');
 var helper  = require('./helper');
 
-suite("Entity (HashKey)", function() {
+var Item = subject.configure({
+  version:          1,
+  partitionKey:     subject.keys.HashKey('id', 'data'),
+  rowKey:           subject.keys.HashKey('text1', 'text2'),
+  properties: {
+    text1:          subject.types.Text,
+    text2:          subject.types.String,
+    id:             subject.types.SlugId,
+    data:           subject.types.JSON
+  }
+});
 
-  var Item = subject.configure({
-    version:          1,
-    partitionKey:     subject.keys.HashKey('id', 'data'),
-    rowKey:           subject.keys.HashKey('text1', 'text2'),
-    properties: {
-      text1:          subject.types.Text,
-      text2:          subject.types.String,
-      id:             subject.types.SlugId,
-      data:           subject.types.JSON
-    }
-  }).setup({
-      credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName
+helper.contextualSuites("Entity (HashKey)", helper.makeContexts(Item),
+function(context, options) {
+  var Item = options.Item;
+
+  setup(function() {
+    return Item.ensureTable();
   });
 
   test("Item.create, HashKey.exact (test against static data)", function() {

@@ -6,20 +6,24 @@ var Promise = require('promise');
 var crypto  = require('crypto');
 var helper  = require('./helper');
 
-suite("Entity (EncryptedBlobType)", function() {
-  var Item = subject.configure({
-    version:          1,
-    partitionKey:     subject.keys.StringKey('id'),
-    rowKey:           subject.keys.StringKey('name'),
-    properties: {
-      id:             subject.types.String,
-      name:           subject.types.String,
-      data:           subject.types.EncryptedBlob
-    }
-  }).setup({
-    credentials:  helper.cfg.azure,
-    table:        helper.cfg.tableName,
-    cryptoKey:    'CNcj2aOozdo7Pn+HEkAIixwninIwKnbYc6JPS9mNxZk='
+var Item = subject.configure({
+  version:          1,
+  partitionKey:     subject.keys.StringKey('id'),
+  rowKey:           subject.keys.StringKey('name'),
+  properties: {
+    id:             subject.types.String,
+    name:           subject.types.String,
+    data:           subject.types.EncryptedBlob
+  }
+});
+
+helper.contextualSuites("Entity (EncryptedBlobType)", helper.makeContexts(Item, {
+  cryptoKey:    'CNcj2aOozdo7Pn+HEkAIixwninIwKnbYc6JPS9mNxZk='
+}), function(context, options) {
+  var Item = options.Item;
+
+  setup(function() {
+    return Item.ensureTable();
   });
 
   var compareBuffers = function(b1, b2) {

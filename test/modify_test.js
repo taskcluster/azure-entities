@@ -6,22 +6,24 @@ var Promise = require('promise');
 var debug   = require('debug')('test:entity:create_load');
 var helper  = require('./helper');
 
-suite("Entity (modify)", function() {
+var Item = subject.configure({
+  version:          1,
+  partitionKey:     subject.keys.StringKey('id'),
+  rowKey:           subject.keys.StringKey('name'),
+  properties: {
+    id:             subject.types.String,
+    name:           subject.types.String,
+    count:          subject.types.Number
+  }
+});
 
-  var Item = subject.configure({
-    version:          1,
-    partitionKey:     subject.keys.StringKey('id'),
-    rowKey:           subject.keys.StringKey('name'),
-    properties: {
-      id:             subject.types.String,
-      name:           subject.types.String,
-      count:          subject.types.Number
-    }
-  }).setup({
-    credentials:  helper.cfg.azure,
-    table:        helper.cfg.tableName
+helper.contextualSuites("Entity (modify)", helper.makeContexts(Item),
+function(context, options) {
+  var Item = options.Item;
+
+  setup(function() {
+    return Item.ensureTable();
   });
-
 
   test("Item.create, Item.modify, Item.load", function() {
     var id = slugid.v4();
@@ -71,6 +73,28 @@ suite("Entity (modify)", function() {
       assert(false, "Expected an error");
     }, function(err2) {
       assert(err === err2, "Expected the error I threw!");
+    });
+  });
+
+  test("Item.modify a deleted itedm", function() {
+    var id = slugid.v4();
+    var deletedItem;
+    return Item.create({
+      id:     id,
+      name:   'my-test-item',
+      count:  1
+    }).then(function(item) {
+      deletedItem = item;
+      return Item.remove({id: id, name: 'my-test-item'});
+    }).then(function() {
+      return deletedItem.modify(function(item) {
+        item.count += 1;
+      });
+    }).then(function() {
+      assert(false, "Expected an error");
+    }, function(err) {
+      assert(err.code === 'ResourceNotFound', "Expected ResourceNotFound");
+      assert(err.statusCode == 404, "Expected 404");
     });
   });
 
@@ -153,6 +177,11 @@ suite("Entity (modify)", function() {
       return Promise.all(items.map(function(item) {
         return item.modify(function() {
           this.count += 1;
+          // finish the modify functions in random time
+          var res = new Promise(function(resolve, reject) {
+            setTimeout(resolve, Math.floor(Math.random() * 100));
+          });
+          return res;
         });
       }));
     }).then(function() {
@@ -167,3 +196,4 @@ suite("Entity (modify)", function() {
     });
   });
 });
+

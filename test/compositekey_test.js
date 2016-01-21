@@ -7,21 +7,24 @@ var crypto  = require('crypto');
 var debug   = require('debug')('test:entity:compositekey');
 var helper  = require('./helper');
 
-suite("Entity (CompositeKey)", function() {
+var Item = subject.configure({
+  version:          1,
+  partitionKey:     subject.keys.CompositeKey('id', 'data'),
+  rowKey:           subject.keys.CompositeKey('text1', 'text2'),
+  properties: {
+    text1:          subject.types.String,
+    text2:          subject.types.String,
+    id:             subject.types.SlugId,
+    data:           subject.types.Number
+  }
+});
 
-  var Item = subject.configure({
-    version:          1,
-    partitionKey:     subject.keys.CompositeKey('id', 'data'),
-    rowKey:           subject.keys.CompositeKey('text1', 'text2'),
-    properties: {
-      text1:          subject.types.String,
-      text2:          subject.types.String,
-      id:             subject.types.SlugId,
-      data:           subject.types.Number
-    }
-  }).setup({
-    credentials:  helper.cfg.azure,
-    table:        helper.cfg.tableName
+helper.contextualSuites("Entity (CompositeKey)", helper.makeContexts(Item),
+function(context, options) {
+  var Item = options.Item;
+
+  setup(function() {
+    return Item.ensureTable();
   });
 
   test("Item.create, Item.load", function() {

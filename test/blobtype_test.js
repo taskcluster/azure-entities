@@ -6,36 +6,39 @@ var Promise = require('promise');
 var crypto  = require('crypto');
 var helper  = require('./helper');
 
-suite("Entity (BlobType)", function() {
+var Item = subject.configure({
+  version:          1,
+  partitionKey:     subject.keys.StringKey('id'),
+  rowKey:           subject.keys.StringKey('name'),
+  properties: {
+    id:             subject.types.String,
+    name:           subject.types.String,
+    data:           subject.types.Blob
+  }
+});
 
-  var Item = subject.configure({
-    version:          1,
-    partitionKey:     subject.keys.StringKey('id'),
-    rowKey:           subject.keys.StringKey('name'),
-    properties: {
-      id:             subject.types.String,
-      name:           subject.types.String,
-      data:           subject.types.Blob
-    }
-  }).setup({
-    credentials:  helper.cfg.azure,
-    table:        helper.cfg.tableName
-  });
-
-  var compareBuffers = function(b1, b2) {
-    assert(Buffer.isBuffer(b1));
-    assert(Buffer.isBuffer(b2));
-    if (b1.length !== b2.length) {
+var compareBuffers = function(b1, b2) {
+  assert(Buffer.isBuffer(b1));
+  assert(Buffer.isBuffer(b2));
+  if (b1.length !== b2.length) {
+    return false;
+  }
+  var n = b1.length;
+  for (var i = 0; i < n; i++) {
+    if (b1[i] !== b2[i]) {
       return false;
     }
-    var n = b1.length;
-    for (var i = 0; i < n; i++) {
-      if (b1[i] !== b2[i]) {
-        return false;
-      }
-    }
-    return true;
   }
+  return true;
+}
+
+helper.contextualSuites("Entity (BlobType)", helper.makeContexts(Item), 
+function(context, options) {
+  var Item = options.Item;
+
+  setup(function() {
+    return Item.ensureTable();
+  });
 
   test("small blob", function() {
     var id  = slugid.v4();

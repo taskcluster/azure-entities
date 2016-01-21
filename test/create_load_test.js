@@ -7,34 +7,79 @@ var Promise = require('promise');
 var stats   = require("taskcluster-lib-stats");
 var debug   = require('debug')('test:entity:create_load');
 
-suite("Entity (create/load)", function() {
-  var ItemV1;
-  test("ItemV1 = Entity.configure", function() {
-    ItemV1 = subject.configure({
-      version:          1,
-      partitionKey:     subject.keys.StringKey('id'),
-      rowKey:           subject.keys.StringKey('name'),
-      properties: {
-        id:             subject.types.String,
-        name:           subject.types.String,
-        count:          subject.types.Number
-      }
-    });
-  });
+var ItemV1 = subject.configure({
+  version:          1,
+  partitionKey:     subject.keys.StringKey('id'),
+  rowKey:           subject.keys.StringKey('name'),
+  properties: {
+    id:             subject.types.String,
+    name:           subject.types.String,
+    count:          subject.types.Number
+  }
+});
 
-  var Item;
-  test("Item = ItemV1.setup", function() {
-    Item = ItemV1.setup({
-      credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName
-    });
-  });
+var ItemV2 = ItemV1.configure({
+  version:          2,
+  properties: {
+    id:             subject.types.String,
+    name:           subject.types.String,
+    count:          subject.types.Number,
+    reason:         subject.types.String
+  },
+  migrate: function(item) {
+    return {
+      id:           item.id,
+      name:         item.name,
+      count:        item.count,
+      reason:       "no-reason"
+    };
+  }
+});
+
+helper.contextualSuites("Entity (create/load)", [
+  {
+    context: "Azure",
+    options: function() {
+      var drain = new stats.NullDrain();
+      return {
+        drain: drain,
+        Item: ItemV1.setup({
+          credentials:  helper.cfg.azure,
+          table:        helper.cfg.tableName
+        }),
+        Item2: ItemV2.setup({
+          credentials:  helper.cfg.azure,
+          table:        helper.cfg.tableName,
+          drain:        drain,
+          component:    '"taskcluster-base"-test',
+          process:      'mocha'
+        }),
+      };
+    },
+  }, {
+    context: "In-Memory",
+    options: function() {
+      return {
+        Item: ItemV1.setup({
+          account:  "inMemory",
+          table:    'items'
+        }),
+        Item2: ItemV2.setup({
+          account:  "inMemory",
+          table:    'items'
+        }),
+      };
+    },
+  }
+], function(context, options) {
+  var Item  = options.Item,
+      Item2 = options.Item2,
+      drain = options.drain;
+  var id = slugid.v4();
 
   test("Item.ensureTable", function() {
     return Item.ensureTable();
   });
-
-  var id = slugid.v4();
 
   test("Item.create", function() {
     return Item.create({
@@ -79,6 +124,7 @@ suite("Entity (create/load)", function() {
       }, function(err) {
         assert(err.code === 'EntityAlreadyExists',
                "Expected EntityAlreadyExists");
+        assert(err.statusCode === 409, "Expected 409");
       });
     });
   });
@@ -121,6 +167,7 @@ suite("Entity (create/load)", function() {
       assert(false, "Expected an error");
     }, function(err) {
       assert(err.code === 'ResourceNotFound');
+        assert(err.statusCode === 404, "Expected 404");
     });
   });
 
@@ -133,51 +180,22 @@ suite("Entity (create/load)", function() {
     });
   });
 
-  var ItemV2; // Tisk, tisk, intertest dependency!
-
-  test("ItemV2 = ItemV1.configure", function() {
-    ItemV2 = ItemV1.configure({
-      version:          2,
-      properties: {
-        id:             subject.types.String,
-        name:           subject.types.String,
-        count:          subject.types.Number,
-        reason:         subject.types.String
-      },
-      migrate: function(item) {
-        return {
-          id:           item.id,
-          name:         item.name,
-          count:        item.count,
-          reason:       "no-reason"
-        };
-      }
+  if (context == "Azure") { // inMemory doesn't do stats
+    test("Item2.load writes stats", function() {
+      assert(drain.pendingPoints() === 0, "Shouldn't have stats yet!");
+      return Item2.load({
+        id:     id,
+        name:   'my-test-item',
+      }).then(function(item) {
+        assert(drain.pendingPoints() >= 0, "Should have stats now!");
+        assert(item.count === 1);
+        assert(item.reason === "no-reason");
+      });
     });
-  });
+  }
 
-  test("Item = ItemV2.setup with NullDrain for stats", function() {
-    var drain = new stats.NullDrain();
-    Item = ItemV2.setup({
-      credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName,
-      drain:        drain,
-      component:    '"taskcluster-base"-test',
-      process:      'mocha'
-    });
-    assert(drain.pendingPoints() === 0, "Shouldn't have stats yet!");
-    return Item.load({
-      id:     id,
-      name:   'my-test-item',
-    }).then(function(item) {
-      assert(drain.pendingPoints() >= 0, "Should have stats now!");
-      assert(item.count === 1);
-      assert(item.reason === "no-reason");
-    });
-  });
-
-
-  test("Item.load", function() {
-    return Item.load({
+  test("Item2.load", function() {
+    return Item2.load({
       id:     id,
       name:   'my-test-item',
     }).then(function(item) {

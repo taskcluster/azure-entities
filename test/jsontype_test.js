@@ -6,20 +6,23 @@ var Promise = require('promise');
 var crypto  = require('crypto');
 var helper  = require('./helper');
 
-suite("Entity (JSONType)", function() {
+var Item = subject.configure({
+  version:          1,
+  partitionKey:     subject.keys.StringKey('id'),
+  rowKey:           subject.keys.StringKey('name'),
+  properties: {
+    id:             subject.types.String,
+    name:           subject.types.String,
+    data:           subject.types.JSON
+  }
+});
 
-  var Item = subject.configure({
-    version:          1,
-    partitionKey:     subject.keys.StringKey('id'),
-    rowKey:           subject.keys.StringKey('name'),
-    properties: {
-      id:             subject.types.String,
-      name:           subject.types.String,
-      data:           subject.types.JSON
-    }
-  }).setup({
-    credentials:  helper.cfg.azure,
-    table:        helper.cfg.tableName
+helper.contextualSuites("Entity (JSONType)", helper.makeContexts(Item),
+function(context, options) {
+  var Item = options.Item;
+
+  setup(function() {
+    return Item.ensureTable();
   });
 
   // Construct a large string

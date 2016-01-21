@@ -6,12 +6,153 @@ var Promise = require('promise');
 var crypto  = require('crypto');
 var helper  = require('./helper');
 
-suite("Entity (create/load/modify DataTypes)", function() {
+helper.contextualSuites("Entity (create/load/modify DataTypes)", [
+  {
+    context: 'Entity.types.String',
+    options: {
+      type: subject.types.String,
+      sample1: "Hello World",
+      sample2: "Hello World Again"
+    }
+  },
+  {
+    context: 'Entity.types.Number (float)',
+    options: {
+      type: subject.types.Number,
+      sample1: 42.3,
+      sample2: 56.7
+    }
+  },
+  {
+    context: 'Entity.types.Number (large)',
+    options: {
+      type: subject.types.Number,
+      sample1: 12147483648,
+      sample2: 13147483648
+    }
+  },
+  {
+    context: 'Entity.types.Number (int)',
+    options: {
+      type: subject.types.Number,
+      sample1: 45,
+      sample2: 1256
+    }
+  },
+  {
+    context: 'Entity.types.Date',
+    options: {
+      type: subject.types.Date,
+      sample1: new Date(),
+      sample2: new Date('2015-09-01T03:47:24.883Z')
+    }
+  },
+  {
+    context: 'Entity.types.UUID',
+    options: {
+      type: subject.types.UUID,
+      sample1: 'f47ac10b-58cc-4372-a567-0e02b2c3d479', // v4 uuid
+      sample2: '37175f00-505c-11e5-ad72-69c56eeb1d01'  // v1 uuid
+    }
+  },
+  {
+    context: 'Entity.types.SlugId',
+    options: {
+      type: subject.types.SlugId,
+      sample1: 'nvItOmAyRiOvSSWCAHkobQ',
+      sample2: 'NgmMmc_oQZ-dC4nPzWI1Ug'
+    }
+  },
+  {
+    context: 'Entity.types.JSON',
+    options: {
+      type: subject.types.JSON,
+      sample1: {subobject: {number: 42}, array: [1,2,3,4, "string"]},
+      sample2: {subobject: {number: 51}, array: [1,2,3,4,5, "string"]}
+    }
+  },
+  {
+    context: 'Entity.types.Blob',
+    options: {
+      type: subject.types.Blob,
+      sample1: crypto.randomBytes(10 * 1000),
+      sample2: crypto.randomBytes(100 * 1000)
+    }
+  },
+  {
+    context: 'Entity.types.Text',
+    options: {
+      type: subject.types.Text,
+      sample1: "Hello World\n could be a very long string",
+      sample2: crypto.randomBytes(100 * 1000).toString('base64')
+    }
+  },
+  // SlugIdArray cannot be tested with _.isEqual, we also have separate tests for
+  // this EntityType.
+  {
+    context: 'Entity.types.EncryptedJSON',
+    options: {
+      type: subject.types.EncryptedJSON,
+      sample1: {subobject: {number: 42}, array: [1,2,3,4, "string"]},
+      sample2: {subobject: {number: 51}, array: [1,2,3,4,5, "string"]},
+      encryptedTestOnly: true
+    }
+  },
+  {
+    context: 'Entity.types.EncryptedText',
+    options: {
+      type: subject.types.EncryptedText,
+      sample1: "Hello World\n could be a very long string",
+      sample2: crypto.randomBytes(100 * 1000).toString('base64'),
+      encryptedTestOnly: true
+    }
+  },
+  {
+    context: 'Entity.types.EncryptedBlob',
+    options: {
+      type: subject.types.EncryptedBlob,
+      sample1: crypto.randomBytes(10 * 1000),
+      sample2: crypto.randomBytes(100 * 1000),
+      encryptedTestOnly: true
+    }
+  },
+], function(name, typeOptions) {
+  var type = typeOptions.type;
+  var sample1 = typeOptions.sample1;
+  var sample2 = typeOptions.sample2;
+  var encryptedTestOnly = typeOptions.encryptedTestOnly;
 
-  var testType = function(name, type, sample1, sample2, encryptedTestOnly) {
-    assert(!_.isEqual(sample1, sample2), "Samples should not be equal!");
+  assert(!_.isEqual(sample1, sample2), "Samples should not be equal!");
+
+  helper.contextualSuites('', [
+    {
+      context: "Azure",
+      options: {
+        credentials:  helper.cfg.azure,
+        table:        helper.cfg.tableName
+      },
+    }, {
+      context: "In-Memory",
+      options: {
+        account:   "inMemory",
+        table:    "items"
+      }
+    }
+  ], function(context, options) {
+    setup(function() {
+      var Item = subject.configure({
+        version:          1,
+        partitionKey:     subject.keys.ConstantKey('key1'),
+        rowKey:           subject.keys.ConstantKey('key2'),
+        properties: {
+          id:             subject.types.String,
+        }
+      }).setup(options);
+      Item.ensureTable();
+    });
+
     if (!encryptedTestOnly) {
-      test(name, function() {
+      test('raw datatype', function() {
         var Item = subject.configure({
           version:          1,
           partitionKey:     subject.keys.StringKey('id'),
@@ -21,10 +162,7 @@ suite("Entity (create/load/modify DataTypes)", function() {
             name:           subject.types.String,
             data:           type
           }
-        }).setup({
-          credentials:  helper.cfg.azure,
-          table:        helper.cfg.tableName
-        });
+        }).setup(options);
 
         var id = slugid.v4();
         return Item.create({
@@ -55,7 +193,7 @@ suite("Entity (create/load/modify DataTypes)", function() {
         });
       });
 
-      test(name + ' (signEntities)', function() {
+      test('signEntities', function() {
         var Item = subject.configure({
           version:          1,
           partitionKey:     subject.keys.StringKey('id'),
@@ -65,11 +203,9 @@ suite("Entity (create/load/modify DataTypes)", function() {
             id:             subject.types.String,
             data:           type
           }
-        }).setup({
-          credentials:  helper.cfg.azure,
-          table:        helper.cfg.tableName,
+        }).setup(_.defaults({}, options, {
           signingKey:   'my-super-secret'
-        });
+        }));
         var id = slugid.v4();
         return Item.create({
           id:     id,
@@ -96,7 +232,7 @@ suite("Entity (create/load/modify DataTypes)", function() {
         });
       });
 
-      test(name + ' (signEntities detect invalid key)', function() {
+      test('signEntities detect invalid key', function() {
         var ItemClass = subject.configure({
           version:          1,
           partitionKey:     subject.keys.StringKey('id'),
@@ -107,16 +243,12 @@ suite("Entity (create/load/modify DataTypes)", function() {
             data:           type
           }
         })
-        var Item1 = ItemClass.setup({
-          credentials:  helper.cfg.azure,
-          table:        helper.cfg.tableName,
+        var Item1 = ItemClass.setup(_.defaults({}, options, {
           signingKey:   'my-super-secret'
-        });
-        var Item2 = ItemClass.setup({
-          credentials:  helper.cfg.azure,
-          table:        helper.cfg.tableName,
+        }));
+        var Item2 = ItemClass.setup(_.defaults({}, options, {
           signingKey:   'my-super-wrong-secret'
-        });
+        }));
         var id = slugid.v4();
         return Item1.create({
           id:     id,
@@ -152,7 +284,7 @@ suite("Entity (create/load/modify DataTypes)", function() {
       });
     }
 
-    test(name + ' (w. EncryptedBlob)', function() {
+    test('w. EncryptedBlob', function() {
       var Item = subject.configure({
         version:          1,
         partitionKey:     subject.keys.StringKey('id'),
@@ -162,11 +294,9 @@ suite("Entity (create/load/modify DataTypes)", function() {
           blob:           subject.types.EncryptedBlob,
           data:           type
         }
-      }).setup({
-        credentials:  helper.cfg.azure,
-        table:        helper.cfg.tableName,
+      }).setup(_.defaults({}, options, {
         cryptoKey:    'Iiit3Y+b4m7z7YOmKA2iCbZDGyEmy6Xn42QapzTU67w='
-      });
+      }));
 
       var id = slugid.v4();
       return Item.create({
@@ -195,7 +325,7 @@ suite("Entity (create/load/modify DataTypes)", function() {
       });
     });
 
-    test(name + ' (w. EncryptedBlob + signEntities)', function() {
+    test('w. EncryptedBlob + signEntities', function() {
       var Item = subject.configure({
         version:          1,
         partitionKey:     subject.keys.StringKey('id'),
@@ -206,12 +336,10 @@ suite("Entity (create/load/modify DataTypes)", function() {
           blob:           subject.types.EncryptedBlob,
           data:           type
         }
-      }).setup({
-        credentials:  helper.cfg.azure,
-        table:        helper.cfg.tableName,
+      }).setup(_.defaults({}, options, {
         signingKey:   'my-super-secret',
         cryptoKey:    'Iiit3Y+b4m7z7YOmKA2iCbZDGyEmy6Xn42QapzTU67w='
-      });
+      }));
 
       var id = slugid.v4();
       return Item.create({
@@ -239,99 +367,5 @@ suite("Entity (create/load/modify DataTypes)", function() {
         });
       });
     });
-  };
-
-  testType(
-    'Entity.types.String',
-    subject.types.String,
-    "Hello World",
-    "Hello World Again"
-  );
-  testType(
-    'Entity.types.Number (float)',
-    subject.types.Number,
-    42.3,
-    56.7
-  );
-  testType(
-    'Entity.types.Number (large)',
-    subject.types.Number,
-    12147483648,
-    13147483648
-  );
-  testType(
-    'Entity.types.Number (int)',
-    subject.types.Number,
-    45,
-    1256
-  );
-  testType(
-    'Entity.types.Date',
-    subject.types.Date,
-    new Date(),
-    new Date('2015-09-01T03:47:24.883Z')
-  );
-  testType(
-    'Entity.types.UUID',
-    subject.types.UUID,
-    'f47ac10b-58cc-4372-a567-0e02b2c3d479', // v4 uuid
-    '37175f00-505c-11e5-ad72-69c56eeb1d01'  // v1 uuid
-  );
-  testType(
-    'Entity.types.SlugId',
-    subject.types.SlugId,
-    'nvItOmAyRiOvSSWCAHkobQ',
-    'NgmMmc_oQZ-dC4nPzWI1Ug'
-  );
-  testType(
-    'Entity.types.JSON',
-    subject.types.JSON,
-    {
-      subobject: {number: 42},
-      array: [1,2,3,4, "string"]
-    }, {
-      subobject: {number: 51},
-      array: [1,2,3,4,5, "string"]
-    }
-  );
-  testType(
-    'Entity.types.Blob',
-    subject.types.Blob,
-    crypto.randomBytes(10 * 1000),
-    crypto.randomBytes(100 * 1000)
-  );
-  testType(
-    'Entity.types.Text',
-    subject.types.Text,
-    "Hello World\n could be a very long string",
-    crypto.randomBytes(100 * 1000).toString('base64')
-  );
-  // SlugIdArray cannot be tested with _.isEqual, we also have separate tests for
-  // this EntityType.
-  testType(
-    'Entity.types.EncryptedJSON',
-    subject.types.EncryptedJSON,
-    {
-      subobject: {number: 42},
-      array: [1,2,3,4, "string"]
-    }, {
-      subobject: {number: 51},
-      array: [1,2,3,4,5, "string"]
-    },
-    true
-  );
-  testType(
-    'Entity.types.EncryptedText',
-    subject.types.EncryptedText,
-    "Hello World\n could be a very long string",
-    crypto.randomBytes(100 * 1000).toString('base64'),
-    true
-  );
-  testType(
-    'Entity.types.EncryptedBlob',
-    subject.types.EncryptedBlob,
-    crypto.randomBytes(10 * 1000),
-    crypto.randomBytes(100 * 1000),
-    true
-  );
+  });
 });

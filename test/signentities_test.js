@@ -6,7 +6,21 @@ var Promise = require('promise');
 var debug   = require('debug')('test:entity:signEntities');
 var helper  = require('./helper');
 
-suite("Entity (signEntities)", function() {
+helper.contextualSuites("Entity (signEntities)", [
+  {
+    context: "Azure",
+    options: {
+      credentials:  helper.cfg.azure,
+      table:        helper.cfg.tableName,
+    },
+  }, {
+    context: "In-Memory",
+    options: {
+      account: "inMemory",
+      table:   "items",
+    }
+  },
+], function(context, options) {
 
   var ItemV1;
   test("ItemV1 = Entity.configure", function() {
@@ -25,19 +39,16 @@ suite("Entity (signEntities)", function() {
 
   var Item;
   test("Item = ItemV1.setup", function() {
-    Item = ItemV1.setup({
-      credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName,
+    Item = ItemV1.setup(_.defaults({}, options, {
       signingKey:   'no-way-you-can-guess-this'
-    });
+    }));
+
+    return Item.ensureTable();
   });
 
   test("ItemV1.setup (requires signingKey)", function() {
     try {
-      ItemV1.setup({
-        credentials:  helper.cfg.azure,
-        table:        helper.cfg.tableName
-      });
+      ItemV1.setup(options);
     } catch (err) {
       return; // Expected error
     }
@@ -89,11 +100,9 @@ suite("Entity (signEntities)", function() {
   });
 
   test("Item.load (invalid signature)", function() {
-    var BadKeyItem = ItemV1.setup({
-      credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName,
+    var BadKeyItem = ItemV1.setup(_.defaults({}, options, {
       signingKey:   'wrong-secret'
-    });
+    }));
     return BadKeyItem.load({
       id:     id,
       name:   'my-test-item',
@@ -128,19 +137,14 @@ suite("Entity (signEntities)", function() {
 
   var Item2;
   test("Item2 = ItemV2.setup", function() {
-    Item2 = ItemV2.setup({
-      credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName,
+    Item2 = ItemV2.setup(_.defaults({}, options, {
       signingKey:   'no-way-you-can-guess-this'
-    });
+    }));
   });
 
   test("ItemV2.setup (requires signingKey)", function() {
     try {
-      ItemV2.setup({
-        credentials:  helper.cfg.azure,
-        table:        helper.cfg.tableName
-      });
+      ItemV2.setup(options);
     } catch (err) {
       return; // Expected error
     }
@@ -158,11 +162,9 @@ suite("Entity (signEntities)", function() {
   });
 
   test("Item2.load (invalid signature)", function() {
-    var BadKeyItem2 = ItemV2.setup({
-      credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName,
+    var BadKeyItem2 = ItemV2.setup(_.defaults({}, options, {
       signingKey:   'wrong-secret'
-    });
+    }));
     return BadKeyItem2.load({
       id:     id,
       name:   'my-test-item',
@@ -251,11 +253,9 @@ suite("Entity (signEntities)", function() {
 
   var Item3;
   test("Item3 = ItemV3.setup", function() {
-    Item3 = ItemV3.setup({
-      credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName,
+    Item3 = ItemV3.setup(_.defaults({}, options, {
       signingKey:   'no-way-you-can-guess-this'
-    });
+    }));
   });
 
   test("Item3.load, item.modify, item.reload()", function() {
@@ -287,11 +287,9 @@ suite("Entity (signEntities)", function() {
   });
 
   test("Item3.load (invalid signature)", function() {
-    var BadKeyItem3 = ItemV3.setup({
-      credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName,
+    var BadKeyItem3 = ItemV3.setup(_.defaults({}, options, {
       signingKey:   'wrong-secret'
-    });
+    }));
     return BadKeyItem3.load({
       id:     id,
       name:   'my-test-item',

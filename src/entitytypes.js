@@ -86,7 +86,12 @@ BaseType.prototype.clone = function(value) {
 };
 
 /** Construct $filter string with operator */
-BaseType.prototype.filter = function(op, filterBuilder) {
+BaseType.prototype.filterCondition = function(op) {
+  throw new Error("Not implemented");
+};
+
+/** Apply the filter op in-memory */
+BaseType.prototype.compare = function(entity, op) {
   throw new Error("Not implemented");
 };
 
@@ -172,11 +177,13 @@ StringType.prototype.validate = function(value) {
   checkType('StringType', this.property, value, 'string');
 };
 
-StringType.prototype.filter = function(op, filterBuilder) {
+StringType.prototype.filterCondition = function(op) {
   this.validate(op.operand);
-  filterBuilder(
-    this.property + ' ' + op.operator + ' ' + fmt.string(op.operand)
-  );
+  return this.property + ' ' + op.operator + ' ' + fmt.string(op.operand);
+};
+
+StringType.prototype.compare = function(entity, op) {
+  return op.compare(entity[this.property], op.operand);
 };
 
 // Export StringType as String
@@ -222,12 +229,15 @@ NumberType.prototype.deserialize = function(source) {
   return value;
 };
 
-NumberType.prototype.filter = function(op, filterBuilder) {
+NumberType.prototype.filterCondition = function(op) {
   this.validate(op.operand);
-  filterBuilder(
-    this.property + ' ' + op.operator + ' ' + fmt.number(op.operand)
-  );
+  return this.property + ' ' + op.operator + ' ' + fmt.number(op.operand);
 };
+
+NumberType.prototype.compare = function(entity, op) {
+  return op.compare(+entity[this.property], +op.operand);
+};
+
 
 // Export NumberType as Number
 exports.Number = NumberType;
@@ -280,11 +290,14 @@ DateType.prototype.deserialize = function(source) {
   return value;
 };
 
-DateType.prototype.filter = function(op, filterBuilder) {
+DateType.prototype.filterCondition = function(op) {
   this.validate(op.operand);
-  filterBuilder(
-    this.property + ' ' + op.operator + ' ' + fmt.date(op.operand)
-  );
+  return this.property + ' ' + op.operator + ' ' + fmt.date(op.operand);
+};
+
+DateType.prototype.compare = function(entity, op) {
+  return op.compare(new Date(entity[this.property]), op.operand);
+  throw new Error("Not implemented");
 };
 
 
@@ -329,11 +342,13 @@ UUIDType.prototype.serialize = function(target, value) {
   target[this.property] = value;
 };
 
-UUIDType.prototype.filter = function(op, filterBuilder) {
+UUIDType.prototype.filterCondition = function(op) {
   this.validate(op.operand);
-  filterBuilder(
-    this.property + ' ' + op.operator + ' ' + fmt.guid(op.operand)
-  );
+  return this.property + ' ' + op.operator + ' ' + fmt.guid(op.operand);
+};
+
+UUIDType.prototype.compare = function(entity, op) {
+  throw new Error("Not implemented");
 };
 
 // Export UUIDType as UUID
@@ -373,12 +388,14 @@ SlugIdType.prototype.deserialize = function(source) {
   return slugid.encode(source[this.property]);
 };
 
-SlugIdType.prototype.filter = function(op, filterBuilder) {
+SlugIdType.prototype.filterCondition = function(op) {
   this.validate(op.operand);
-  filterBuilder(
-    this.property + ' ' + op.operator + ' ' +
-    fmt.guid(slugid.encode(op.operand))
-  );
+  return this.property + ' ' + op.operator + ' ' +
+    fmt.guid(slugid.encode(op.operand));
+};
+
+SlugIdType.prototype.compare = function(entity, op) {
+  throw new Error("Not implemented");
 };
 
 
@@ -441,9 +458,14 @@ BaseBufferType.prototype.deserialize = function(source, cryptoKey) {
   return this.fromBuffer(Buffer.concat(chunks), cryptoKey);
 };
 
-BaseBufferType.prototype.filter = function() {
+BaseBufferType.prototype.filterCondition = function(op) {
   throw new Error("Buffer based types are not comparable!");
 };
+
+SlugIdType.prototype.compare = function(entity, op) {
+  throw new Error("Buffer based types are not comparable!");
+};
+
 
 // Export BaseBufferType as BaseBufferType
 exports.BaseBufferType = BaseBufferType;

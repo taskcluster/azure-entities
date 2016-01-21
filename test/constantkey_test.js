@@ -7,21 +7,24 @@ var crypto  = require('crypto');
 var debug   = require('debug')('test:entity:compositekey');
 var helper  = require('./helper');
 
-suite("Entity (ConstantKey)", function() {
+var Item = subject.configure({
+  version:          1,
+  partitionKey:     subject.keys.ConstantKey(slugid.v4()),
+  rowKey:           subject.keys.ConstantKey(slugid.v4()),
+  properties: {
+    data:           subject.types.Number
+  }
+});
+
+helper.contextualSuites("Entity (ConstantKey)", helper.makeContexts(Item),
+function(context, options) {
+  var Item = options.Item;
+
+  setup(function() {
+    return Item.ensureTable();
+  });
 
   test("Item.create, Item.load (without properties)", function() {
-    var Item = subject.configure({
-      version:          1,
-      partitionKey:     subject.keys.ConstantKey(slugid.v4()),
-      rowKey:           subject.keys.ConstantKey(slugid.v4()),
-      properties: {
-        data:           subject.types.Number
-      }
-    }).setup({
-      credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName
-    });
-
     return Item.create({
       data:     42,
     }).then(function(itemA) {
@@ -31,22 +34,28 @@ suite("Entity (ConstantKey)", function() {
       });
     });
   });
+});
+
+Item = subject.configure({
+  version:          1,
+  partitionKey:     subject.keys.CompositeKey('taskId', 'runId'),
+  rowKey:           subject.keys.ConstantKey("task-info"),
+  properties: {
+    taskId:         subject.types.SlugId,
+    runId:          subject.types.Number,
+    data:           subject.types.Number
+  }
+});
+
+helper.contextualSuites("Entity (ConstantKey + CompositeKey)", helper.makeContexts(Item),
+function(context, options) {
+  var Item = options.Item;
+
+  setup(function() {
+    return Item.ensureTable();
+  });
 
   test("Item.create, Item.load (combined with CompositeKey)", function() {
-    var Item = subject.configure({
-      version:          1,
-      partitionKey:     subject.keys.CompositeKey('taskId', 'runId'),
-      rowKey:           subject.keys.ConstantKey("task-info"),
-      properties: {
-        taskId:         subject.types.SlugId,
-        runId:          subject.types.Number,
-        data:           subject.types.Number
-      }
-    }).setup({
-      credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName
-    });
-
     var id = slugid.v4();
     return Item.create({
       taskId:   id,
