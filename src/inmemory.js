@@ -313,7 +313,7 @@ InMemoryWrapper.prototype.updateEntity = function(entity, options) {
     if (!options.eTag) {
       tables[this.table][key] = entity;
     } else if (options.eTag != '*') {
-      return Promise.reject(makeError(500, 'NotSureWhatToDo'));
+      return Promise.reject(makeError(404, 'ResourceNotFound'));
     }
   }
   return Promise.resolve(entityEtag(entity));

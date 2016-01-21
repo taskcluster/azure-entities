@@ -76,6 +76,28 @@ function(context, options) {
     });
   });
 
+  test("Item.modify a deleted itedm", function() {
+    var id = slugid.v4();
+    var deletedItem;
+    return Item.create({
+      id:     id,
+      name:   'my-test-item',
+      count:  1
+    }).then(function(item) {
+      deletedItem = item;
+      return Item.remove({id: id, name: 'my-test-item'});
+    }).then(function() {
+      return deletedItem.modify(function(item) {
+        item.count += 1;
+      });
+    }).then(function() {
+      assert(false, "Expected an error");
+    }, function(err) {
+      assert(err.code === 'ResourceNotFound', "Expected ResourceNotFound");
+      assert(err.statusCode == 404, "Expected 404");
+    });
+  });
+
   test("Item.create, Item.modify (first argument), Item.load", function() {
     var id = slugid.v4();
     return Item.create({
