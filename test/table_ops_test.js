@@ -34,7 +34,7 @@ helper.contextualSuites("Entity (modify)", [
     options: function() {
       return {
         Item: Item.setup({
-          inMemory: true,
+          account:  "inMemory",
           table:    'items'
         })
       };

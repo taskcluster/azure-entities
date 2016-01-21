@@ -32,8 +32,8 @@ exports.makeContexts = function(Item, setupOptions) {
       options: function() {
         return {
           Item: Item.setup(_.defaults({}, setupOptions, {
-            inMemory: true,
-            table:    'items'
+            account: "inMemory",
+            table:   'items'
           }))
         };
       }

@@ -134,7 +134,7 @@ helper.contextualSuites("Entity (create/load/modify DataTypes)", [
     }, {
       context: "In-Memory",
       options: {
-        inMemory: true,
+        account:   "inMemory",
         table:    "items"
       }
     }

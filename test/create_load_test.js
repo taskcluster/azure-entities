@@ -61,11 +61,11 @@ helper.contextualSuites("Entity (create/load)", [
     options: function() {
       return {
         Item: ItemV1.setup({
-            inMemory: true,
-            table:    'items'
+          account:  "inMemory",
+          table:    'items'
         }),
         Item2: ItemV2.setup({
-          inMemory: true,
+          account:  "inMemory",
           table:    'items'
         }),
       };

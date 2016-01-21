@@ -574,10 +574,10 @@ Entity.configure = function(options) {
  *   },
  * }
  *
- * To use an in-memory, testing-oriented table, replace the `account` key with
- * `inMemory`, and do not supply credentials:
+ * To use an in-memory, testing-oriented table, use the special accountName
+ * `inMemory`.  Credentials are not required.
  * {
- *   inMemory: true,
+ *   account:  "inMemory,
  *   table:    "AzureTableName"
  * }
  *
@@ -601,7 +601,8 @@ Entity.setup = function(options) {
   assert(options,                             "options must be given");
   assert(options.table,                       "options.table must be given");
   assert(typeof(options.table) === 'string',  "options.table isn't a string");
-  assert(options.credentials || options.inMemory, "credentials are required");
+  assert(options.credentials || options.account == "inMemory",
+      "credentials are required unless using in-memory tables");
   assert(!options.drain || options.component, "component is required if drain");
   assert(!options.drain || options.process,   "process is required if drain");
   options = _.defaults({}, options, {
@@ -699,109 +700,110 @@ Entity.setup = function(options) {
     reporter = series.AzureTableOperations.reporter(options.drain);
   }
 
-  if (options.inMemory) {
+  if (options.account == "inMemory") {
     if (!inmemory) {
       inmemory = require('./inmemory'); // lazy-loaded
     }
     subClass.prototype.__table = options.table;
     subClass.prototype.__filterBuilder = inmemory.appendFilter;
     subClass.prototype.__aux = new inmemory.InMemoryWrapper(options.table);
-  } else {
-    // Set azure table name
-    subClass.prototype.__table = options.table;
 
-    // Create an azure table client
-    var client = null;
-    if (options.account) {
-      // If we're setting up to fetch credentials for auth.taskcluster.net
-      assert(typeof(options.account) === 'string',
-             "Expected options.account to be a string, or undefined");
-      // Create auth client to fetch SAS from auth.taskcluster.net
-      var auth = new taskcluster.Auth({
-        credentials:    options.credentials,
-        baseUrl:        options.authBaseUrl
-      });
-      // Create azure table client with logic for fetch SAS
-      client = new azure.Table({
-        timeout:          AZURE_TABLE_TIMEOUT,
-        agent:            options.agent,
-        accountId:        options.account,
-        minSASAuthExpiry: options.minSASAuthExpiry,
-        sas: function() {
-          return auth.azureTableSAS(
-            options.account,
-            options.table
-          ).then(function(result) {
-            return result.sas;
-          });
-        }
-      });
-    } else {
-      // Create client using credentials already present
-      assert(options.credentials.accountName, "Missing accountName");
-      assert(options.credentials.accountKey ||
-             options.credentials.sas,         "Missing accountKey or sas");
-      // Create azure table client with accessKey
-      client = new azure.Table({
-        timeout:      AZURE_TABLE_TIMEOUT,
-        agent:        options.agent,
-        accountId:    options.credentials.accountName,
-        accessKey:    options.credentials.accountKey,
-        sas:          options.credentials.sas
-      });
-    }
+    return subClass;
+  }
 
-    // Store reference to azure table client
-    subClass.prototype.__client = client;
+  // Set azure table name
+  subClass.prototype.__table = options.table;
 
-    // set the filter builder
-    subClass.prototype.__filterBuilder = entityfilters.appendFilter;
-
-    // Create table client wrapper, to record statistics and bind table name
-    subClass.prototype.__aux = {};
-    [
-      'createTable',
-      'deleteTable',
-      'getEntity',
-      'queryEntities',
-      'insertEntity',
-      'updateEntity',
-      'deleteEntity'
-    ].forEach(function(name) {
-      // Bind table name
-      var method = client[name].bind(client, options.table);
-
-      // Record statistics
-      subClass.prototype.__aux[name] = function() {
-        var start = process.hrtime();
-        return method.apply(client, arguments).then(function(result) {
-          var d = process.hrtime(start);
-          reporter({
-            component:    options.component,
-            process:      options.process,
-            duration:     d[0] * 1000 + (d[1] / 1000000),
-            table:        options.table,
-            method:       name,
-            error:        'false'
-          });
-          return result;
-        }, function(err) {
-          var d = process.hrtime(start);
-          reporter({
-            component:    options.component,
-            process:      options.process,
-            duration:     d[0] * 1000 + (d[1] / 1000000),
-            table:        options.table,
-            method:       name,
-            error:        (err ? err.code : null) || 'UnknownError'
-          });
-          throw err;
+  // Create an azure table client
+  var client = null;
+  if (options.account) {
+    // If we're setting up to fetch credentials for auth.taskcluster.net
+    assert(typeof(options.account) === 'string',
+           "Expected options.account to be a string, or undefined");
+    // Create auth client to fetch SAS from auth.taskcluster.net
+    var auth = new taskcluster.Auth({
+      credentials:    options.credentials,
+      baseUrl:        options.authBaseUrl
+    });
+    // Create azure table client with logic for fetch SAS
+    client = new azure.Table({
+      timeout:          AZURE_TABLE_TIMEOUT,
+      agent:            options.agent,
+      accountId:        options.account,
+      minSASAuthExpiry: options.minSASAuthExpiry,
+      sas: function() {
+        return auth.azureTableSAS(
+          options.account,
+          options.table
+        ).then(function(result) {
+          return result.sas;
         });
-      };
+      }
+    });
+  } else {
+    // Create client using credentials already present
+    assert(options.credentials.accountName, "Missing accountName");
+    assert(options.credentials.accountKey ||
+           options.credentials.sas,         "Missing accountKey or sas");
+    // Create azure table client with accessKey
+    client = new azure.Table({
+      timeout:      AZURE_TABLE_TIMEOUT,
+      agent:        options.agent,
+      accountId:    options.credentials.accountName,
+      accessKey:    options.credentials.accountKey,
+      sas:          options.credentials.sas
     });
   }
 
-  // Return subClass
+  // Store reference to azure table client
+  subClass.prototype.__client = client;
+
+  // set the filter builder
+  subClass.prototype.__filterBuilder = entityfilters.appendFilter;
+
+  // Create table client wrapper, to record statistics and bind table name
+  subClass.prototype.__aux = {};
+  [
+    'createTable',
+    'deleteTable',
+    'getEntity',
+    'queryEntities',
+    'insertEntity',
+    'updateEntity',
+    'deleteEntity'
+  ].forEach(function(name) {
+    // Bind table name
+    var method = client[name].bind(client, options.table);
+
+    // Record statistics
+    subClass.prototype.__aux[name] = function() {
+      var start = process.hrtime();
+      return method.apply(client, arguments).then(function(result) {
+        var d = process.hrtime(start);
+        reporter({
+          component:    options.component,
+          process:      options.process,
+          duration:     d[0] * 1000 + (d[1] / 1000000),
+          table:        options.table,
+          method:       name,
+          error:        'false'
+        });
+        return result;
+      }, function(err) {
+        var d = process.hrtime(start);
+        reporter({
+          component:    options.component,
+          process:      options.process,
+          duration:     d[0] * 1000 + (d[1] / 1000000),
+          table:        options.table,
+          method:       name,
+          error:        (err ? err.code : null) || 'UnknownError'
+        });
+        throw err;
+      });
+    };
+  });
+
   return subClass;
 };
 

@@ -16,8 +16,8 @@ helper.contextualSuites("Entity (signEntities)", [
   }, {
     context: "In-Memory",
     options: {
-      inMemory: true,
-      table: "items",
+      account: "inMemory",
+      table:   "items",
     }
   },
 ], function(context, options) {
