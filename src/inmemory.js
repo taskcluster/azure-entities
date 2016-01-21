@@ -37,10 +37,10 @@ var entityEtag = function(entity) {
     if (typeof v === "boolean") {
       entity[odata_type] = 'Edm.Boolean';
     } else if (typeof v === "number") {
-      if (/\./.test(v)) {
-        entity[odata_type] = "Edm.Double";
-      } else {
+      if (v % 1 === 0) {
         entity[odata_type] = "Edm.Int32";
+      } else {
+        entity[odata_type] = "Edm.Double";
       }
     } else {
       entity[odata_type] = "Edm.String";
@@ -125,7 +125,7 @@ InMemoryWrapper.prototype.getEntity = function(partitionKey, rowKey, options) {
   if (!tables[this.table]) {
     return Promise.reject(makeError(404, 'ResourceNotFound'));
   }
-  if (key in tables[this.table]) {
+  if (tables[this.table][key]) {
     var res = _.clone(tables[this.table][makeKey(partitionKey, rowKey)]);
     res['odata.etag'] = entityEtag(res);
     return Promise.resolve(res);
@@ -231,12 +231,13 @@ InMemoryWrapper.prototype.insertEntity = function(entity) {
   if (!tables[this.table]) {
     return Promise.reject(makeError(404, 'ResourceNotFound'));
   }
-  if (key in tables[this.table]) {
+  if (tables[this.table][key]) {
     return Promise.reject(makeError(409, 'EntityAlreadyExists'));
   }
+  entity = tables[this.table][key] = _.cloneDeep(entity);
   updateTimestamp(entity);
-  tables[this.table][key] = entity;
-  return Promise.resolve(entityEtag(entity));
+  var eTag = entity['odata.etag'] = entityEtag(entity);
+  return Promise.resolve(eTag);
 };
 
 /**
@@ -287,10 +288,12 @@ InMemoryWrapper.prototype.insertEntity = function(entity) {
  */
 InMemoryWrapper.prototype.updateEntity = function(entity, options) {
   var key = makeKey(entity.PartitionKey, entity.RowKey);
+  entity = _.cloneDeep(entity);
+  entity['odata.etag'] = entityEtag(entity);
   if (!tables[this.table]) {
     return Promise.reject(makeError(404, 'ResourceNotFound'));
   }
-  if (key in tables[this.table]) {
+  if (tables[this.table][key]) {
     if (options.eTag != '*') {
       if (options.eTag && options.eTag != entityEtag(tables[this.table][key])) {
         return Promise.reject(makeError(412, 'UpdateConditionNotSatisfied'));
@@ -304,6 +307,7 @@ InMemoryWrapper.prototype.updateEntity = function(entity, options) {
         existing[prop] = val;
       });
       entity = existing;
+      entity['odata.etag'] = entityEtag(entity);
     }
   } else {
     if (!options.eTag) {
