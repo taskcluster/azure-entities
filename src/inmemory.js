@@ -57,6 +57,7 @@ var makeError = function(statusCode, code) {
   var err = new Error(code);
   err.statusCode = statusCode;
   err.code = code;
+  err.name = code + "Error";
   return err;
 };
 
