@@ -9,7 +9,6 @@ var debug           = require('debug')('base:entity');
 var azure           = require('fast-azure-storage');
 var taskcluster     = require('taskcluster-client');
 var https           = require('https');
-var series          = require('./series');
 var crypto          = require('crypto');
 var entityfilters   = require('./entityfilters');
 var inmemory;       // lazy-loaded
@@ -550,9 +549,7 @@ Entity.configure = function(options) {
  *   authBaseUrl:       "...",              // baseUrl for auth (optional)
  *   signingKey:        "...",              // Key for HMAC signing entities
  *   cryptoKey:         "...",              // Key for encrypted properties
- *   drain:             base.stats.Influx,  // Statistics drain (optional)
- *   component:         '<name>',           // Component in stats (if drain)
- *   process:           'server',           // Process in stats (if drain)
+ *   monitor:           await require('taskcluster-lib-monitor')({...}),
  *   context:           {...}               // Extend prototype (optional)
  * }
  *
@@ -603,8 +600,13 @@ Entity.setup = function(options) {
   assert(typeof(options.table) === 'string',  "options.table isn't a string");
   assert(options.credentials || options.account == "inMemory",
       "credentials are required unless using in-memory tables");
-  assert(!options.drain || options.component, "component is required if drain");
-  assert(!options.drain || options.process,   "process is required if drain");
+  if (options.drain || options.component || options.process) {
+    console.log('taskcluster-lib-stats is now deprecated!\n' +
+                'Use the `monitor` option rather than `drain`.\n' +
+                '`monitor` should be an instance of taskcluster-lib-monitor.\n' +
+                '`component` is no longer needed. Prefix your `monitor` before use.\n' +
+                '`process` is no longer needed. Prefix your `monitor` before use.');
+  }
   options = _.defaults({}, options, {
     context:          {},
     agent:            undefined,
@@ -695,9 +697,9 @@ Entity.setup = function(options) {
   }
 
   // Reporter for statistics
-  var reporter = function() {};
-  if (options.drain) {
-    reporter = series.AzureTableOperations.reporter(options.drain);
+  var reporter = null;
+  if (options.monitor) {
+    reporter = options.monitor;
   }
 
   if (options.account == "inMemory") {
@@ -780,25 +782,17 @@ Entity.setup = function(options) {
       var start = process.hrtime();
       return method.apply(client, arguments).then(function(result) {
         var d = process.hrtime(start);
-        reporter({
-          component:    options.component,
-          process:      options.process,
-          duration:     d[0] * 1000 + (d[1] / 1000000),
-          table:        options.table,
-          method:       name,
-          error:        'false'
-        });
+        if (reporter) {
+          reporter.measure(name + '.success', d[0] * 1000 + (d[1] / 1000000));
+          reporter.count(name + '.success');
+        }
         return result;
       }, function(err) {
         var d = process.hrtime(start);
-        reporter({
-          component:    options.component,
-          process:      options.process,
-          duration:     d[0] * 1000 + (d[1] / 1000000),
-          table:        options.table,
-          method:       name,
-          error:        (err ? err.code : null) || 'UnknownError'
-        });
+        if (reporter) {
+          reporter.measure(name + '.error', d[0] * 1000 + (d[1] / 1000000));
+          reporter.count(name + '.error');
+        }
         throw err;
       });
     };

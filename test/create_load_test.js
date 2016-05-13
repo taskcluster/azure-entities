@@ -4,8 +4,8 @@ var assert  = require('assert');
 var slugid  = require('slugid');
 var _       = require('lodash');
 var Promise = require('promise');
-var stats   = require("taskcluster-lib-stats");
 var debug   = require('debug')('test:entity:create_load');
+var base    = require('taskcluster-base');
 
 var ItemV1 = subject.configure({
   version:          1,
@@ -40,9 +40,7 @@ helper.contextualSuites("Entity (create/load)", [
   {
     context: "Azure",
     options: function() {
-      var drain = new stats.NullDrain();
       return {
-        drain: drain,
         Item: ItemV1.setup({
           credentials:  helper.cfg.azure,
           table:        helper.cfg.tableName
@@ -50,9 +48,6 @@ helper.contextualSuites("Entity (create/load)", [
         Item2: ItemV2.setup({
           credentials:  helper.cfg.azure,
           table:        helper.cfg.tableName,
-          drain:        drain,
-          component:    '"taskcluster-base"-test',
-          process:      'mocha'
         }),
       };
     },
@@ -73,8 +68,7 @@ helper.contextualSuites("Entity (create/load)", [
   }
 ], function(context, options) {
   var Item  = options.Item,
-      Item2 = options.Item2,
-      drain = options.drain;
+      Item2 = options.Item2;
   var id = slugid.v4();
 
   test("Item.ensureTable", function() {
@@ -179,20 +173,6 @@ helper.contextualSuites("Entity (create/load)", [
       assert(item === null, "Expected an null to be returned");
     });
   });
-
-  if (context == "Azure") { // inMemory doesn't do stats
-    test("Item2.load writes stats", function() {
-      assert(drain.pendingPoints() === 0, "Shouldn't have stats yet!");
-      return Item2.load({
-        id:     id,
-        name:   'my-test-item',
-      }).then(function(item) {
-        assert(drain.pendingPoints() >= 0, "Should have stats now!");
-        assert(item.count === 1);
-        assert(item.reason === "no-reason");
-      });
-    });
-  }
 
   test("Item2.load", function() {
     return Item2.load({
