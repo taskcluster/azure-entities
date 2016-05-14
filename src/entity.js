@@ -696,12 +696,6 @@ Entity.setup = function(options) {
                                 "entities aren't signed!");
   }
 
-  // Reporter for statistics
-  var reporter = null;
-  if (options.monitor) {
-    reporter = options.monitor;
-  }
-
   if (options.account == "inMemory") {
     if (!inmemory) {
       inmemory = require('./inmemory'); // lazy-loaded
@@ -782,16 +776,16 @@ Entity.setup = function(options) {
       var start = process.hrtime();
       return method.apply(client, arguments).then(function(result) {
         var d = process.hrtime(start);
-        if (reporter) {
-          reporter.measure(name + '.success', d[0] * 1000 + (d[1] / 1000000));
-          reporter.count(name + '.success');
+        if (options.monitor) {
+          options.monitor.measure(name + '.success', d[0] * 1000 + (d[1] / 1000000));
+          options.monitor.count(name + '.success');
         }
         return result;
       }, function(err) {
         var d = process.hrtime(start);
-        if (reporter) {
-          reporter.measure(name + '.error', d[0] * 1000 + (d[1] / 1000000));
-          reporter.count(name + '.error');
+        if (options.monitor) {
+          options.monitor.measure(name + '.error', d[0] * 1000 + (d[1] / 1000000));
+          options.monitor.count(name + '.error');
         }
         throw err;
       });
