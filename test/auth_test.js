@@ -64,58 +64,35 @@ suite("Entity (SAS from auth.taskcluster.net)", function() {
   });
 
   // Create servers
-  var authServer = null;
   var server = null
-  setup(function() {
-    return base.testing.createMockAuthServer({
-      port: 23247,
-      clients: [
-        {
-          clientId:     'authed-client',
-          accessToken:  'test-token',
-          scopes:       ['*'],
-          expires:      new Date(2092, 0, 0, 0, 0, 0, 0)
-        }, {
-          clientId:     'unauthed-client',
-          accessToken:  'test-token',
-          scopes:       [],
-          expires:      new Date(2092, 0, 0, 0, 0, 0, 0)
-        }
-      ]
-    }).then(function(authServer_) {
-      authServer = authServer_;
-
-      return base.validator();
-    }).then(function(validator) {
-
-      // Create a simple app
-      var app = base.app({
-        port:       23244,
-        env:        'development',
-        forceSSL:   false,
-        trustProxy: false
-      });
-
-      app.use(api.router({
-        validator:      validator,
-        credentials: {
-          clientId:     'authed-client',
-          accessToken:  'test-token'
-        },
-        authBaseUrl:    'http://localhost:23247/v1'
-      }));
-
-      return app.createServer();
-    }).then(function(server_) {
-      server = server_;
+  setup(async function() {
+    base.testing.fakeauth.start({
+      'authed-client': ['*'],
+      'unauthed-client': ['*'],
     });
+    var validator = await base.validator({
+      folder: 'test/schemas',
+      prefix: 'test/v1',
+    });
+
+    // Create a simple app
+    var app = base.app({
+      port:       23244,
+      env:        'development',
+      forceSSL:   false,
+      trustProxy: false
+    });
+
+    app.use(api.router({
+      validator:      validator
+    }));
+
+    server = await app.createServer();
   });
 
-  // Shutdown authServer
-  teardown(function() {
-    return server.terminate().then(function() {
-      return authServer.terminate();
-    });
+  teardown(async function() {
+    await server.terminate();
+    base.testing.fakeauth.stop();
   });
 
 

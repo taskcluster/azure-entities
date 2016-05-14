@@ -3,7 +3,6 @@ var assert  = require('assert');
 var slugid  = require('slugid');
 var _       = require('lodash');
 var Promise = require('promise');
-var stats   = require("taskcluster-lib-stats");
 var debug   = require('debug')('test:entity:query');
 var helper  = require('./helper');
 
@@ -34,10 +33,7 @@ helper.contextualSuites("Entity (query)", [
       tag:            subject.types.String,
       time:           subject.types.Date
     }
-  }).setup(_.defaults({}, options, {
-    component:    '"taskcluster-base"-test',
-    process:      'mocha'
-  }));
+  }).setup(_.defaults(options));
 
   setup(function() {
     return Item.ensureTable();
