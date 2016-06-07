@@ -183,7 +183,7 @@ To use an in-memory, testing-oriented table, use the special accountName
 
 ````js
 {
-  account:  "inMemory,
+  account:  "inMemory",
   table:    "AzureTableName"
 }
 ````
