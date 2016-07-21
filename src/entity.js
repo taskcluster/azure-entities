@@ -1003,6 +1003,7 @@ Entity.prototype.modify = function(modifier) {
 
   // Attempt to modify this object
   var attemptsLeft = MAX_MODIFY_ATTEMPTS;
+  var modifiedEntityAttempts = [];
   var attemptModify = function() {
     // Invoke modifier
     return Promise.resolve(modifier.call(
@@ -1065,6 +1066,8 @@ Entity.prototype.modify = function(modifier) {
         return self;
       });
     }).catch(function(err) {
+      var modifiedEntity = self._properties;
+      
       // Restore internal state
       self._etag        = eTag;
       self._properties  = properties;
@@ -1080,10 +1083,17 @@ Entity.prototype.modify = function(modifier) {
       attemptsLeft -= 1;
       if (attemptsLeft === 0) {
         debug("ERROR: MAX_MODIFY_ATTEMPTS exhausted, we might have congestion");
-        throw new Error("MAX_MODIFY_ATTEMPTS exhausted, check for congestion");
+        var err = new Error("MAX_MODIFY_ATTEMPTS exhausted, check for congestion");
+        err.code = 'EntityWriteCongestionError';
+        err.originalEntity = properties;
+        err.modifiedEntity = modifiedEntity;
+        err.modifiedEntityAttempts = modifiedEntityAttempts;
+        throw err;
+      } else {
+        modifiedEntityAttempts.push(modifiedEntity);
       }
 
-      // Reload and try again
+      // Reload and try again (overwrites self._properties, self._version and self._etag)
       return Entity.prototype.reload.call(self).then(attemptModify);
     });
   };
