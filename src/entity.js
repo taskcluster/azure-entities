@@ -1091,6 +1091,7 @@ Entity.prototype.modify = function(modifier) {
         err.originalEntity = properties;
         err.modifiedEntity = modifiedEntity;
         err.modifiedEntityAttempts = modifiedEntityAttempts;
+        err.table = self.__table;
         throw err;
       } else {
         modifiedEntityAttempts.push(modifiedEntity);
