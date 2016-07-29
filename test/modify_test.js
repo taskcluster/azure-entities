@@ -13,7 +13,8 @@ var Item = subject.configure({
   properties: {
     id:             subject.types.String,
     name:           subject.types.String,
-    count:          subject.types.Number
+    count:          subject.types.Number,
+    time:           subject.types.Date,
   }
 });
 
@@ -30,7 +31,8 @@ function(context, options) {
     return Item.create({
       id:     id,
       name:   'my-test-item',
-      count:  1
+      count:  1,
+      time:   new Date(),
     }).then(function(item) {
       assert(item instanceof Item);
       assert(item.id === id);
@@ -64,7 +66,8 @@ function(context, options) {
     return Item.create({
       id:     id,
       name:   'my-test-item',
-      count:  1
+      count:  1,
+      time:   new Date(),
     }).then(function(item) {
       return item.modify(function() {
         throw err;
@@ -82,7 +85,8 @@ function(context, options) {
     return Item.create({
       id:     id,
       name:   'my-test-item',
-      count:  1
+      count:  1,
+      time:   new Date(),
     }).then(function(item) {
       deletedItem = item;
       return Item.remove({id: id, name: 'my-test-item'});
@@ -103,7 +107,8 @@ function(context, options) {
     return Item.create({
       id:     id,
       name:   'my-test-item',
-      count:  1
+      count:  1,
+      time:   new Date(),
     }).then(function(item) {
       assert(item instanceof Item);
       assert(item.id === id);
@@ -131,7 +136,8 @@ function(context, options) {
     return Item.create({
       id:     id,
       name:   'my-test-item',
-      count:  1
+      count:  1,
+      time:   new Date(),
     }).then(function(itemA) {
       return Item.load({
         id:     id,
@@ -163,7 +169,8 @@ function(context, options) {
     return Item.create({
       id:     id,
       name:   'my-test-item',
-      count:  1
+      count:  1,
+      time:   new Date(),
     }).then(function() {
       var promisedItems = [];
       for(var i = 0; i < 5; i++) {
@@ -196,4 +203,3 @@ function(context, options) {
     });
   });
 });
-
