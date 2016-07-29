@@ -991,20 +991,23 @@ Entity.prototype.reload = function() {
  */
 Entity.prototype.modify = function(modifier) {
   var self = this;
-
-  // Create a clone of this._properties, so we can compare properties and
-  // decide what to upload, as well as we can restore state if operations fail
-  var properties    = {};
-  _.forIn(this.__mapping, function(type, property) {
-    properties[property] = type.clone(self._properties[property]);
-  });
-  var eTag          = this._etag;
-  var version       = this._version;
+  var properties;
+  var eTag;
+  var version;
 
   // Attempt to modify this object
   var attemptsLeft = MAX_MODIFY_ATTEMPTS;
   var modifiedEntityAttempts = [];
   var attemptModify = function() {
+    // Create a clone of this._properties, so we can compare properties and
+    // decide what to upload, as well as we can restore state if operations fail
+    properties    = {};
+    _.forIn(self.__mapping, function(type, property) {
+      properties[property] = type.clone(self._properties[property]);
+    });
+    eTag          = self._etag;
+    version       = self._version;
+
     // Invoke modifier
     return Promise.resolve(modifier.call(
       self._properties,
@@ -1067,7 +1070,7 @@ Entity.prototype.modify = function(modifier) {
       });
     }).catch(function(err) {
       var modifiedEntity = self._properties;
-      
+
       // Restore internal state
       self._etag        = eTag;
       self._properties  = properties;
@@ -1372,4 +1375,3 @@ Entity.prototype.inspect = function(depth) {
 
 // Export Entity
 module.exports = Entity;
-

@@ -174,8 +174,9 @@ helper.contextualSuites("Entity (create/load/modify DataTypes)", [
             id:     id,
             name:   'my-test-item'
           }).then(function(itemB) {
-            assert(_.isEqual(itemA.data, itemB.data));
             assert(_.isEqual(itemA.data, sample1));
+            assert(_.isEqual(itemA.data, itemB.data));
+            assert(itemA._etag === itemB._etag);
             return itemB;
           });
         }).then(function(item) {
@@ -187,8 +188,57 @@ helper.contextualSuites("Entity (create/load/modify DataTypes)", [
             id:     id,
             name:   'my-test-item'
           }).then(function(itemB) {
-            assert(_.isEqual(itemA.data, itemB.data));
             assert(_.isEqual(itemA.data, sample2));
+            assert(_.isEqual(itemA.data, itemB.data));
+            assert(itemA._etag === itemB._etag);
+            return itemB.modify(function(item) {
+              item.data = sample1;
+            });
+          }).then(function(itemB) {
+            assert(_.isEqual(itemA.data, sample2));
+            return itemA.reload().then(function() {
+              assert(_.isEqual(itemA.data, sample1));
+              assert(_.isEqual(itemA.data, itemB.data));
+              assert(itemA._etag === itemB._etag);
+            }).then(function() {
+              // Try noop edit
+              var etag = itemA._etag;
+              return itemA.modify(function(item) {
+                item.data = sample1; // This is the value it already has
+              }).then(function() {
+                assert(itemA._etag === etag);
+              });
+            }).then(function() {
+              // Try parallel edit
+              var count = 0;
+              var noop = 0;
+              return Promise.all([
+                itemA.modify(function(item) {
+                  count++;
+                  if (_.isEqual(item.data, sample2)) {
+                    noop++;
+                  }
+                  item.data = sample2;
+                }),
+                itemB.modify(function(item) {
+                  count++;
+                  if (_.isEqual(item.data, sample2)) {
+                    noop++;
+                  }
+                  item.data = sample2;
+                })
+              ]).then(function() {
+                assert(count === 3, "Expected 3 edits, 2 initial + 1 conflict");
+                assert(noop === 1, "Expected 1 noop edit");
+                assert(_.isEqual(itemA.data, sample2));
+                assert(_.isEqual(itemB.data, sample2));
+                assert(_.isEqual(itemA.data, itemB.data));
+                // Check that etags match, otherwise we might have updated even when not needed
+                assert(itemA._etag);
+                assert(itemB._etag);
+                assert(itemA._etag === itemB._etag);
+              });
+            });
           });
         });
       });
