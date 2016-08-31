@@ -161,7 +161,9 @@ Using the ``options`` format provided above a shared-access-signature will be
 fetched from auth.taskcluster.net. The goal with this is to reduce secret
 configuration and reduce exposure of our Azure ``accountKey``. To fetch the
 shared-access-signature the following scope is required:
-``auth:azure-table-access:<accountName>/<table>``
+``auth:azure-table-access:<accountName>/<table>``. If you use this option,
+you do not need to ensure the table exists later, as taskcluster-auth will
+do that for you.
 
 If you have the azure credentials, you can also specify the options
 as follows:
@@ -207,7 +209,9 @@ called again.
 
 To ensure that the underlying Azure table actually exists, call
 ``ensureTable``.  This is an idempotent operation, and is often called in
-service start-up.
+service start-up. If you've used taskcluster-auth to get credentials
+rather than azure credentials, do not use this as taskcluster-auth has
+already ensured the table exists for you.
 
 ````js
 await MyEntity.ensureTable()
