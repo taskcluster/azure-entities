@@ -703,6 +703,7 @@ Entity.setup = function(options) {
     subClass.prototype.__table = options.table;
     subClass.prototype.__filterBuilder = inmemory.appendFilter;
     subClass.prototype.__aux = new inmemory.InMemoryWrapper(options.table);
+    subClass.prototype.__client = {};
 
     return subClass;
   }
@@ -803,6 +804,13 @@ Entity.setup = function(options) {
 Entity.ensureTable = function() {
   var Class       = this;
   var ClassProps  = Class.prototype;
+
+  // Auth creates the table for us, so we don't do it again
+  // The request will actually fail because Auth doesn't give
+  // us permissions for creating tables.
+  if (ClassProps.__client.options && ClassProps.__client.options.sas) {
+    return;
+  }
 
   return ClassProps.__aux.createTable().catch(function(err) {
     if (!err || err.code !== 'TableAlreadyExists') {
