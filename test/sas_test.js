@@ -44,6 +44,10 @@ suite("Entity (Shared-Access-Signatures)", function() {
     table:            helper.cfg.tableName
   });
 
+  test("ensureTable doesn't fail", async function() {
+    return Item.ensureTable();
+  });
+
   test("Item.create, item.modify, item.reload", function() {
     var id = slugid.v4();
     return Item.create({
