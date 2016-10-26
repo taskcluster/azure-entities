@@ -288,6 +288,7 @@ the row does not exist, unless its second argument is true.
 
 ````js
 var entity = await MyEntity.load({id: myThingId});
+var maybe = await MyEntity.load({id: myThingId}, true);
 ````
 
 An existing row has a ``reload`` method which will load the properties from the
