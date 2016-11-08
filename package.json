@@ -36,5 +36,6 @@
     "tc-rules": "^1.0.5",
     "typed-env-config": "^0.10.0"
   },
-  "main": "./lib/entity"
+  "main": "./lib/entity",
+  "files": ["lib/"],
 }
