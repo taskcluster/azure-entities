@@ -103,6 +103,7 @@ exports.StringKey = function(key) {
 /******************** Descending Integer Key ********************/
 
 // More nines than an int can hold, ie. MORE_NINES_THAN_INT > 2^32
+// DescendingIntegerKey only works with PositiveInteger which is limited 2^32.
 var MORE_NINES_THAN_INT = 9999999999;
 
 /** Construct a DescendingIntegerKey */
@@ -149,6 +150,8 @@ exports.DescendingIntegerKey = function(key) {
 
 /******************** Ascending Integer Key ********************/
 
+// Padding for integers up to 2^32 be in ascending order. 
+// AscendingIntegerKey only works with PositiveInteger which is limited 2^32.
 var ASCENDING_KEY_PADDING = '00000000000';
 
 /** Construct a AscendingIntegerKey */
