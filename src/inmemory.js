@@ -172,7 +172,7 @@ InMemoryWrapper.prototype.queryEntities = function(options) {
   if (!tables[this.table]) {
     return Promise.reject(makeError(404, 'ResourceNotFound'));
   }
-  
+
   var filterFunctionFor = function(filter) {
     return function(entity) {
       return _.every(filter, function(condition) {
@@ -182,6 +182,7 @@ InMemoryWrapper.prototype.queryEntities = function(options) {
   };
 
   var entities = _.values(tables[this.table]);
+  entities = _.sortBy(entities, e => [e.PartitionKey, e.RowKey]);
 
   if (options.filter) {
     entities = _.filter(entities, filterFunctionFor(options.filter));

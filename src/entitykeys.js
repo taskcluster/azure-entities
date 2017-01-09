@@ -6,6 +6,7 @@ var _               = require('lodash');
 var debug           = require('debug')('base:entity:keys');
 var crypto          = require('crypto');
 var Op              = require('./entityops');
+var Types           = require('./entitytypes');
 
 /**
  * Get value from equality operator or value
@@ -96,6 +97,108 @@ StringKey.prototype.exactFromConditions = function(properties) {
 exports.StringKey = function(key) {
   return function(mapping) {
     return new StringKey(mapping, key);
+  };
+};
+
+/******************** Descending Integer Key ********************/
+
+// More nines than an int can hold, ie. MORE_NINES_THAN_INT > 2^32
+// DescendingIntegerKey only works with PositiveInteger which is limited 2^32.
+var MORE_NINES_THAN_INT = 9999999999;
+
+/** Construct a DescendingIntegerKey */
+var DescendingIntegerKey = function(mapping, key) {
+  // Set key
+  this.key = key;
+
+  // Set key type
+  assert(mapping[this.key], "key '" + key + "' is not defined in mapping");
+  assert(mapping[this.key] instanceof Types.PositiveInteger,
+         "key '" + key + "' must be a PositiveInteger type");
+  this.type = mapping[this.key];
+
+  // Set covers
+  this.covers = [key];
+};
+
+/** Construct exact key if possible */
+DescendingIntegerKey.prototype.exact = function(properties) {
+  // Get value
+  var value = properties[this.key];
+  // Check that value was given
+  assert(value !== undefined, "Unable to create key from properties");
+  // Return exact key
+  return (MORE_NINES_THAN_INT - value).toString();
+};
+
+/** Construct exact key if possible */
+DescendingIntegerKey.prototype.exactFromConditions = function(properties) {
+  // Get value
+  var value = valueFromOpOrValue(properties[this.key]);
+  // Check that value was given
+  assert(value !== undefined, "Unable to create key from properties");
+  // Return exact key
+  return (MORE_NINES_THAN_INT - value).toString();
+};
+
+/** Create DescendingIntegerKey builder */
+exports.DescendingIntegerKey = function(key) {
+  return function(mapping) {
+    return new DescendingIntegerKey(mapping, key);
+  };
+};
+
+/******************** Ascending Integer Key ********************/
+
+// Padding for integers up to 2^32 be in ascending order. 
+// AscendingIntegerKey only works with PositiveInteger which is limited 2^32.
+var ASCENDING_KEY_PADDING = '00000000000';
+
+/** Construct a AscendingIntegerKey */
+var AscendingIntegerKey = function(mapping, key) {
+  // Set key
+  this.key = key;
+
+  // Set key type
+  assert(mapping[this.key], "key '" + key + "' is not defined in mapping");
+  assert(mapping[this.key] instanceof Types.PositiveInteger,
+         "key '" + key + "' must be a PositiveInteger type");
+  this.type = mapping[this.key];
+
+  // Set covers
+  this.covers = [key];
+};
+
+/** Construct exact key if possible */
+AscendingIntegerKey.prototype.exact = function(properties) {
+  // Get value
+  var value = properties[this.key];
+  // Check that value was given
+  assert(value !== undefined, "Unable to create key from properties");
+  // Return exact key
+  var str = value.toString()
+  return ASCENDING_KEY_PADDING.substring(
+    0, ASCENDING_KEY_PADDING.length - str.length
+  ) + str;
+};
+
+/** Construct exact key if possible */
+AscendingIntegerKey.prototype.exactFromConditions = function(properties) {
+  // Get value
+  var value = valueFromOpOrValue(properties[this.key]);
+  // Check that value was given
+  assert(value !== undefined, "Unable to create key from properties");
+  // Return exact key
+  var str = value.toString()
+  return ASCENDING_KEY_PADDING.substring(
+    0, ASCENDING_KEY_PADDING.length - str.length
+  ) + str;
+};
+
+/** Create AscendingIntegerKey builder */
+exports.AscendingIntegerKey = function(key) {
+  return function(mapping) {
+    return new AscendingIntegerKey(mapping, key);
   };
 };
 

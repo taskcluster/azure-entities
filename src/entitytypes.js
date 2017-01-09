@@ -242,6 +242,35 @@ NumberType.prototype.compare = function(entity, op) {
 // Export NumberType as Number
 exports.Number = NumberType;
 
+/******************** Positive Integer Type ********************/
+
+/** Positive Integer Entity type */
+var PositiveIntegerType = function(property) {
+  NumberType.apply(this, arguments);
+};
+
+// Inherit from NumberType
+util.inherits(PositiveIntegerType, NumberType);
+
+PositiveIntegerType.prototype.validate = function(value) {
+  checkType('PositiveIntegerType', this.property, value, 'number');
+  if (!isNaN(value) && value % 1  !== 0) {
+    throw new Error("PositiveIntegerType '" + this.property + "'" +
+                    " expected an integer got a float or NaN");
+  }
+  if (value < 0) {
+    throw new Error("PositiveIntegerType '" + this.property + "'" +
+                    " expected a positive integer, got less than zero");
+  }
+  if (value > Math.pow(2, 32)) {
+    throw new Error("PositiveIntegerType '" + this.property + "'" +
+                    " expected an integer, got more than 2^32");
+  }
+};
+
+// Export PositiveIntegerType as PositiveInteger
+exports.PositiveInteger = PositiveIntegerType;
+
 /******************** Date Type ********************/
 
 /** Date Entity type */

@@ -40,6 +40,14 @@ helper.contextualSuites("Entity (create/load/modify DataTypes)", [
     }
   },
   {
+    context: 'Entity.types.PositiveInteger',
+    options: {
+      type: subject.types.Number,
+      sample1: 455,
+      sample2: 125236
+    }
+  },
+  {
     context: 'Entity.types.Date',
     options: {
       type: subject.types.Date,
