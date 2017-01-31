@@ -1286,7 +1286,7 @@ Entity.scan = function(conditions, options) {
   _.forIn(conditions, function(op, property) {
     // If the property is covered by the partitionKey or rowKey, we don't want
     // to apply a filter to it
-    if (_.contains(covered, property)) {
+    if (_.includes(covered, property)) {
       return;
     }
 

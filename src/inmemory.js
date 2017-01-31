@@ -23,7 +23,7 @@ var odataPrefix = /^odata\./;
 var odataSuffix = /@odata\.type$/;
 var entityEtag = function(entity) {
   // always filter out odata.* metadata
-  entity = _.omit(entity, function(v, k) { return odataPrefix.test(k); });
+  entity = _.omitBy(entity, (v, k) => odataPrefix.test(k));
 
   // include an entity type for each attribute
   _.forIn(entity, function(v, k) {
