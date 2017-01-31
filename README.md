@@ -29,6 +29,14 @@ The configure call returns the class, and takes options:
     prop2:           Entity.types.String,
     prop3:           Entity.types.Number,
     prop4:           Entity.types.JSON
+    prop5:           Entity.types.Schema({ // Same as JSON, but enforces schema validation
+      type: 'object',
+      properties: {
+        myKey: {type: 'string'},
+      }
+      additionalProperties: false,
+      required: ['myKey'],
+    }),
   },
   signEntities:      false,                // HMAC sign entities
   context: [                               // Required context keys
@@ -90,6 +98,7 @@ The example above shows a few entity types.  The full list, all properties of
   * ``Blob`` -- binary blob
   * ``Text`` -- arbitrary text
   * ``JSON`` -- JSONable data
+  * ``Schema(s)`` -- JSON matching the JSON schema `s`
   * ``SlugIdArray`` -- an array of slugids
 
 The following types are encrypted, and require additional arguments to the
@@ -98,6 +107,7 @@ The following types are encrypted, and require additional arguments to the
   * ``EncryptedText``
   * ``EncryptedBlob``
   * ``EncryptedJSON``
+  * ``EncryptedSchema(s)`` -- JSON matching the JSON schema `s`
 
 #### Keys
 
