@@ -9,6 +9,7 @@ var stringify       = require('json-stable-stringify');
 var buffertools     = require('buffertools');
 var crypto          = require('crypto');
 var azure           = require('fast-azure-storage');
+var Ajv             = require('ajv');
 var fmt             = azure.Table.Operators;
 
 // Check that value is of types for name and property
@@ -625,6 +626,37 @@ JSONType.prototype.clone = function(value) {
 // Export JSONType as JSON
 exports.JSON = JSONType;
 
+/******************** Schema Type ********************/
+
+// Export SchemaEnforcedType as Schema
+exports.Schema = function(schema) {
+  let ajv = new Ajv({useDefaults: true});
+  let validate = ajv.compile(schema);
+
+  /** Schema Entity type */
+  var SchemaEnforcedType = function(property) {
+    JSONType.apply(this, arguments);
+  };
+
+  // Inherit from JSONType
+  util.inherits(SchemaEnforcedType, JSONType);
+
+  SchemaEnforcedType.prototype.validate = function(value) {
+    if (validate(value)) {
+      return;
+    }
+    let err = new Error(
+      "SchemaEnforcedType '" + this.property +
+      "' schema validation failed: " + ajv.errorsText(validate.errors)
+    );
+    err.errors = validate.errors;
+    err.value = value;
+    throw err;
+  };
+
+  return SchemaEnforcedType;
+};
+
 /******************** Encrypted Base Type ********************/
 
 /** Encrypted Base Entity type */
@@ -797,6 +829,37 @@ EncryptedJSONType.prototype.clone = function(value) {
 
 // Export EncryptedJSONType as EncryptedJSON
 exports.EncryptedJSON = EncryptedJSONType;
+
+/******************** EncryptedSchema Type ********************/
+
+// Export EncryptedSchemaEnforcedType as EncryptedSchema
+exports.EncryptedSchema = function(schema) {
+  let ajv = new Ajv({useDefaults: true});
+  let validate = ajv.compile(schema);
+
+  /** Schema Entity type */
+  var EncryptedSchemaEnforcedType = function(property) {
+    EncryptedJSONType.apply(this, arguments);
+  };
+
+  // Inherit from EncryptedJSONType
+  util.inherits(EncryptedSchemaEnforcedType, EncryptedJSONType);
+
+  EncryptedSchemaEnforcedType.prototype.validate = function(value) {
+    if (validate(value)) {
+      return;
+    }
+    let err = new Error(
+      "EncryptedSchemaEnforcedType '" + this.property +
+      "' schema validation failed: " + ajv.errorsText(validate.errors)
+    );
+    err.errors = validate.errors;
+    err.value = value;
+    throw err;
+  };
+
+  return EncryptedSchemaEnforcedType;
+};
 
 /******************** SlugIdArray Type ********************/
 
