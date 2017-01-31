@@ -1,7 +1,7 @@
 var _      = require('lodash');
 var config = require('typed-env-config');
 
-exports.cfg = config();
+exports.cfg = config({});
 
 exports.contextualSuites = function(name, contexts, suiteFunc) {
   _.forEach(contexts, function(ctx) {
