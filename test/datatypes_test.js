@@ -80,6 +80,16 @@ helper.contextualSuites("Entity (create/load/modify DataTypes)", [
     }
   },
   {
+    context: 'Entity.types.Schema',
+    options: {
+      type: subject.types.Schema({
+        type: 'object', required: ['subobject', 'array'],
+      }),
+      sample1: {subobject: {number: 42}, array: [1,2,3,4, "string"]},
+      sample2: {subobject: {number: 51}, array: [1,2,3,4,5, "string"]},
+    }
+  },
+  {
     context: 'Entity.types.Blob',
     options: {
       type: subject.types.Blob,
@@ -101,6 +111,17 @@ helper.contextualSuites("Entity (create/load/modify DataTypes)", [
     context: 'Entity.types.EncryptedJSON',
     options: {
       type: subject.types.EncryptedJSON,
+      sample1: {subobject: {number: 42}, array: [1,2,3,4, "string"]},
+      sample2: {subobject: {number: 51}, array: [1,2,3,4,5, "string"]},
+      encryptedTestOnly: true
+    }
+  },
+  {
+    context: 'Entity.types.EncryptedSchema',
+    options: {
+      type: subject.types.EncryptedSchema({
+        type: 'object', required: ['subobject', 'array'],
+      }),
       sample1: {subobject: {number: 42}, array: [1,2,3,4, "string"]},
       sample2: {subobject: {number: 51}, array: [1,2,3,4,5, "string"]},
       encryptedTestOnly: true

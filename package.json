@@ -24,7 +24,8 @@
     "lodash": "^3.10.0",
     "promise": "^7.0.4",
     "slugid": "^1.0.3",
-    "taskcluster-client": "^0.23.4"
+    "taskcluster-client": "^1.6.3",
+    "ajv": "^4.11.2"
   },
   "devDependencies": {
     "azure-table-node": "1.4.1",
