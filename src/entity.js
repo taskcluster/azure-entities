@@ -557,7 +557,7 @@ Entity.configure = function(options) {
  * fetched from auth.taskcluster.net. The goal with this is to reduce secret
  * configuration and reduce exposure of our Azure `accountKey`. To fetch the
  * shared-access-signature the following scope is required:
- *   `auth:azure-table-access:<accountName>/<table>`
+ *   `auth:azure-table:read-write:<accountName>/<table>`
  *
  * If you have the azure credentials, you can also specify the options
  * as follows:
@@ -731,7 +731,8 @@ Entity.setup = function(options) {
       sas: function() {
         return auth.azureTableSAS(
           options.account,
-          options.table
+          options.table,
+          'read-write'  // TODO: If we need it, we can make this an option
         ).then(function(result) {
           return result.sas;
         });

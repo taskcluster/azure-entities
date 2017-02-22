@@ -171,7 +171,7 @@ Using the ``options`` format provided above a shared-access-signature will be
 fetched from auth.taskcluster.net. The goal with this is to reduce secret
 configuration and reduce exposure of our Azure ``accountKey``. To fetch the
 shared-access-signature the following scope is required:
-``auth:azure-table-access:<accountName>/<table>``. If you use this option,
+``auth:azure-table:read-write:<accountName>/<table>``. If you use this option,
 you do not need to ensure the table exists later, as taskcluster-auth will
 do that for you.
 

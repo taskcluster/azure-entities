@@ -21,17 +21,18 @@ suite("Entity (SAS from auth.taskcluster.net)", function() {
   var callCount = 0;
   api.declare({
     method:     'get',
-    route:      '/azure/:account/table/:table/read-write',
+    route:      '/azure/:account/table/:table/:level',
     name:       'azureTableSAS',
     deferAuth:  true,
-    scopes:     [['auth:azure-table-access:<account>/<table>']],
+    scopes:     [['auth:azure-table:<level>:<account>/<table>']],
     title:        "Test SAS End-Point",
     description:  "Get SAS for testing",
   }, function(req, res) {
     callCount += 1;
     var account = req.params.account;
     var table   = req.params.table;
-    if (!req.satisfies({account: account, table: table})) {
+    var level   = req.params.level;
+    if (!req.satisfies({account: account, table: table, level: level})) {
       return;
     }
     var credentials = helper.cfg.azure;
