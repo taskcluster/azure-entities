@@ -17,18 +17,22 @@ env:
   - DEBUG='* -superagent -express:* -mocha:* -babel -nock*'
   - secure: CFHtd3es0aG0YgsA5OBVgdLZlIrdHdEhayvyJSCWo0AooyVe1zxbBtAPLWysm3UeaK5iqDAPZXrH/M+GXiLFE+yiSkJk+O7q6Fx7rM3oO3J1AZLbseuCbdjJGe/2NXDDzadfeV/4Z9aDYf6f17jxYNlq33XZvNHLBr2BbXw5DzZrcIp4qa8wZym/3Gmp9un9rR3+Pij5iNItaTRpjYQYug12GQsueMaB9dgqCpKVAWzGfOE5zDH1ilyyq9O1xdaRDEeFaPmMzh47a1nCBJ/OcCra21PRDa3BKjnemrGM3TQhTdX2JN5QZTKcDvg9XiapafsIMisbsG8U2GHB61y0T64HZzHLa3lhq0LVfj8aPH7x8cruDMIibB4mKeScgN1/VSxJqwdisPJMYnfX8z4N/7WI53a+nfaVjd7q7kbBQRzmI8zQVdMFzJ2pcl2aISGyl6ZD8EFjQLJQzPJixMpbAPz++0PeBJ76yBYJvD1NshJTLFwjPken+5bQT0ltKS2KuYgkXxS0dVX4nXsJFuUXqBtqEm8vuqh0+tQqjMY6GDsGk6DC6KCHaKfEPhYSWapVhO4F15PArydm1APQ6EhJLB7I0tm1LV0FAcj884J8vWPmwGCakqJ09SmxXTtIyepzvkPCAaDiSxoQY5a0qchRjlWPEshwXHi+x8Gg9L5IL6M=
   - secure: MDr12e/VPN/3rM/maEXXtLb9HEpYIz0qp3grx4upJnR0samcwuiOmO/8TkIRY4oxGwLl7sfE51b5P+2LiEhGInQqWl4EkTKtDjFLuGsakIFK6NUzLBN1K76tmVL0RGfIU+Abo4Y+LWyIBRn3mlp1KlIQlXZo0tHPACEfloHgDlw3YFpJM3kNWK5XlvsxetL2yudG7zTpJbAuJ37h4J38tIAs62x+b5bTaMOz7E0i+DdS8lm9XtIjiwQq6bMIBMFc/xkbfNf6u3MSJ/3Lbi5P0+rTCoVXC6byyzLBqrtYfu8+RLA7K2G/3/guZwQe7ERJgogIJN4rHhR83akUxvfNRutRN5/IwVVS9MKaVAzxQMn11io/Ju5EDBP0Kx7P6ZenJi816UCrew/1sC3cyElJ95zlCAga2pehZ9XumL0V5mwUuAKFu2DsncCh/q/Ci/gNK6OWoSVKekdjFFpeWPXLnriasRWeKmkGNPCHQIQeR747GPSqbS2o4TMh+0H4KzCJQV6p0vu8iH3D/up/QVzIAjb0KLrDXzZUZypk1z1KmHx9lcBRKMzIiyNLkKG35Shb6zhw13lACHlHYKoWwLpJ91Qn5kxr++BSC1JTlNdc8/s/Creqwpz50a4OwgroOZ+tGtnXOd1QCMfMQCHC+NlCnK8LYYkd54v02+LTdVFDMZo=
-
-# encrpyt channel name to get around issue
-# https://github.com/travis-ci/travis-ci/issues/1094
 notifications:
   irc:
     channels:
-      # encrpyted string was "irc.mozilla.org#taskcluster-bots"
-      - secure: "qF+kt+bGzSxK8jiD5hACkx1Rnbh3Dcy6g9EO4Qqsjem2w2dBHbPSOeePvum50fO6ShcpmqCWCFYqclgDfMJq03mUMzHSidlNjCvNOPnrn3SJ0RUOcNRrM00lf5UjDLoCRtNFypjGJoyz2kCbbVxHpBIzIlq9MCiIQ+X9JIrptz6GhLiRqEjnk14FeJgr9rWFlruzKt5h0EzP077KZUY7/pwMWahdAtTEKGaoef/I6F8rWb6s/xJX1Xw5J3Jxq1gDI9usC3JbMEVV+gvqHsE5RVBTJRK0a8u9jMFaCeBX21qvfHg4AWjEsTg7plnWZcTHEmNUjO9SHorcTpGIUk5bOHHs8Xv42vkfyHHPd8hg2NU/F/2GVEyXaVHlusOfcHAlDBpZ81SeIfcaOL/ueQmRnd2+nrDQ+SOjKbSn8QGjDzkZ4OL/lT3o29ej4ZkDsCgRRpN2rW0Opoe26Khs80tx3mK2bcq9rAGR9+/pnC9SZU/dHYpKioNLCoAMmnxfPNY4/YdAmLhUazCafhPa9qa2zxFu9fWh7oLtfTfmLkhx8AFysgk+7t/0SYWwEccJZ0dUtdcMUYRXNp5QmqA3srKZyQSDIhu/ncglqCBTW5pRULc2Ycgc3SjTFMmHjCK3cpW819DHrfkhy6mz+yCf8lV8UK8VHcCXDK8l5vGb0ZRrLDs="
+    - secure: qF+kt+bGzSxK8jiD5hACkx1Rnbh3Dcy6g9EO4Qqsjem2w2dBHbPSOeePvum50fO6ShcpmqCWCFYqclgDfMJq03mUMzHSidlNjCvNOPnrn3SJ0RUOcNRrM00lf5UjDLoCRtNFypjGJoyz2kCbbVxHpBIzIlq9MCiIQ+X9JIrptz6GhLiRqEjnk14FeJgr9rWFlruzKt5h0EzP077KZUY7/pwMWahdAtTEKGaoef/I6F8rWb6s/xJX1Xw5J3Jxq1gDI9usC3JbMEVV+gvqHsE5RVBTJRK0a8u9jMFaCeBX21qvfHg4AWjEsTg7plnWZcTHEmNUjO9SHorcTpGIUk5bOHHs8Xv42vkfyHHPd8hg2NU/F/2GVEyXaVHlusOfcHAlDBpZ81SeIfcaOL/ueQmRnd2+nrDQ+SOjKbSn8QGjDzkZ4OL/lT3o29ej4ZkDsCgRRpN2rW0Opoe26Khs80tx3mK2bcq9rAGR9+/pnC9SZU/dHYpKioNLCoAMmnxfPNY4/YdAmLhUazCafhPa9qa2zxFu9fWh7oLtfTfmLkhx8AFysgk+7t/0SYWwEccJZ0dUtdcMUYRXNp5QmqA3srKZyQSDIhu/ncglqCBTW5pRULc2Ycgc3SjTFMmHjCK3cpW819DHrfkhy6mz+yCf8lV8UK8VHcCXDK8l5vGb0ZRrLDs=
     on_success: change
     on_failure: always
     template:
-      - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}"
-      - "Change view : %{compare_url}"
-      - "Build details : %{build_url}"
-      - "Commit message : %{commit_message}"
+    - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}"
+    - 'Change view : %{compare_url}'
+    - 'Build details : %{build_url}'
+    - 'Commit message : %{commit_message}'
+deploy:
+  provider: npm
+  email: taskcluster-accounts@mozilla.com
+  api_key:
+    secure: KGKm1x9IuXJDnrSN5mOBzo8IONy4WPHhg9t7TsIb8USwPJsU1jHM5Hoyl+NSt1rERVYmGQ6xXwlMSd6m/UxpR722ZmsaLy5+1aZbSUlcipHuFGG9WDpVJR6pPWwRP253WF8fHsDhadfYCMCM3rs4FpBAge/hiDTP6GKtSb8SOPURcCy8fWyqeH8C34U2M7Zvot7dvAfGZYCuJAd+YsrOFz3u8a2wb/B2od4AfI5GtIqfYuPW3mlx+L1FbegvqVQu0/un8KEI/C28BHyqi9hJIruug+9ODBfid/gb65Xhm+uyGq/G7o8MAx0buddnLwhprVEuNjICNxqNu1JvupA9LcaZIFiQTtSZh0oqMF4PRAAs5ghofsb7lKOo/wmnbE7dbe03jVkEw0Wq7XDn2tN4LqAElrXT7PkPLO0KI+9LVzfXWEBOae9zc7WRyEFm8Ux9Tpey/ZMZNVvUp0CZ/a3428+wUROzxsdoY/EUufhsJ57TJHlngargcEgFO3cwh5SAtNlOe4tCaH0AVHm5iVTuYqvXlzvUEmqZ5LlqT7zTUpPrTtX6Qki94u/T3eGWX/bVNABR1xhdmKp2czsMIAHyqe7pqPt0xoYomqHm15TN8odLNdj+d9CWZTmtxqm8vD0gPtVEJnT0oRJ+AlOkJsBxnZvYZT6Ud2bMqand2VMLTo4=
+  on:
+    tags: true
+    repo: taskcluster/azure-entities
