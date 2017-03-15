@@ -1312,7 +1312,7 @@ Entity.scan = function(conditions, options) {
     var continuation = decodeContinuationToken(continuation);
     return ClassProps.__aux.queryEntities({
       filter:           filter,
-      top:              options.limit,
+      top:              Math.min(options.limit, 1000),
       nextPartitionKey: continuation.nextPartitionKey,
       nextRowKey:       continuation.nextRowKey
     }).then(function(data) {
