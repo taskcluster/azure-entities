@@ -1202,9 +1202,19 @@ extsprintf@1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/extsprintf/-/extsprintf-1.0.2.tgz#e1080e0658e300b06294990cc70e1502235fd550"
 
-fast-azure-storage@^0.3.0, fast-azure-storage@^0.3.7:
+fast-azure-storage@^0.3.0:
   version "0.3.7"
   resolved "https://registry.yarnpkg.com/fast-azure-storage/-/fast-azure-storage-0.3.7.tgz#638b11ab074d5774cfd6fe8c628f0a419ef2874d"
+  dependencies:
+    debug "^2.2.0"
+    pixl-xml "^1.0.10"
+    promise "^7.0.4"
+  optionalDependencies:
+    libxmljs "^0.18.0"
+
+fast-azure-storage@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/fast-azure-storage/-/fast-azure-storage-1.0.1.tgz#b3dfd13fa9ba7780c23bff99bae46ac65cb696d2"
   dependencies:
     debug "^2.2.0"
     pixl-xml "^1.0.10"
@@ -3025,17 +3035,13 @@ uuid@1.4.1:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-1.4.1.tgz#a337828580d426e375b8ee11bd2bf901a596e0b8"
 
-uuid@3.0.0:
+uuid@3.0.0, uuid@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.0.0.tgz#6728fc0459c450d796a99c31837569bdf672d728"
 
 uuid@^2.0.1:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-2.0.3.tgz#67e2e863797215530dff318e5bf9dcebfd47b21a"
-
-uuid@^3.0.0:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.0.1.tgz#6544bba2dfda8c1cf17e629a3a305e2bb1fee6c1"
 
 vary@~1.0.0:
   version "1.0.1"
