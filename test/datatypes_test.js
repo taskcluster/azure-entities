@@ -16,6 +16,14 @@ helper.contextualSuites("Entity (create/load/modify DataTypes)", [
     }
   },
   {
+    context: 'Entity.types.Boolean',
+    options: {
+      type: subject.types.Boolean,
+      sample1: false,
+      sample2: true
+    }
+  },
+  {
     context: 'Entity.types.Number (float)',
     options: {
       type: subject.types.Number,
