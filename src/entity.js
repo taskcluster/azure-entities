@@ -489,7 +489,11 @@ Entity.configure = function(options) {
              "entity.Version is greater than configured version!");
       // Migrate, if necessary
       if (entity.Version < options.version) {
-        return options.migrate.call(this, deserialize.call(this, entity));
+        let migrated = options.migrate.call(this, deserialize.call(this, entity));
+        if (!migrated) {
+          throw new Error('migration must return value');
+        }
+        return migrated;
       }
       // Deserialize properties, if not migrated
       var cryptoKey  = this.__cryptoKey;
