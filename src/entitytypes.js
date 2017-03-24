@@ -190,6 +190,38 @@ StringType.prototype.compare = function(entity, op) {
 // Export StringType as String
 exports.String = StringType;
 
+/******************** Boolean Type ********************/
+
+/** Boolean Entity type */
+var BooleanType = function(property) {
+  BaseValueType.apply(this, arguments);
+};
+
+// Inherit from BaseValueType
+util.inherits(BooleanType, BaseValueType);
+
+BooleanType.prototype.isOrdered = false;
+
+BooleanType.prototype.validate = function(value) {
+  checkType('BooleanType', this.property, value, 'boolean');
+};
+
+BooleanType.prototype.string = function(value) {
+  this.validate(value);
+  return value.toString();
+};
+
+BooleanType.prototype.filterCondition = function(op) {
+  this.validate(op.operand);
+  return this.property + ' ' + op.operator + ' ' + op.operand.toString();
+};
+
+BooleanType.prototype.compare = function(entity, op) {
+  return op.compare(entity[this.property], op.operand);
+};
+
+// Export BooleanType as Boolean
+exports.Boolean = BooleanType;
 
 /******************** Number Type ********************/
 

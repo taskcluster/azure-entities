@@ -31,7 +31,8 @@ helper.contextualSuites("Entity (query)", [
       name:           subject.types.String,
       count:          subject.types.Number,
       tag:            subject.types.String,
-      time:           subject.types.Date
+      time:           subject.types.Date,
+      active:         subject.types.Boolean
     }
   }).setup(_.defaults(options));
 
@@ -48,21 +49,24 @@ helper.contextualSuites("Entity (query)", [
           name:   'item1',
           count:  1,
           tag:    'tag1',
-          time:   new Date(0)
+          time:   new Date(0),
+          active: true
         }),
         Item.create({
           id:     id,
           name:   'item2',
           count:  2,
           tag:    'tag2',
-          time:   new Date(1)
+          time:   new Date(1),
+          active: false
         }),
         Item.create({
           id:     id,
           name:   'item3',
           count:  3,
           tag:    'tag1',   // same tag as item1
-          time:   new Date(1000000000000)
+          time:   new Date(1000000000000),
+          active: true
         })
       ]);
     });
@@ -231,6 +235,33 @@ helper.contextualSuites("Entity (query)", [
     }).then(function(data) {
       assert(data.entries.length === 1);
       assert(data.entries[0].name == 'item3');
+    });
+  });
+
+  test("Filter by active == true", function() {
+    var sum = 0;
+    return Item.query({
+      id:       id,
+      active:   true
+    }).then(function(data) {
+      assert(data.entries.length === 2);
+      data.entries.forEach(function(item) {
+        assert(item.active === true);
+      });
+    });
+  });
+
+  test("Filter by active == false", function() {
+    var sum = 0;
+    return Item.query({
+      id:       id,
+      active:   false
+    }).then(function(data) {
+      assert(data.entries.length === 1);
+      assert(data.entries[0].name == 'item2');
+      data.entries.forEach(function(item) {
+        assert(item.active === false);
+      });
     });
   });
 
