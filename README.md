@@ -28,8 +28,9 @@ The configure call returns the class, and takes options:
     prop1:           Entity.types.Blob,    // Properties and types
     prop2:           Entity.types.String,
     prop3:           Entity.types.Number,
-    prop4:           Entity.types.JSON
-    prop5:           Entity.types.Schema({ // Same as JSON, but enforces schema validation
+    prop4:           Entity.types.JSON,
+    prop5:           Entity.types.Boolean,
+    prop6:           Entity.types.Schema({ // Same as JSON, but enforces schema validation
       type: 'object',
       properties: {
         myKey: {type: 'string'},
@@ -40,7 +41,7 @@ The configure call returns the class, and takes options:
   },
   signEntities:      false,                // HMAC sign entities
   context: [                               // Required context keys
-    'prop5'                                // Constant specified in setup()
+    'prop7'                                // Constant specified in setup()
   ],
   migrate: function(itemV1) {              // Migration function, if not v1
     return // transform item from version 1 to version 2
@@ -95,7 +96,8 @@ The example above shows a few entity types.  The full list, all properties of
   * ``Date``
   * ``UUID``
   * ``SlugId``
-  * ``Blob`` -- binary blob
+  * ``Boolean``
+  * ``Blob`` -- binary blob
   * ``Text`` -- arbitrary text
   * ``JSON`` -- JSONable data
   * ``Schema(s)`` -- JSON matching the JSON schema `s`
