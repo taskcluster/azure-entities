@@ -358,8 +358,7 @@ DateType.prototype.filterCondition = function(op) {
 };
 
 DateType.prototype.compare = function(entity, op) {
-  return op.compare(new Date(entity[this.property]), op.operand);
-  throw new Error("Not implemented");
+  return op.compare(new Date(entity[this.property]).getTime(), op.operand.getTime());
 };
 
 
