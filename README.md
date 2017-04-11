@@ -193,12 +193,14 @@ as follows:
 ```
 
 To use an in-memory, testing-oriented table, use the special accountName
-`inMemory`.  Credentials are not required.
+`inMemory`.  Credentials are not required. The field `credentials` must
+be specified, but can be null.
 
 ```js
 {
-  account:  "inMemory",
-  table:    "AzureTableName"
+  account:     "inMemory",
+  table:       "AzureTableName"
+  credentials: null,
 }
 ```
 

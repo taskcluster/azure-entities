@@ -172,7 +172,8 @@ helper.contextualSuites("Entity (create/load/modify DataTypes)", [
       context: "In-Memory",
       options: {
         account:   "inMemory",
-        table:    "items"
+        table:    "items",
+        credentials: null,
       }
     }
   ], function(context, options) {

@@ -33,7 +33,8 @@ exports.makeContexts = function(Item, setupOptions) {
         return {
           Item: Item.setup(_.defaults({}, setupOptions, {
             account: "inMemory",
-            table:   'items'
+            table:   'items',
+            credentials: null,
           }))
         };
       }

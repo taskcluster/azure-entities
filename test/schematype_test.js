@@ -43,7 +43,8 @@ helper.contextualSuites("Entity", [
       context: "In-Memory",
       options: {
         account:   "inMemory",
-        table:    "items"
+        table:    "items",
+        credentials: null,
       }
     }
   ], function(ctx, config) {

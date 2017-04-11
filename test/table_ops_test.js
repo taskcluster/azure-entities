@@ -35,7 +35,8 @@ helper.contextualSuites("Entity (modify)", [
       return {
         Item: Item.setup({
           account:  "inMemory",
-          table:    'items'
+          table:    'items',
+          credentials: null,
         })
       };
     }

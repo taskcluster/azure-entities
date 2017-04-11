@@ -18,6 +18,7 @@ helper.contextualSuites("Entity (signEntities)", [
     options: {
       account: "inMemory",
       table:   "items",
+      credentials: null,
     }
   },
 ], function(context, options) {
