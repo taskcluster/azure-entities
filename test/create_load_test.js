@@ -57,11 +57,13 @@ helper.contextualSuites("Entity (create/load)", [
       return {
         Item: ItemV1.setup({
           account:  "inMemory",
-          table:    'items'
+          table:    'items',
+          credentials: null,
         }),
         Item2: ItemV2.setup({
           account:  "inMemory",
-          table:    'items'
+          table:    'items',
+          credentials: null,
         }),
       };
     },

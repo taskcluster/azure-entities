@@ -18,6 +18,7 @@ helper.contextualSuites("Entity (query)", [
     options: {
       account: "inMemory",
       table:   "items",
+      credentials: null,
     }
   },
 ], function(context, options) {

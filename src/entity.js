@@ -578,8 +578,9 @@ Entity.configure = function(options) {
  * To use an in-memory, testing-oriented table, use the special accountName
  * `inMemory`.  Credentials are not required.
  * {
- *   account:  "inMemory,
- *   table:    "AzureTableName"
+ *   account:     "inMemory,
+ *   table:       "AzureTableName"
+ *   credentials: null,
  * }
  *
  * This implementation is largely true to Azure, but is intended only for
@@ -599,11 +600,14 @@ Entity.configure = function(options) {
  */
 Entity.setup = function(options) {
   // Validate options
-  assert(options,                             "options must be given");
-  assert(options.table,                       "options.table must be given");
-  assert(typeof(options.table) === 'string',  "options.table isn't a string");
-  assert(options.credentials || options.account == "inMemory",
-      "credentials are required unless using in-memory tables");
+  assert(options,                             'options must be given');
+  assert(options.table,                       'options.table must be given');
+  assert(typeof(options.table) === 'string',  'options.table isn\'t a string');
+  if (options.account === 'inMemory') {
+    assert(options.hasOwnProperty('credentials'), 'credentials should be specified even with inMemory, but can be null');
+  } else {
+    assert(options.credentials, 'credentials are required unless using in-memory tables');
+  }
   if (options.drain || options.component || options.process) {
     console.log('taskcluster-lib-stats is now deprecated!\n' +
                 'Use the `monitor` option rather than `drain`.\n' +
