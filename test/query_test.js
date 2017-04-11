@@ -206,6 +206,17 @@ helper.contextualSuites("Entity (query)", [
     });
   });
 
+  test("Filter by time == Date(1)", function() {
+    var sum = 0;
+    return Item.query({
+      id:       id,
+      time:     new Date(1)
+    }).then(function(data) {
+      assert(data.entries.length === 1);
+      assert(data.entries[0].name == 'item2');
+    });
+  });
+
   test("Filter by time < Date(1)", function() {
     var sum = 0;
     return Item.query({
