@@ -906,11 +906,33 @@ var slugIdToBuffer = function(slug) {
   return new Buffer(base64, 'base64');
 };
 
+// Convert buffer to slugId where `entryIndex` is the slugId entry index to retrieve
+var bufferToSlugId = function (bufferView, entryIndex) {
+  return bufferView.toString('base64', entryIndex * SLUGID_SIZE, SLUGID_SIZE * (entryIndex + 1))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/==/g, '');
+};
+
 /** Array of slugids packed into a buffer for space and speed */
 var SlugIdArray = function() {
   this.buffer = new Buffer(SLUGID_SIZE * 32);
   this.length = 0;
   this.avail  = 32;
+};
+
+/** Retrieve all the entries added to the buffer in their original format i.e., before being turned into base64 slugIds */
+SlugIdArray.prototype.toArray = function() {
+  const buffer = this.getBufferView();
+  let result = [];
+
+  for (let i = 0; i < this.length; i++) {
+    const slug = bufferToSlugId(buffer, i);
+
+    result.push(slug);
+  }
+
+  return result;
 };
 
 /** Added slugid to end of the array */
