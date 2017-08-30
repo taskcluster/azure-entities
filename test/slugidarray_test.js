@@ -31,6 +31,39 @@ function(context, options) {
     arr.push(id);
   });
 
+  test("SlugIdArray.toArray", function() {
+    const slugArray = subject.types.SlugIdArray.create();
+    const slug1 = slugid.v4();
+    const slug2 = slugid.v4();
+
+    slugArray.push(slug1);
+    slugArray.push(slug2);
+
+    const arr = slugArray.toArray();
+
+    assert(slug1 === arr[0], `Expected ${slug1}`);
+    assert(slug2 === arr[1], `Expected ${slug2}`);
+  });
+
+  test("SlugIdArray.toArray (with 1k ids)", function() {
+    const slugArray = subject.types.SlugIdArray.create();
+    const N = 1000;
+    let slugids = [];
+
+    for (let i = 0; i < N; i++) {
+      const id = slugid.v4();
+
+      slugArray.push(id);
+      slugids.push(id)
+    }
+
+    const result = slugArray.toArray();
+
+    for (let i = 0; i < N; i++) {
+      assert(slugids[i] === result[i], `Expected ${slugids[i]}`);
+    }
+  });
+
   test("SlugIdArray.push (with 1k ids)", function() {
     var arr = subject.types.SlugIdArray.create();
     for(var i = 0; i < 1000; i++) {
