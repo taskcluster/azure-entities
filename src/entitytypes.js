@@ -976,6 +976,35 @@ SlugIdArray.prototype.indexOf = function(slug) {
   return -1;
 };
 
+/** Determines whether it includes a certain element, returning true or false as appropriate. */
+SlugIdArray.prototype.includes = function(slug) {
+  return this.buffer.includes(slugIdToBuffer(slug));
+};
+
+/** The shift() method removes element. */
+SlugIdArray.prototype.shift = function() {
+  if (this.length === 0) {
+    return;
+  }
+
+  this.buffer.copy(this.buffer, 0, SLUGID_SIZE);
+  this.avail  += 1;
+  this.length -= 1;
+  this.realloc();
+};
+
+/** The pop() method removes the last element. */
+SlugIdArray.prototype.pop = function() {
+  if (this.length === 0) {
+    return;
+  }
+
+  this.buffer.copy(this.buffer, (this.length - 1) * SLUGID_SIZE, this.length * SLUGID_SIZE);
+  this.avail  += 1;
+  this.length -= 1;
+  this.realloc();
+};
+
 /** Remove slugid from array */
 SlugIdArray.prototype.remove = function(slug) {
   var index = this.indexOf(slug);
@@ -992,6 +1021,34 @@ SlugIdArray.prototype.remove = function(slug) {
     return true;
   }
   return false;
+};
+
+/**
+ * The slice() method extracts a portion of a SlugIdArray's buffer into a
+ * new buffer from begin to end (end not included).
+ * Specifying negative indexes causes the slice to be generated relative to the end.
+ */
+SlugIdArray.prototype.slice = function(begin, end) {
+  if (begin < 0) {
+    begin = this.length + begin;
+  } else {
+    begin = begin || 0;
+  }
+
+  if (end < 0) {
+    end = this.length + end;
+  } else {
+    end = (!end || this.length > end) ? this.length : end;
+  }
+
+  const count = end - begin;
+
+  this.buffer = this.buffer.slice(begin * SLUGID_SIZE, end * SLUGID_SIZE);
+  this.avail += count;
+  this.length = count;
+  this.realloc();
+
+  return this;
 };
 
 /** Clone the slugid array */
