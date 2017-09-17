@@ -66,6 +66,7 @@ function(context, options) {
 
   test("SlugIdArray.includes", function() {
     const slugArray = subject.types.SlugIdArray.create();
+
     const slug1 = slugid.v4();
     const slug2 = slugid.v4();
     const slug3 = slugid.v4();
@@ -82,7 +83,6 @@ function(context, options) {
     assert(result3 === false, `Did not expect ${slug3}`);
   });
 
-
   test("SlugIdArray.shift", function() {
     const slugArray = subject.types.SlugIdArray.create();
     const slug1 = slugid.v4();
@@ -91,10 +91,11 @@ function(context, options) {
     slugArray.push(slug1);
     slugArray.push(slug2);
 
-    slugArray.shift();
+    const result = slugArray.shift();
 
     assert(slugArray.length === 1, 'Expected length 1');
     assert(slugArray.avail === 31, 'Expected avail 31');
+    assert(result === slug1, `Expected ${slug1}`);
     assert(!slugArray.includes(slug1), `Did not expect ${slug1}`);
   });
 
@@ -115,12 +116,13 @@ function(context, options) {
     slugArray.push(slug1);
     slugArray.push(slug2);
 
-    slugArray.pop();
+    const result = slugArray.pop();
 
     assert(slugArray.length === 1, 'Expected length 1');
     assert(slugArray.avail === 31, 'Expected avail 31');
     assert(slugArray.includes(slug1), `Expected ${slug1}`);
     assert(!slugArray.includes(slug2), `Did not expect ${slug2}`);
+    assert(result === slug2, `Expected ${slug2}`);
   });
 
   test("SlugIdArray.slice", function() {
@@ -133,11 +135,11 @@ function(context, options) {
     slugArray.push(slug2);
     slugArray.push(slug3);
 
-    slugArray.slice(1, 3);
+    const result = slugArray.slice(1, 3);
 
-    assert(!slugArray.includes(slug1), `Did not expect ${slug1}`);
-    assert(slugArray.includes(slug2), `Expected ${slug2}`);
-    assert(slugArray.includes(slug3), `Expected ${slug3}`);
+    assert(result.length === 2, 'Expected length 2');
+    assert(result[0] === slug2, `Expected ${slug2}`);
+    assert(result[1] === slug3, `Expected ${slug3}`);
   });
 
   test("SlugIdArray.slice with negative index", function() {
@@ -150,11 +152,11 @@ function(context, options) {
     slugArray.push(slug2);
     slugArray.push(slug3);
 
-    slugArray.slice(-3, -1);
+    const result = slugArray.slice(-3, -1);
 
-    assert(slugArray.includes(slug1), `Expected ${slug1}`);
-    assert(slugArray.includes(slug2), `Expected ${slug2}`);
-    assert(!slugArray.includes(slug3), `Did not expect ${slug3}`);
+    assert(result.length === 2, 'Expected length 2');
+    assert(result[0] === slug1, `Expected ${slug1}`);
+    assert(result[1] === slug2, `Expected ${slug2}`);
   });
 
   test("SlugIdArray.pop on an empty SlugIdArray", function() {

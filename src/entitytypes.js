@@ -967,6 +967,7 @@ SlugIdArray.prototype.realloc = function() {
 SlugIdArray.prototype.indexOf = function(slug) {
   var slug  = slugIdToBuffer(slug);
   var index = buffertools.indexOf(this.buffer, slug);
+
   while (index !== -1 && index < this.length * SLUGID_SIZE) {
     if (index % SLUGID_SIZE === 0) {
       return index / SLUGID_SIZE;
@@ -978,19 +979,26 @@ SlugIdArray.prototype.indexOf = function(slug) {
 
 /** Determines whether it includes a certain element, returning true or false as appropriate. */
 SlugIdArray.prototype.includes = function(slug) {
-  return this.buffer.includes(slugIdToBuffer(slug));
+  return this.indexOf(slug) !== -1 ? true : false;
 };
 
-/** The shift() method removes element. */
+/**
+ * The shift() method removes the first element. Each operation will take a
+ * time proportional to the number of the array length */
 SlugIdArray.prototype.shift = function() {
   if (this.length === 0) {
     return;
   }
 
+  const result = bufferToSlugId(this.buffer, 0);
+
   this.buffer.copy(this.buffer, 0, SLUGID_SIZE);
+
   this.avail  += 1;
   this.length -= 1;
   this.realloc();
+
+  return result;
 };
 
 /** The pop() method removes the last element. */
@@ -999,10 +1007,13 @@ SlugIdArray.prototype.pop = function() {
     return;
   }
 
-  this.buffer.copy(this.buffer, (this.length - 1) * SLUGID_SIZE, this.length * SLUGID_SIZE);
+  const result = bufferToSlugId(this.buffer, this.length - 1);
+
   this.avail  += 1;
   this.length -= 1;
   this.realloc();
+
+  return result;
 };
 
 /** Remove slugid from array */
@@ -1024,9 +1035,9 @@ SlugIdArray.prototype.remove = function(slug) {
 };
 
 /**
- * The slice() method extracts a portion of a SlugIdArray's buffer into a
- * new buffer from begin to end (end not included).
- * Specifying negative indexes causes the slice to be generated relative to the end.
+ * The slice() method returns a copy of a portion of an array
+ * into a new array object, selected from begin to end (end not included).
+ * The original array will not be modified.
  */
 SlugIdArray.prototype.slice = function(begin, end) {
   if (begin < 0) {
@@ -1041,14 +1052,16 @@ SlugIdArray.prototype.slice = function(begin, end) {
     end = (!end || this.length > end) ? this.length : end;
   }
 
+  // Return a copy of the array
   const count = end - begin;
+  const buffer = this.buffer.slice(begin * SLUGID_SIZE, end * SLUGID_SIZE);
+  let result = [];
 
-  this.buffer = this.buffer.slice(begin * SLUGID_SIZE, end * SLUGID_SIZE);
-  this.avail += count;
-  this.length = count;
-  this.realloc();
+  for (let i = 0; i < count; i++) {
+    result.push(bufferToSlugId(buffer, i));
+  }
 
-  return this;
+  return result;
 };
 
 /** Clone the slugid array */
