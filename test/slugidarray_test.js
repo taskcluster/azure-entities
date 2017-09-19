@@ -64,6 +64,110 @@ function(context, options) {
     }
   });
 
+  test("SlugIdArray.includes", function() {
+    const slugArray = subject.types.SlugIdArray.create();
+
+    const slug1 = slugid.v4();
+    const slug2 = slugid.v4();
+    const slug3 = slugid.v4();
+
+    slugArray.push(slug1);
+    slugArray.push(slug2);
+
+    const result1 = slugArray.includes(slug1);
+    const result2 = slugArray.includes(slug2);
+    const result3 = slugArray.includes(slug3);
+
+    assert(result1 === true, `Expected ${slug1}`);
+    assert(result2 === true, `Expected ${slug2}`);
+    assert(result3 === false, `Did not expect ${slug3}`);
+  });
+
+  test("SlugIdArray.shift", function() {
+    const slugArray = subject.types.SlugIdArray.create();
+    const slug1 = slugid.v4();
+    const slug2 = slugid.v4();
+
+    slugArray.push(slug1);
+    slugArray.push(slug2);
+
+    const result = slugArray.shift();
+
+    assert(slugArray.length === 1, 'Expected length 1');
+    assert(slugArray.avail === 31, 'Expected avail 31');
+    assert(result === slug1, `Expected ${slug1}`);
+    assert(!slugArray.includes(slug1), `Did not expect ${slug1}`);
+  });
+
+  test("SlugIdArray.shift on an empty SlugIdArray", function() {
+    const slugArray = subject.types.SlugIdArray.create();
+
+    slugArray.shift();
+
+    assert(slugArray.length === 0, 'Expected length 0');
+    assert(slugArray.avail === 32, 'Expected avail 32');
+  });
+
+  test("SlugIdArray.pop", function() {
+    const slugArray = subject.types.SlugIdArray.create();
+    const slug1 = slugid.v4();
+    const slug2 = slugid.v4();
+
+    slugArray.push(slug1);
+    slugArray.push(slug2);
+
+    const result = slugArray.pop();
+
+    assert(slugArray.length === 1, 'Expected length 1');
+    assert(slugArray.avail === 31, 'Expected avail 31');
+    assert(slugArray.includes(slug1), `Expected ${slug1}`);
+    assert(!slugArray.includes(slug2), `Did not expect ${slug2}`);
+    assert(result === slug2, `Expected ${slug2}`);
+  });
+
+  test("SlugIdArray.slice", function() {
+    const slugArray = subject.types.SlugIdArray.create();
+    const slug1 = slugid.v4();
+    const slug2 = slugid.v4();
+    const slug3 = slugid.v4();
+
+    slugArray.push(slug1);
+    slugArray.push(slug2);
+    slugArray.push(slug3);
+
+    const result = slugArray.slice(1, 3);
+
+    assert(result.length === 2, 'Expected length 2');
+    assert(result[0] === slug2, `Expected ${slug2}`);
+    assert(result[1] === slug3, `Expected ${slug3}`);
+  });
+
+  test("SlugIdArray.slice with negative index", function() {
+    const slugArray = subject.types.SlugIdArray.create();
+    const slug1 = slugid.v4();
+    const slug2 = slugid.v4();
+    const slug3 = slugid.v4();
+
+    slugArray.push(slug1);
+    slugArray.push(slug2);
+    slugArray.push(slug3);
+
+    const result = slugArray.slice(-3, -1);
+
+    assert(result.length === 2, 'Expected length 2');
+    assert(result[0] === slug1, `Expected ${slug1}`);
+    assert(result[1] === slug2, `Expected ${slug2}`);
+  });
+
+  test("SlugIdArray.pop on an empty SlugIdArray", function() {
+    const slugArray = subject.types.SlugIdArray.create();
+
+    slugArray.pop();
+
+    assert(slugArray.length === 0, 'Expected length 0');
+    assert(slugArray.avail === 32, 'Expected avail 32');
+  });
+
   test("SlugIdArray.push (with 1k ids)", function() {
     var arr = subject.types.SlugIdArray.create();
     for(var i = 0; i < 1000; i++) {
