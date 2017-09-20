@@ -945,6 +945,14 @@ SlugIdArray.prototype.push = function(slug) {
 
 /** Allocate more space if needed, and less space if below threshold */
 SlugIdArray.prototype.realloc = function() {
+  if (this.avail === 0 && this.length === 0) {
+    this.buffer = new Buffer(SLUGID_SIZE * 32);
+    this.length = 0;
+    this.avail = 32;
+
+    return true;
+  }
+
   // Allocate more space, if needed, we this by doubling the underlying buffer
   if (this.avail === 0) {
     var buffer = new Buffer(this.length * 2 * SLUGID_SIZE);
