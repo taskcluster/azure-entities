@@ -29,7 +29,7 @@ suite('Config', function() {
       });
       assert(false, 'Should have thrown an error!');
     } catch (e) {
-      assert(e.name === 'AssertionError');
+      assert(e.code === 'ERR_ASSERTION');
       assert(e.message === 'credentials should be specified even with inMemory, but can be null');
     }
   });

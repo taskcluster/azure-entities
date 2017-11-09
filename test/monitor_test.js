@@ -1,11 +1,11 @@
-var subject = require('../lib/entity');
-var helper  = require('./helper');
-var assert  = require('assert');
-var slugid  = require('slugid');
-var _       = require('lodash');
-var Promise = require('promise');
-var debug   = require('debug')('test:entity:create_load');
-var base    = require('taskcluster-base');
+var subject   = require('../lib/entity');
+var helper    = require('./helper');
+var assert    = require('assert');
+var slugid    = require('slugid');
+var _         = require('lodash');
+var Promise   = require('promise');
+var debug     = require('debug')('test:entity:create_load');
+var _monitor = require('taskcluster-lib-monitor');
 
 var ItemV1 = subject.configure({
   version:          1,
@@ -23,7 +23,7 @@ suite('Monitoring Integration', function() {
   var Item = null;
   var id = null;
   suiteSetup(async function() {
-    monitor = await base.monitor({
+    monitor = await _monitor({
       project: 'azure-entities',
       credentials: {},
       mock: true,

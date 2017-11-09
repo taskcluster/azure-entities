@@ -3,15 +3,18 @@ var assert          = require('assert');
 var slugid          = require('slugid');
 var _               = require('lodash');
 var Promise         = require('promise');
-var base            = require('taskcluster-base');
 var debug           = require('debug')('test:entity:auth');
 var express         = require('express');
 var azureTable      = require('azure-table-node');
 var helper          = require('./helper');
+var API             = require('taskcluster-lib-api');
+var testing         = require('taskcluster-lib-testing');
+var _validate       = require('taskcluster-lib-validate');
+var _app            = require('taskcluster-lib-app');
 
 suite('Entity (SAS from auth.taskcluster.net)', function() {
   // Create test api
-  var api = new base.API({
+  var api = new API({
     title:        'Test TC-Auth',
     description:  'Another test api',
   });
@@ -67,17 +70,17 @@ suite('Entity (SAS from auth.taskcluster.net)', function() {
   // Create servers
   var server = null;
   setup(async function() {
-    base.testing.fakeauth.start({
+    testing.fakeauth.start({
       'authed-client': ['*'],
       'unauthed-client': ['*'],
     });
-    var validator = await base.validator({
+    var validator = await _validate({
       folder: 'test/schemas',
       prefix: 'test/v1',
     });
 
     // Create a simple app
-    var app = base.app({
+    var app = _app({
       port:       23244,
       env:        'development',
       forceSSL:   false,
@@ -93,7 +96,7 @@ suite('Entity (SAS from auth.taskcluster.net)', function() {
 
   teardown(async function() {
     await server.terminate();
-    base.testing.fakeauth.stop();
+    testing.fakeauth.stop();
   });
 
   var ItemV1;
@@ -163,7 +166,7 @@ suite('Entity (SAS from auth.taskcluster.net)', function() {
       count:  1,
     }).then(function() {
       assert(callCount === 1, 'We should only have called once!');
-      return base.testing.sleep(200);
+      return testing.sleep(200);
     }).then(function() {
       return Item2.load({
         id:     id,
