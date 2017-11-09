@@ -10,7 +10,7 @@ suite('Config', function() {
     properties: {
       id:             subject.types.SlugId,
       rev:            subject.types.PositiveInteger,
-    }
+    },
   });
 
   test('inMemory with credentials', function() {

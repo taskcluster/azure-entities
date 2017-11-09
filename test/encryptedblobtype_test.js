@@ -1,4 +1,4 @@
-var subject = require("../lib/entity")
+var subject = require('../lib/entity');
 var assert  = require('assert');
 var slugid  = require('slugid');
 var _       = require('lodash');
@@ -13,12 +13,12 @@ var Item = subject.configure({
   properties: {
     id:             subject.types.String,
     name:           subject.types.String,
-    data:           subject.types.EncryptedBlob
-  }
+    data:           subject.types.EncryptedBlob,
+  },
 });
 
-helper.contextualSuites("Entity (EncryptedBlobType)", helper.makeContexts(Item, {
-  cryptoKey:    'CNcj2aOozdo7Pn+HEkAIixwninIwKnbYc6JPS9mNxZk='
+helper.contextualSuites('Entity (EncryptedBlobType)', helper.makeContexts(Item, {
+  cryptoKey:    'CNcj2aOozdo7Pn+HEkAIixwninIwKnbYc6JPS9mNxZk=',
 }), function(context, options) {
   var Item = options.Item;
 
@@ -39,70 +39,70 @@ helper.contextualSuites("Entity (EncryptedBlobType)", helper.makeContexts(Item, 
       }
     }
     return true;
-  }
+  };
 
-  test("small blob", function() {
+  test('small blob', function() {
     var id  = slugid.v4();
     var buf = new Buffer([0, 1, 2, 3]);
     return Item.create({
       id:     id,
       name:   'my-test-item',
-      data:   buf
+      data:   buf,
     }).then(function(itemA) {
       return Item.load({
         id:     id,
-        name:   'my-test-item'
+        name:   'my-test-item',
       }).then(function(itemB) {
         assert(compareBuffers(itemA.data, itemB.data));
       });
     });
   });
 
-  test("large blob (64k)", function() {
+  test('large blob (64k)', function() {
     var id  = slugid.v4();
     var buf = crypto.pseudoRandomBytes(64 * 1024);
     return Item.create({
       id:     id,
       name:   'my-test-item',
-      data:   buf
+      data:   buf,
     }).then(function(itemA) {
       return Item.load({
         id:     id,
-        name:   'my-test-item'
+        name:   'my-test-item',
       }).then(function(itemB) {
         assert(compareBuffers(itemA.data, itemB.data));
       });
     });
   });
 
-  test("large blob (128k)", function() {
+  test('large blob (128k)', function() {
     var id  = slugid.v4();
     var buf = crypto.pseudoRandomBytes(128 * 1024);
     return Item.create({
       id:     id,
       name:   'my-test-item',
-      data:   buf
+      data:   buf,
     }).then(function(itemA) {
       return Item.load({
         id:     id,
-        name:   'my-test-item'
+        name:   'my-test-item',
       }).then(function(itemB) {
         assert(compareBuffers(itemA.data, itemB.data));
       });
     });
   });
 
-  test("large blob (256k - 32)", function() {
+  test('large blob (256k - 32)', function() {
     var id  = slugid.v4();
     var buf = crypto.pseudoRandomBytes(256 * 1024 - 32);
     return Item.create({
       id:     id,
       name:   'my-test-item',
-      data:   buf
+      data:   buf,
     }).then(function(itemA) {
       return Item.load({
         id:     id,
-        name:   'my-test-item'
+        name:   'my-test-item',
       }).then(function(itemB) {
         assert(compareBuffers(itemA.data, itemB.data));
       });

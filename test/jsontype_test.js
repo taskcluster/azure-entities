@@ -1,4 +1,4 @@
-var subject = require("../lib/entity")
+var subject = require('../lib/entity');
 var assert  = require('assert');
 var slugid  = require('slugid');
 var _       = require('lodash');
@@ -6,7 +6,7 @@ var Promise = require('promise');
 var crypto  = require('crypto');
 var helper  = require('./helper');
 
-helper.contextualSuites("Entity", [
+helper.contextualSuites('Entity', [
   {
     context: 'JSON',
     options: {
@@ -37,19 +37,19 @@ helper.contextualSuites("Entity", [
 ], function(context, options) {
   helper.contextualSuites('', [
     {
-      context: "Azure",
+      context: 'Azure',
       options: {
         credentials:  helper.cfg.azure,
-        table:        helper.cfg.tableName
+        table:        helper.cfg.tableName,
       },
     }, {
-      context: "In-Memory",
+      context: 'In-Memory',
       options: {
-        account:   "inMemory",
-        table:    "items",
+        account:   'inMemory',
+        table:    'items',
         credentials: null,
-      }
-    }
+      },
+    },
   ], function(ctx, config) {
     let Item = subject.configure({
       version:          1,
@@ -59,7 +59,7 @@ helper.contextualSuites("Entity", [
         id:             subject.types.String,
         name:           subject.types.String,
         data:           options.type,
-      }
+      },
     }).setup(_.defaults({}, config, options.config));
 
     setup(function() {
@@ -68,34 +68,34 @@ helper.contextualSuites("Entity", [
 
     // Construct a large string
     var randomString = function(kbytes) {
-      var s = "abcefsfcccsrcsdfsdfsfrfdefdwedwiedowijdwoeidnwoifneoifnweodnwoid";
-      s = s + s; // 128
-      s = s + s; // 256
-      s = s + s; // 512
-      s = s + s; // 1024
+      var s = 'abcefsfcccsrcsdfsdfsfrfdefdwedwiedowijdwoeidnwoifneoifnweodnwoid';
+      s += s; // 128
+      s += s; // 256
+      s += s; // 512
+      s += s; // 1024
       var arr = [];
-      for(var i = 0; i < kbytes; i++) {
+      for (var i = 0; i < kbytes; i++) {
         arr.push(s);
       }
       return arr.join('');
     };
 
-    test("largeString helper", function() {
+    test('largeString helper', function() {
       var text  = randomString(64);
       assert(text.length === 1024 * 64);
     });
 
-    test("small JSON object", function() {
+    test('small JSON object', function() {
       var id    = slugid.v4();
-      var obj   = {text: "Hello World", number: 42};
+      var obj   = {text: 'Hello World', number: 42};
       return Item.create({
         id:     id,
         name:   'my-test-item',
-        data:   obj
+        data:   obj,
       }).then(function(itemA) {
         return Item.load({
           id:     id,
-          name:   'my-test-item'
+          name:   'my-test-item',
         }).then(function(itemB) {
           assert(_.isEqual(itemA.data, itemB.data));
           assert(_.isEqual(itemA.data, obj));
@@ -103,18 +103,17 @@ helper.contextualSuites("Entity", [
       });
     });
 
-
-    test("large JSON object (62k)", function() {
+    test('large JSON object (62k)', function() {
       var id    = slugid.v4();
       var obj   = {text: randomString(62), number: 42};
       return Item.create({
         id:     id,
         name:   'my-test-item',
-        data:   obj
+        data:   obj,
       }).then(function(itemA) {
         return Item.load({
           id:     id,
-          name:   'my-test-item'
+          name:   'my-test-item',
         }).then(function(itemB) {
           assert(_.isEqual(itemA.data, itemB.data));
           assert(_.isEqual(itemA.data, obj));
@@ -122,17 +121,17 @@ helper.contextualSuites("Entity", [
       });
     });
 
-    test("large JSON object (126k)", function() {
+    test('large JSON object (126k)', function() {
       var id    = slugid.v4();
       var obj   = {text: randomString(126), number: 42};
       return Item.create({
         id:     id,
         name:   'my-test-item',
-        data:   obj
+        data:   obj,
       }).then(function(itemA) {
         return Item.load({
           id:     id,
-          name:   'my-test-item'
+          name:   'my-test-item',
         }).then(function(itemB) {
           assert(_.isEqual(itemA.data, itemB.data));
           assert(_.isEqual(itemA.data, obj));
@@ -140,17 +139,17 @@ helper.contextualSuites("Entity", [
       });
     });
 
-    test("large JSON object (255k)", function() {
+    test('large JSON object (255k)', function() {
       var id    = slugid.v4();
       var obj   = {text: randomString(255), number: 42};
       return Item.create({
         id:     id,
         name:   'my-test-item',
-        data:   obj
+        data:   obj,
       }).then(function(itemA) {
         return Item.load({
           id:     id,
-          name:   'my-test-item'
+          name:   'my-test-item',
         }).then(function(itemB) {
           assert(_.isEqual(itemA.data, itemB.data));
           assert(_.isEqual(itemA.data, obj));

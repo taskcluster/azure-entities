@@ -1,4 +1,4 @@
-var subject = require("../lib/entity")
+var subject = require('../lib/entity');
 var assert  = require('assert');
 var slugid  = require('slugid');
 var _       = require('lodash');
@@ -13,34 +13,34 @@ var Item = subject.configure({
   properties: {
     id:             subject.types.String,
     name:           subject.types.String,
-    count:          subject.types.Number
-  }
+    count:          subject.types.Number,
+  },
 });
 
-helper.contextualSuites("Entity (modify)", [
+helper.contextualSuites('Entity (modify)', [
   {
-    context: "Azure",
+    context: 'Azure',
     options: function() {
       return {
         Item: Item.setup({
           credentials:  helper.cfg.azure,
           // randomize table names, as azure takes a while to delete a table
-          table:        helper.cfg.tableName + Math.floor(Math.random() * 20)
-        })
+          table:        helper.cfg.tableName + Math.floor(Math.random() * 20),
+        }),
       };
-    }
+    },
   }, {
-    context: "In-Memory",
+    context: 'In-Memory',
     options: function() {
       return {
         Item: Item.setup({
-          account:  "inMemory",
+          account:  'inMemory',
           table:    'items',
           credentials: null,
-        })
+        }),
       };
-    }
-  }
+    },
+  },
 ], function(context, options) {
   var Item = options.Item;
 
@@ -51,24 +51,24 @@ helper.contextualSuites("Entity (modify)", [
   suiteSetup(cleanup);
   suiteTeardown(cleanup);
 
-  test("Item.ensureTable", function() {
+  test('Item.ensureTable', function() {
     return Item.ensureTable();
   });
 
-  test("Item.ensureTable (again)", function() {
+  test('Item.ensureTable (again)', function() {
     return Item.ensureTable();
   });
 
-  test("Item.removeTable", function() {
+  test('Item.removeTable', function() {
     return Item.removeTable();
   });
 
-  test("Item.removeTable (again, should error)", function() {
+  test('Item.removeTable (again, should error)', function() {
     return Item.removeTable().then(function() {
-      assert(false, "Expected an error");
+      assert(false, 'Expected an error');
     }, function(err) {
       assert(err.code === 'ResourceNotFound');
-      assert(err.statusCode === 404, "Expected 404");
+      assert(err.statusCode === 404, 'Expected 404');
     });
   });
 });

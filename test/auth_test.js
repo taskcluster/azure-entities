@@ -1,4 +1,4 @@
-var subject         = require("../lib/entity");
+var subject         = require('../lib/entity');
 var assert          = require('assert');
 var slugid          = require('slugid');
 var _               = require('lodash');
@@ -9,11 +9,11 @@ var express         = require('express');
 var azureTable      = require('azure-table-node');
 var helper          = require('./helper');
 
-suite("Entity (SAS from auth.taskcluster.net)", function() {
+suite('Entity (SAS from auth.taskcluster.net)', function() {
   // Create test api
   var api = new base.API({
-    title:        "Test TC-Auth",
-    description:  "Another test api"
+    title:        'Test TC-Auth',
+    description:  'Another test api',
   });
 
   // Declare a method we can test parameterized scopes with
@@ -25,8 +25,8 @@ suite("Entity (SAS from auth.taskcluster.net)", function() {
     name:       'azureTableSAS',
     deferAuth:  true,
     scopes:     [['auth:azure-table:<level>:<account>/<table>']],
-    title:        "Test SAS End-Point",
-    description:  "Get SAS for testing",
+    title:        'Test SAS End-Point',
+    description:  'Get SAS for testing',
   }, function(req, res) {
     callCount += 1;
     var account = req.params.account;
@@ -36,13 +36,13 @@ suite("Entity (SAS from auth.taskcluster.net)", function() {
       return;
     }
     var credentials = helper.cfg.azure;
-    assert(account === credentials.accountName, "Must used test account!");
+    assert(account === credentials.accountName, 'Must used test account!');
     credentials = _.defaults({}, credentials, {
       accountUrl: [
-        "https://",
+        'https://',
         credentials.accountName,
-        ".table.core.windows.net/"
-      ].join('')
+        '.table.core.windows.net/',
+      ].join(''),
     });
     var client = azureTable.createClient(credentials);
     var expiry = new Date(Date.now() + 25 * 60 * 1000);
@@ -55,17 +55,17 @@ suite("Entity (SAS from auth.taskcluster.net)", function() {
       'raud',
       expiry,
       {
-        start:  new Date(Date.now() - 15 * 60 * 1000)
+        start:  new Date(Date.now() - 15 * 60 * 1000),
       }
     );
     res.status(200).json({
       expiry:   expiry.toJSON(),
-      sas:      sas
+      sas:      sas,
     });
   });
 
   // Create servers
-  var server = null
+  var server = null;
   setup(async function() {
     base.testing.fakeauth.start({
       'authed-client': ['*'],
@@ -81,11 +81,11 @@ suite("Entity (SAS from auth.taskcluster.net)", function() {
       port:       23244,
       env:        'development',
       forceSSL:   false,
-      trustProxy: false
+      trustProxy: false,
     });
 
     app.use(api.router({
-      validator:      validator
+      validator:      validator,
     }));
 
     server = await app.createServer();
@@ -96,9 +96,8 @@ suite("Entity (SAS from auth.taskcluster.net)", function() {
     base.testing.fakeauth.stop();
   });
 
-
   var ItemV1;
-  test("ItemV1 = Entity.configure", function() {
+  test('ItemV1 = Entity.configure', function() {
     ItemV1 = subject.configure({
       version:          1,
       partitionKey:     subject.keys.StringKey('id'),
@@ -106,33 +105,33 @@ suite("Entity (SAS from auth.taskcluster.net)", function() {
       properties: {
         id:             subject.types.String,
         name:           subject.types.String,
-        count:          subject.types.Number
-      }
+        count:          subject.types.Number,
+      },
     });
   });
 
   var Item;
-  test("Item = ItemV1.setup", function() {
+  test('Item = ItemV1.setup', function() {
     Item = ItemV1.setup({
       account:      helper.cfg.azure.accountName,
       table:        helper.cfg.tableName,
       credentials:  {
         clientId:         'authed-client',
-        accessToken:      'test-token'
+        accessToken:      'test-token',
       },
       authBaseUrl:  'http://localhost:23244',
-      minSASAuthExpiry: 15 * 60 * 1000
+      minSASAuthExpiry: 15 * 60 * 1000,
     });
   });
 
-  test("Item.create && Item.load", function() {
+  test('Item.create && Item.load', function() {
     var id = slugid.v4();
     callCount = 0;
     returnExpiredSAS = false; // We should be able to reuse the SAS
     return Item.create({
       id:     id,
       name:   'my-test-item',
-      count:  1
+      count:  1,
     }).then(function() {
       return Item.load({
         id:     id,
@@ -141,11 +140,11 @@ suite("Entity (SAS from auth.taskcluster.net)", function() {
         assert(item.count === 1);
       });
     }).then(function() {
-      assert(callCount === 1, "We should only have called once!");
+      assert(callCount === 1, 'We should only have called once!');
     });
   });
 
-  test("Expiry < now => refreshed SAS", function() {
+  test('Expiry < now => refreshed SAS', function() {
     callCount = 0;
     returnExpiredSAS = true;  // This means we call for each operation
     var id = slugid.v4();
@@ -154,16 +153,16 @@ suite("Entity (SAS from auth.taskcluster.net)", function() {
       table:        helper.cfg.tableName,
       credentials:  {
         clientId:         'authed-client',
-        accessToken:      'test-token'
+        accessToken:      'test-token',
       },
-      authBaseUrl:  'http://localhost:23244'
+      authBaseUrl:  'http://localhost:23244',
     });
     return Item2.create({
       id:     id,
       name:   'my-test-item',
-      count:  1
+      count:  1,
     }).then(function() {
-      assert(callCount === 1, "We should only have called once!");
+      assert(callCount === 1, 'We should only have called once!');
       return base.testing.sleep(200);
     }).then(function() {
       return Item2.load({
@@ -173,11 +172,11 @@ suite("Entity (SAS from auth.taskcluster.net)", function() {
         assert(item.count === 1);
       });
     }).then(function() {
-      assert(callCount === 2, "We should have called twice!");
+      assert(callCount === 2, 'We should have called twice!');
     });
   });
 
-  test("Load in parallel, only gets SAS once", function() {
+  test('Load in parallel, only gets SAS once', function() {
     callCount = 0;
     returnExpiredSAS = false;  // This means we call for each operation
     var Item3 = ItemV1.setup({
@@ -185,23 +184,23 @@ suite("Entity (SAS from auth.taskcluster.net)", function() {
       table:        helper.cfg.tableName,
       credentials:  {
         clientId:         'authed-client',
-        accessToken:      'test-token'
+        accessToken:      'test-token',
       },
-      authBaseUrl:  'http://localhost:23244'
+      authBaseUrl:  'http://localhost:23244',
     });
     return Promise.all([
       Item3.create({
         id:     slugid.v4(),
         name:   'my-test-item1',
-        count:  1
+        count:  1,
       }),
       Item3.create({
         id:     slugid.v4(),
         name:   'my-test-item2',
-        count:  1
-      })
+        count:  1,
+      }),
     ]).then(function() {
-      assert(callCount === 1, "We should only have called once!");
+      assert(callCount === 1, 'We should only have called once!');
     });
   });
 });

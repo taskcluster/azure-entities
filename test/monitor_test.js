@@ -1,4 +1,4 @@
-var subject = require("../lib/entity")
+var subject = require('../lib/entity');
 var helper  = require('./helper');
 var assert  = require('assert');
 var slugid  = require('slugid');
@@ -14,8 +14,8 @@ var ItemV1 = subject.configure({
   properties: {
     id:             subject.types.String,
     name:           subject.types.String,
-    count:          subject.types.Number
-  }
+    count:          subject.types.Number,
+  },
 });
 
 suite('Monitoring Integration', function() {
@@ -39,17 +39,17 @@ suite('Monitoring Integration', function() {
     await Item.create({
       id:     id,
       name:   'my-test-item',
-      count:  1
+      count:  1,
     });
   });
 
-  test("Item.load writes stats", function() {
-    assert(_.keys(monitor.counts).length === 2, "Should only have counts from create and insert.");
+  test('Item.load writes stats', function() {
+    assert(_.keys(monitor.counts).length === 2, 'Should only have counts from create and insert.');
     return Item.load({
       id:     id,
       name:   'my-test-item',
     }).then(function(item) {
-      assert(_.keys(monitor.counts).length >= 3, "Should have more stats now!");
+      assert(_.keys(monitor.counts).length >= 3, 'Should have more stats now!');
       assert(item.count === 1);
     });
   });

@@ -1,4 +1,4 @@
-var subject = require("../lib/entity")
+var subject = require('../lib/entity');
 var assert  = require('assert');
 var slugid  = require('slugid');
 var _       = require('lodash');
@@ -6,25 +6,25 @@ var Promise = require('promise');
 var debug   = require('debug')('test:entity:signEntities');
 var helper  = require('./helper');
 
-helper.contextualSuites("Entity (signEntities)", [
+helper.contextualSuites('Entity (signEntities)', [
   {
-    context: "Azure",
+    context: 'Azure',
     options: {
       credentials:  helper.cfg.azure,
       table:        helper.cfg.tableName,
     },
   }, {
-    context: "In-Memory",
+    context: 'In-Memory',
     options: {
-      account: "inMemory",
-      table:   "items",
+      account: 'inMemory',
+      table:   'items',
       credentials: null,
-    }
+    },
   },
 ], function(context, options) {
 
   var ItemV1;
-  test("ItemV1 = Entity.configure", function() {
+  test('ItemV1 = Entity.configure', function() {
     ItemV1 = subject.configure({
       version:          1,
       signEntities:     true,
@@ -33,40 +33,40 @@ helper.contextualSuites("Entity (signEntities)", [
       properties: {
         id:             subject.types.String,
         name:           subject.types.String,
-        count:          subject.types.Number
-      }
+        count:          subject.types.Number,
+      },
     });
   });
 
   var Item;
-  test("Item = ItemV1.setup", function() {
+  test('Item = ItemV1.setup', function() {
     Item = ItemV1.setup(_.defaults({}, options, {
-      signingKey:   'no-way-you-can-guess-this'
+      signingKey:   'no-way-you-can-guess-this',
     }));
 
     return Item.ensureTable();
   });
 
-  test("ItemV1.setup (requires signingKey)", function() {
+  test('ItemV1.setup (requires signingKey)', function() {
     try {
       ItemV1.setup(options);
     } catch (err) {
       return; // Expected error
     }
-    assert(false, "Expected an error!");
+    assert(false, 'Expected an error!');
   });
 
   var id = slugid.v4();
 
-  test("Item.create", function() {
+  test('Item.create', function() {
     return Item.create({
       id:     id,
       name:   'my-test-item',
-      count:  1
+      count:  1,
     });
   });
 
-  test("Item.load, item.modify, item.reload()", function() {
+  test('Item.load, item.modify, item.reload()', function() {
     return Item.load({
       id:     id,
       name:   'my-test-item',
@@ -89,33 +89,33 @@ helper.contextualSuites("Entity (signEntities)", [
     });
   });
 
-  test("Item.load (missing)", function() {
+  test('Item.load (missing)', function() {
     return Item.load({
       id:     slugid.v4(),
       name:   'my-test-item',
     }).then(function() {
-      assert(false, "Expected an error");
+      assert(false, 'Expected an error');
     }, function(err) {
       assert(err.code === 'ResourceNotFound');
     });
   });
 
-  test("Item.load (invalid signature)", function() {
+  test('Item.load (invalid signature)', function() {
     var BadKeyItem = ItemV1.setup(_.defaults({}, options, {
-      signingKey:   'wrong-secret'
+      signingKey:   'wrong-secret',
     }));
     return BadKeyItem.load({
       id:     id,
       name:   'my-test-item',
     }).then(function() {
-      assert(false, "Expected a signature error");
+      assert(false, 'Expected a signature error');
     }, function(err) {
-      assert(err, "Expected a signature error");
+      assert(err, 'Expected a signature error');
     });
   });
 
   var ItemV2;
-  test("ItemV2 = ItemV1.configure (signEntities: false)", function() {
+  test('ItemV2 = ItemV1.configure (signEntities: false)', function() {
     ItemV2 = ItemV1.configure({
       version:          2,
       signEntities:     false,
@@ -123,60 +123,60 @@ helper.contextualSuites("Entity (signEntities)", [
         id:             subject.types.String,
         name:           subject.types.String,
         count:          subject.types.Number,
-        reason:         subject.types.String
+        reason:         subject.types.String,
       },
       migrate: function(item) {
         return {
           id:           item.id,
           name:         item.name,
           count:        item.count,
-          reason:       "no-reason"
+          reason:       'no-reason',
         };
-      }
+      },
     });
   });
 
   var Item2;
-  test("Item2 = ItemV2.setup", function() {
+  test('Item2 = ItemV2.setup', function() {
     Item2 = ItemV2.setup(_.defaults({}, options, {
-      signingKey:   'no-way-you-can-guess-this'
+      signingKey:   'no-way-you-can-guess-this',
     }));
   });
 
-  test("ItemV2.setup (requires signingKey)", function() {
+  test('ItemV2.setup (requires signingKey)', function() {
     try {
       ItemV2.setup(options);
     } catch (err) {
       return; // Expected error
     }
-    assert(false, "Expected an error!");
+    assert(false, 'Expected an error!');
   });
 
-  test("Item2.load (w. migrate)", function() {
+  test('Item2.load (w. migrate)', function() {
     return Item2.load({
       id:     id,
       name:   'my-test-item',
     }).then(function(item) {
       assert(item.count === 2);
-      assert(item.reason === "no-reason");
+      assert(item.reason === 'no-reason');
     });
   });
 
-  test("Item2.load (invalid signature)", function() {
+  test('Item2.load (invalid signature)', function() {
     var BadKeyItem2 = ItemV2.setup(_.defaults({}, options, {
-      signingKey:   'wrong-secret'
+      signingKey:   'wrong-secret',
     }));
     return BadKeyItem2.load({
       id:     id,
       name:   'my-test-item',
     }).then(function() {
-      assert(false, "Expected a signature error");
+      assert(false, 'Expected a signature error');
     }, function(err) {
-      assert(err, "Expected a signature error");
+      assert(err, 'Expected a signature error');
     });
   });
 
-  test("Item2.load, item.modify, item.reload()", function() {
+  test('Item2.load, item.modify, item.reload()', function() {
     return Item2.load({
       id:     id,
       name:   'my-test-item',
@@ -209,57 +209,57 @@ helper.contextualSuites("Entity (signEntities)", [
     });
   });
 
-  test("ItemV2.configure (signEntities must be explicit)", function() {
+  test('ItemV2.configure (signEntities must be explicit)', function() {
     try {
       ItemV2.configure({
         version:          3,
         properties: {
           id:             subject.types.String,
           name:           subject.types.String,
-          count:          subject.types.Number
+          count:          subject.types.Number,
         },
         migrate: function(item) {
           return {
             id:           item.id,
             name:         item.name,
-            count:        item.count
+            count:        item.count,
           };
-        }
+        },
       });
     } catch (err) {
       return; // Expected error
     }
-    assert(false, "Expected an error, that signEntities wasn't explicit");
+    assert(false, 'Expected an error, that signEntities wasn\'t explicit');
   });
 
   var ItemV3;
-  test("ItemV3 = ItemV2.configure", function() {
+  test('ItemV3 = ItemV2.configure', function() {
     ItemV3 = ItemV2.configure({
       version:          3,
       signEntities:     true,
       properties: {
         id:             subject.types.String,
         name:           subject.types.String,
-        count:          subject.types.Number
+        count:          subject.types.Number,
       },
       migrate: function(item) {
         return {
           id:           item.id,
           name:         item.name,
-          count:        item.count
+          count:        item.count,
         };
-      }
+      },
     });
   });
 
   var Item3;
-  test("Item3 = ItemV3.setup", function() {
+  test('Item3 = ItemV3.setup', function() {
     Item3 = ItemV3.setup(_.defaults({}, options, {
-      signingKey:   'no-way-you-can-guess-this'
+      signingKey:   'no-way-you-can-guess-this',
     }));
   });
 
-  test("Item3.load, item.modify, item.reload()", function() {
+  test('Item3.load, item.modify, item.reload()', function() {
     return Item3.load({
       id:     id,
       name:   'my-test-item',
@@ -287,17 +287,17 @@ helper.contextualSuites("Entity (signEntities)", [
     });
   });
 
-  test("Item3.load (invalid signature)", function() {
+  test('Item3.load (invalid signature)', function() {
     var BadKeyItem3 = ItemV3.setup(_.defaults({}, options, {
-      signingKey:   'wrong-secret'
+      signingKey:   'wrong-secret',
     }));
     return BadKeyItem3.load({
       id:     id,
       name:   'my-test-item',
     }).then(function() {
-      assert(false, "Expected a signature error");
+      assert(false, 'Expected a signature error');
     }, function(err) {
-      assert(err, "Expected a signature error");
+      assert(err, 'Expected a signature error');
     });
   });
 });

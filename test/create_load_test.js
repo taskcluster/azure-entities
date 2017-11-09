@@ -1,4 +1,4 @@
-var subject = require("../lib/entity")
+var subject = require('../lib/entity');
 var helper  = require('./helper');
 var assert  = require('assert');
 var slugid  = require('slugid');
@@ -14,8 +14,8 @@ var ItemV1 = subject.configure({
   properties: {
     id:             subject.types.String,
     name:           subject.types.String,
-    count:          subject.types.Number
-  }
+    count:          subject.types.Number,
+  },
 });
 
 var ItemV2 = ItemV1.configure({
@@ -24,26 +24,26 @@ var ItemV2 = ItemV1.configure({
     id:             subject.types.String,
     name:           subject.types.String,
     count:          subject.types.Number,
-    reason:         subject.types.String
+    reason:         subject.types.String,
   },
   migrate: function(item) {
     return {
       id:           item.id,
       name:         item.name,
       count:        item.count,
-      reason:       "no-reason"
+      reason:       'no-reason',
     };
-  }
+  },
 });
 
-helper.contextualSuites("Entity (create/load)", [
+helper.contextualSuites('Entity (create/load)', [
   {
-    context: "Azure",
+    context: 'Azure',
     options: function() {
       return {
         Item: ItemV1.setup({
           credentials:  helper.cfg.azure,
-          table:        helper.cfg.tableName
+          table:        helper.cfg.tableName,
         }),
         Item2: ItemV2.setup({
           credentials:  helper.cfg.azure,
@@ -52,36 +52,36 @@ helper.contextualSuites("Entity (create/load)", [
       };
     },
   }, {
-    context: "In-Memory",
+    context: 'In-Memory',
     options: function() {
       return {
         Item: ItemV1.setup({
-          account:  "inMemory",
+          account:  'inMemory',
           table:    'items',
           credentials: null,
         }),
         Item2: ItemV2.setup({
-          account:  "inMemory",
+          account:  'inMemory',
           table:    'items',
           credentials: null,
         }),
       };
     },
-  }
+  },
 ], function(context, options) {
   var Item  = options.Item,
-      Item2 = options.Item2;
+    Item2 = options.Item2;
   var id = slugid.v4();
 
-  test("Item.ensureTable", function() {
+  test('Item.ensureTable', function() {
     return Item.ensureTable();
   });
 
-  test("Item.create", function() {
+  test('Item.create', function() {
     return Item.create({
       id:     id,
       name:   'my-test-item',
-      count:  1
+      count:  1,
     });
   });
 
@@ -105,48 +105,48 @@ helper.contextualSuites("Entity (create/load)", [
     return Promise.all([createNext(), createNext()]);
   }); return; //*/
 
-  test("Item.create (won't overwrite)", function() {
+  test('Item.create (won\'t overwrite)', function() {
     return Item.create({
       id:     id,
       name:   'my-test-item5',
-      count:  1
+      count:  1,
     }).then(function() {
       return Item.create({
         id:     id,
         name:   'my-test-item5',
-        count:  1
+        count:  1,
       }).then(function() {
-        assert(false, "Expected error");
+        assert(false, 'Expected error');
       }, function(err) {
         assert(err.code === 'EntityAlreadyExists',
-               "Expected EntityAlreadyExists");
-        assert(err.statusCode === 409, "Expected 409");
+          'Expected EntityAlreadyExists');
+        assert(err.statusCode === 409, 'Expected 409');
       });
     });
   });
 
-  test("Item.create (overwriteIfExists)", function() {
+  test('Item.create (overwriteIfExists)', function() {
     return Item.create({
       id:     id,
       name:   'my-test-item10',
-      count:  1
+      count:  1,
     }).then(function() {
       return Item.create({
         id:     id,
         name:   'my-test-item10',
-        count:  2
+        count:  2,
       }, true);
     }).then(function() {
       return Item.load({
         id:     id,
-        name:   'my-test-item10'
+        name:   'my-test-item10',
       }).then(function(item) {
         assert(item.count === 2);
       });
     });
   });
 
-  test("Item.load", function() {
+  test('Item.load', function() {
     return Item.load({
       id:     id,
       name:   'my-test-item',
@@ -155,34 +155,34 @@ helper.contextualSuites("Entity (create/load)", [
     });
   });
 
-  test("Item.load (missing)", function() {
+  test('Item.load (missing)', function() {
     return Item.load({
       id:     slugid.v4(),
       name:   'my-test-item',
     }).then(function() {
-      assert(false, "Expected an error");
+      assert(false, 'Expected an error');
     }, function(err) {
       assert(err.code === 'ResourceNotFound');
-        assert(err.statusCode === 404, "Expected 404");
+      assert(err.statusCode === 404, 'Expected 404');
     });
   });
 
-  test("Item.load (ignoreIfNotExists)", function() {
+  test('Item.load (ignoreIfNotExists)', function() {
     return Item.load({
       id:     slugid.v4(),
       name:   'my-test-item',
     }, true).then(function(item) {
-      assert(item === null, "Expected an null to be returned");
+      assert(item === null, 'Expected an null to be returned');
     });
   });
 
-  test("Item2.load", function() {
+  test('Item2.load', function() {
     return Item2.load({
       id:     id,
       name:   'my-test-item',
     }).then(function(item) {
       assert(item.count === 1);
-      assert(item.reason === "no-reason");
+      assert(item.reason === 'no-reason');
     });
   });
 });

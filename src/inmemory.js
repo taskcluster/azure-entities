@@ -34,16 +34,16 @@ var entityEtag = function(entity) {
     if (entity[odata_type]) {
       return;
     }
-    if (typeof v === "boolean") {
+    if (typeof v === 'boolean') {
       entity[odata_type] = 'Edm.Boolean';
-    } else if (typeof v === "number") {
+    } else if (typeof v === 'number') {
       if (v % 1 === 0) {
-        entity[odata_type] = "Edm.Int32";
+        entity[odata_type] = 'Edm.Int32';
       } else {
-        entity[odata_type] = "Edm.Double";
+        entity[odata_type] = 'Edm.Double';
       }
     } else {
-      entity[odata_type] = "Edm.String";
+      entity[odata_type] = 'Edm.String';
     }
   });
 
@@ -57,7 +57,7 @@ var makeError = function(statusCode, code) {
   var err = new Error(code);
   err.statusCode = statusCode;
   err.code = code;
-  err.name = code + "Error";
+  err.name = code + 'Error';
   return err;
 };
 
@@ -69,7 +69,7 @@ var ts = 1;
 var updateTimestamp = function(entity) {
   entity['Timestamp'] = ts++;
   entity['Timestamp@odata.type'] = 'Edm.Int32';
-}
+};
 
 /**
  * Create table.
@@ -120,8 +120,8 @@ InMemoryWrapper.prototype.deleteTable = function() {
 InMemoryWrapper.prototype.getEntity = function(partitionKey, rowKey, options) {
   options = options || {};
   // NOTE: azure-entities never uses these features:
-  assert(!options.filter, "filter is not supported for getEntity");
-  assert(!options.select, "select is not supported for getEntity");
+  assert(!options.filter, 'filter is not supported for getEntity');
+  assert(!options.select, 'select is not supported for getEntity');
   var key = makeKey(partitionKey, rowKey);
   if (!tables[this.table]) {
     return Promise.reject(makeError(404, 'ResourceNotFound'));
@@ -167,7 +167,7 @@ InMemoryWrapper.prototype.getEntity = function(partitionKey, rowKey, options) {
  */
 InMemoryWrapper.prototype.queryEntities = function(options) {
   options = options || {};
-  assert(!options.select, "select is not supported for queryEntities");
+  assert(!options.select, 'select is not supported for queryEntities');
 
   if (!tables[this.table]) {
     return Promise.reject(makeError(404, 'ResourceNotFound'));
@@ -190,7 +190,7 @@ InMemoryWrapper.prototype.queryEntities = function(options) {
 
   if (options.nextRowKey || options.nextPartitionKey) {
     var rowKey = options.nextRowKey,
-        partitionKey = options.nextPartitionKey;
+      partitionKey = options.nextPartitionKey;
     while (entities.length > 0 &&
            (entities[0].PartitionKey != partitionKey ||
             entities[0].RowKey != rowKey)) {
@@ -311,12 +311,10 @@ InMemoryWrapper.prototype.updateEntity = function(entity, options) {
       entity = existing;
       entity['odata.etag'] = entityEtag(entity);
     }
-  } else {
-    if (!options.eTag) {
-      tables[this.table][key] = entity;
-    } else if (options.eTag != '*') {
-      return Promise.reject(makeError(404, 'ResourceNotFound'));
-    }
+  } else if (!options.eTag) {
+    tables[this.table][key] = entity;
+  } else if (options.eTag != '*') {
+    return Promise.reject(makeError(404, 'ResourceNotFound'));
   }
   return Promise.resolve(entityEtag(entity));
 };

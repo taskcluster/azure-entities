@@ -1,4 +1,3 @@
-"use strict";
 
 var util            = require('util');
 var assert          = require('assert');
@@ -20,7 +19,7 @@ Op.prototype.ordered = null;
 
 /********************* In-Memory *********************/
 
-var comparisonFuncs = {}
+var comparisonFuncs = {};
 comparisonFuncs[azTableOps.Equal] =              function(x, y) { return x == y; };
 comparisonFuncs[azTableOps.NotEqual] =           function(x, y) { return x != y; };
 comparisonFuncs[azTableOps.GreaterThan] =        function(x, y) { return x > y; };
@@ -35,7 +34,7 @@ var ORDER_RELATIONS = [
   azTableOps.GreaterThan,
   azTableOps.GreaterThanOrEqual,
   azTableOps.LessThan,
-  azTableOps.LessThanOrEqual
+  azTableOps.LessThanOrEqual,
 ];
 
 // Short hand for operators
@@ -50,7 +49,7 @@ ORDER_RELATIONS.forEach(function(operator) {
   Class.prototype.compare = comparisonFuncs[operator];
   // Define function to create class instance
   Op[operator] = function(operand) {
-    assert(operand !== undefined, "operand is required");
+    assert(operand !== undefined, 'operand is required');
     return new Class(operand);
   };
 });
@@ -60,7 +59,7 @@ ORDER_RELATIONS.forEach(function(operator) {
 // Equivalence relations
 var EQUIVALENCE_RELATIONS = [
   azTableOps.Equal,
-  azTableOps.NotEqual
+  azTableOps.NotEqual,
 ];
 
 // Short hand for operators
@@ -75,7 +74,7 @@ EQUIVALENCE_RELATIONS.forEach(function(operator) {
   Class.prototype.compare = comparisonFuncs[operator];
   // Define function to create class instance
   Op[operator] = function(operand) {
-    assert(operand !== undefined, "operand is required");
+    assert(operand !== undefined, 'operand is required');
     return new Class(operand);
   };
 });
@@ -85,9 +84,9 @@ EQUIVALENCE_RELATIONS.forEach(function(operator) {
 // Human readable short hand for operators
 Op.equal                = Op.eq = Op['=='] = Op[azTableOps.Equal];
 Op.notEqual             = Op.ne = Op['!='] = Op[azTableOps.NotEqual];
-Op.greaterThan          = Op.gt = Op['>' ] = Op[azTableOps.GreaterThan];
+Op.greaterThan          = Op.gt = Op['>'] = Op[azTableOps.GreaterThan];
 Op.greaterThanOrEqual   = Op.ge = Op['>='] = Op[azTableOps.GreaterThanOrEqual];
-Op.lessThan             = Op.lt = Op['<' ] = Op[azTableOps.LessThan];
+Op.lessThan             = Op.lt = Op['<'] = Op[azTableOps.LessThan];
 Op.lessThanOrEqual      = Op.le = Op['<='] = Op[azTableOps.LessThanOrEqual];
 
 // Export Op with all auxiliary functions
