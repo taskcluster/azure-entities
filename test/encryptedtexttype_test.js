@@ -1,4 +1,4 @@
-var subject = require("../lib/entity")
+var subject = require('../lib/entity');
 var assert  = require('assert');
 var slugid  = require('slugid');
 var _       = require('lodash');
@@ -13,12 +13,12 @@ var Item = subject.configure({
   properties: {
     id:             subject.types.String,
     name:           subject.types.String,
-    data:           subject.types.EncryptedText
-  }
+    data:           subject.types.EncryptedText,
+  },
 });
 
-helper.contextualSuites("Entity (EncryptedTextType)", helper.makeContexts(Item, {
-  cryptoKey:    'CNcj2aOozdo7Pn+HEkAIixwninIwKnbYc6JPS9mNxZk='
+helper.contextualSuites('Entity (EncryptedTextType)', helper.makeContexts(Item, {
+  cryptoKey:    'CNcj2aOozdo7Pn+HEkAIixwninIwKnbYc6JPS9mNxZk=',
 }), function(context, options) {
   var Item = options.Item;
 
@@ -28,34 +28,34 @@ helper.contextualSuites("Entity (EncryptedTextType)", helper.makeContexts(Item, 
 
   // Construct a large string
   var randomString = function(kbytes) {
-    var s = "abcefsfcccsrcsdfsdfsfrfdefdwedwiedowijdwoeidnwoifneoifnweodnwoid";
-    s = s + s; // 128
-    s = s + s; // 256
-    s = s + s; // 512
-    s = s + s; // 1024
+    var s = 'abcefsfcccsrcsdfsdfsfrfdefdwedwiedowijdwoeidnwoifneoifnweodnwoid';
+    s += s; // 128
+    s += s; // 256
+    s += s; // 512
+    s += s; // 1024
     var arr = [];
-    for(var i = 0; i < kbytes; i++) {
+    for (var i = 0; i < kbytes; i++) {
       arr.push(s);
     }
     return arr.join('');
   };
 
-  test("largeString helper", function() {
+  test('largeString helper', function() {
     var text  = randomString(64);
     assert(text.length === 1024 * 64);
   });
 
-  test("small text", function() {
+  test('small text', function() {
     var id    = slugid.v4();
-    var text  = "Hello World";
+    var text  = 'Hello World';
     return Item.create({
       id:     id,
       name:   'my-test-item',
-      data:   text
+      data:   text,
     }).then(function(itemA) {
       return Item.load({
         id:     id,
-        name:   'my-test-item'
+        name:   'my-test-item',
       }).then(function(itemB) {
         assert(itemA.data === itemB.data);
         assert(text === itemB.data);
@@ -63,17 +63,17 @@ helper.contextualSuites("Entity (EncryptedTextType)", helper.makeContexts(Item, 
     });
   });
 
-  test("large text (64k)", function() {
+  test('large text (64k)', function() {
     var id    = slugid.v4();
     var text  = randomString(64);
     return Item.create({
       id:     id,
       name:   'my-test-item',
-      data:   text
+      data:   text,
     }).then(function(itemA) {
       return Item.load({
         id:     id,
-        name:   'my-test-item'
+        name:   'my-test-item',
       }).then(function(itemB) {
         assert(itemA.data === itemB.data);
         assert(text === itemB.data);
@@ -81,17 +81,17 @@ helper.contextualSuites("Entity (EncryptedTextType)", helper.makeContexts(Item, 
     });
   });
 
-  test("large text (128k)", function() {
+  test('large text (128k)', function() {
     var id    = slugid.v4();
     var text  = randomString(128);
     return Item.create({
       id:     id,
       name:   'my-test-item',
-      data:   text
+      data:   text,
     }).then(function(itemA) {
       return Item.load({
         id:     id,
-        name:   'my-test-item'
+        name:   'my-test-item',
       }).then(function(itemB) {
         assert(itemA.data === itemB.data);
         assert(text === itemB.data);
@@ -99,7 +99,7 @@ helper.contextualSuites("Entity (EncryptedTextType)", helper.makeContexts(Item, 
     });
   });
 
-  test("large text (256k - 32)", function() {
+  test('large text (256k - 32)', function() {
     var id    = slugid.v4();
     var text  = randomString(256);
     // Remove 16 to make room for iv
@@ -107,11 +107,11 @@ helper.contextualSuites("Entity (EncryptedTextType)", helper.makeContexts(Item, 
     return Item.create({
       id:     id,
       name:   'my-test-item',
-      data:   text
+      data:   text,
     }).then(function(itemA) {
       return Item.load({
         id:     id,
-        name:   'my-test-item'
+        name:   'my-test-item',
       }).then(function(itemB) {
         assert(itemA.data === itemB.data);
         assert(text === itemB.data);

@@ -1,4 +1,4 @@
-var subject = require("../lib/entity")
+var subject = require('../lib/entity');
 var assert  = require('assert');
 var slugid  = require('slugid');
 var _       = require('lodash');
@@ -16,7 +16,7 @@ let schema = {
   required: ['text', 'number'],
 };
 
-helper.contextualSuites("Entity", [
+helper.contextualSuites('Entity', [
   {
     context: 'Schema',
     options: {
@@ -34,19 +34,19 @@ helper.contextualSuites("Entity", [
 ], function(context, options) {
   helper.contextualSuites('', [
     {
-      context: "Azure",
+      context: 'Azure',
       options: {
         credentials:  helper.cfg.azure,
-        table:        helper.cfg.tableName
+        table:        helper.cfg.tableName,
       },
     }, {
-      context: "In-Memory",
+      context: 'In-Memory',
       options: {
-        account:   "inMemory",
-        table:    "items",
+        account:   'inMemory',
+        table:    'items',
         credentials: null,
-      }
-    }
+      },
+    },
   ], function(ctx, config) {
     let Item = subject.configure({
       version:          1,
@@ -56,7 +56,7 @@ helper.contextualSuites("Entity", [
         id:             subject.types.String,
         name:           subject.types.String,
         data:           options.type,
-      }
+      },
     }).setup(_.defaults({}, config, options.config));
 
     setup(function() {
@@ -65,7 +65,7 @@ helper.contextualSuites("Entity", [
 
     test('schema match', async () => {
       let id    = slugid.v4();
-      let data  = {text: "Hello World", number: 42};
+      let data  = {text: 'Hello World', number: 42};
       await Item.create({
         id,
         name: 'test',
@@ -76,7 +76,7 @@ helper.contextualSuites("Entity", [
     [
       {
         text: 'float not integer',
-        data: {text: "Hello World", number: 42.4},
+        data: {text: 'Hello World', number: 42.4},
       }, {
         text: 'integer not string',
         data: {text: 5, number: 42},
@@ -85,10 +85,10 @@ helper.contextualSuites("Entity", [
         data: {number: 42},
       }, {
         text: 'additional property',
-        data: {text: "Hello World", number: 42, wrong: false},
+        data: {text: 'Hello World', number: 42, wrong: false},
       }, {
         text: 'string not integer',
-        data: {text: "Hello World", number: "42"},
+        data: {text: 'Hello World', number: '42'},
       },
     ].forEach(({text, data}) => test('schema mismatch (' + text + ')', async () => {
       try {
@@ -96,7 +96,7 @@ helper.contextualSuites("Entity", [
         await Item.create({id, name: 'test', data});
       } catch (err) {
         assert(/schema validation failed/.test(err.toString()),
-               'expected schema error');
+          'expected schema error');
         return;
       }
       assert(false, 'Expected an error');

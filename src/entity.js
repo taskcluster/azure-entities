@@ -1,5 +1,4 @@
-"use strict";
-
+/* eslint-disable consistent-this */
 var assert          = require('assert');
 var util            = require('util');
 var slugid          = require('slugid');
@@ -51,7 +50,6 @@ var inmemory;       // lazy-loaded
 //
 // Okay, that's it for now, happy hacking...
 
-
 /** List of property names reserved or conflicting with method names */
 var RESERVED_PROPERTY_NAMES = [
   // Reserved by Azure Table Storage
@@ -68,7 +66,7 @@ var RESERVED_PROPERTY_NAMES = [
 
   // Methods implemented by `Entity`
   'modify',
-  'remove'
+  'remove',
 ];
 
 /**
@@ -86,10 +84,10 @@ var AZURE_TABLE_TIMEOUT     = 7 * 1000;
  * This constructor will wrap a raw azure-table-node entity.
  */
 var Entity = function(entity) {
-  assert(entity.PartitionKey,   "entity is missing 'PartitionKey'");
-  assert(entity.RowKey,         "entity is missing 'RowKey'");
-  assert(entity['odata.etag'],  "entity is missing 'odata.etag'");
-  assert(entity.Version,        "entity is missing 'Version'");
+  assert(entity.PartitionKey,   'entity is missing \'PartitionKey\'');
+  assert(entity.RowKey,         'entity is missing \'RowKey\'');
+  assert(entity['odata.etag'],  'entity is missing \'odata.etag\'');
+  assert(entity.Version,        'entity is missing \'Version\'');
 
   this._partitionKey  = entity.PartitionKey;
   this._rowKey        = entity.RowKey;
@@ -168,15 +166,15 @@ var fixedTimeComparison = function(b1, b2) {
   var mismatch = 0;
   mismatch |= !(b1 instanceof Buffer);
   mismatch |= !(b2 instanceof Buffer);
-  mismatch |= (b1.length !== b2.length);
+  mismatch |= b1.length !== b2.length;
   if (mismatch === 1) {
     return false;
   }
   var n = b1.length;
-  for(var i = 0; i < n; i++) {
-    mismatch |= (b1[i] ^ b2[i]);
+  for (var i = 0; i < n; i++) {
+    mismatch |= b1[i] ^ b2[i];
   }
-  return (mismatch === 0);
+  return mismatch === 0;
 };
 
 /**
@@ -289,19 +287,18 @@ Entity.configure = function(options) {
   var Parent = this;
 
   // Validate options
-  assert(options,                                 "options must be given");
-  assert(typeof(options.version) === 'number',    "version must be a number");
-  assert(typeof(options.properties) === 'object', "properties must be given");
+  assert(options,                                 'options must be given');
+  assert(typeof options.version === 'number',    'version must be a number');
+  assert(typeof options.properties === 'object', 'properties must be given');
   assert(!this.prototype.__hasSigning ||
-         typeof(options.signEntities) === 'boolean',
-         "When signEntities has been specified once, newer versions **MUST** " +
-         "specify this property explicitly (there is no good default value)");
+         typeof options.signEntities === 'boolean',
+  'When signEntities has been specified once, newer versions **MUST** ' +
+         'specify this property explicitly (there is no good default value)');
   options = _.defaults({}, options, {
     context:      [],
-    signEntities: false
+    signEntities: false,
   });
-  assert(options.context instanceof Array,        "context must be an array");
-
+  assert(options.context instanceof Array,        'context must be an array');
 
   // Create a subclass of Parent
   var subClass = function(entity) {
@@ -315,14 +312,14 @@ Entity.configure = function(options) {
 
   // Validate options.context
   options.context.forEach(function(key) {
-    assert(typeof(key) === 'string',
-           "elements of options.context must be strings");
+    assert(typeof key === 'string',
+      'elements of options.context must be strings');
     assert(RESERVED_PROPERTY_NAMES.indexOf(key) === -1,
-           "Property name '" + key + "' is reserved, and cannot be specified " +
-           "in options.context");
+      'Property name \'' + key + '\' is reserved, and cannot be specified ' +
+           'in options.context');
     assert(options.properties[key] === undefined,
-           "Property name '" + key + "' is defined 'properties' and cannot " +
-           "be specified in options.context");
+      'Property name \'' + key + '\' is defined \'properties\' and cannot ' +
+           'be specified in options.context');
   });
   // Store context for validation of context given in Entity.setup()
   subClass.prototype.__context = options.context.slice();
@@ -330,10 +327,10 @@ Entity.configure = function(options) {
   // Validate property names
   _.forIn(options.properties, function(Type, property) {
     assert(RESERVED_PROPERTY_NAMES.indexOf(property) === -1,
-           "Property name '" + property + "' is reserved");
-    assert(!/^__/.test(property),         "Names prefixed '__' is reserved");
+      'Property name \'' + property + '\' is reserved');
+    assert(!/^__/.test(property),         'Names prefixed \'__\' is reserved');
     assert(/^[a-zA-Z_-][a-zA-Z0-9_-]*$/.test(property),
-           "Property name '" + property + "' is not a proper identifier");
+      'Property name \'' + property + '\' is not a proper identifier');
   });
 
   // Don't allow configure to run after setup, there is no reasons for this.
@@ -344,18 +341,18 @@ Entity.configure = function(options) {
     subClass.prototype.__aux           === undefined &&
     subClass.prototype.__filterBuilder === undefined &&
     subClass.prototype.__table         === undefined,
-    "This `Entity` subclass is already setup!"
+    'This `Entity` subclass is already setup!'
   );
 
   // Check that version in incremented by 1
   assert(options.version === subClass.prototype.__version + 1,
-         "`version` must be incremented by 1 (and only 1)");
+    '`version` must be incremented by 1 (and only 1)');
 
   // Construct mapping
   var mapping = {};
   _.forIn(options.properties, function(Type, property) {
     if (!(Type instanceof Function)) {
-      throw new Error("Type for '" + property + "' does not exist!");
+      throw new Error('Type for \'' + property + '\' does not exist!');
     }
     mapping[property] = new Type(property);
   });
@@ -363,13 +360,13 @@ Entity.configure = function(options) {
 
   // If version 1, then we save the partition/row-keys definitions
   if (options.version === 1) {
-    assert(options.partitionKey, "partitionKey is required in version 1");
-    assert(options.rowKey,       "rowKey is required in version 1");
+    assert(options.partitionKey, 'partitionKey is required in version 1');
+    assert(options.rowKey,       'rowKey is required in version 1');
     subClass.prototype.__partitionKeyDefinition = options.partitionKey;
     subClass.prototype.__rowKeyDefinition       = options.rowKey;
   } else {
-    assert(!options.partitionKey, "You can't redefine the partitionKey");
-    assert(!options.rowKey,       "You can't redefine the rowKey");
+    assert(!options.partitionKey, 'You can\'t redefine the partitionKey');
+    assert(!options.rowKey,       'You can\'t redefine the rowKey');
   }
 
   // Construct __partitionKey and __rowKey from definitions with new mapping
@@ -386,8 +383,8 @@ Entity.configure = function(options) {
     );
     var lockedProperties = {};
     propertiesToLock.forEach(function(property) {
-      assert(options.properties[property], "Property '" + property +
-             "' referenced in partition/row key(s) must be defined");
+      assert(options.properties[property], 'Property \'' + property +
+             '\' referenced in partition/row key(s) must be defined');
       lockedProperties[property] = options.properties[property];
     });
     // Store set of locked properties, so that we can validate their type and
@@ -400,8 +397,8 @@ Entity.configure = function(options) {
     var lockedProperties = subClass.prototype.__lockedPropertiesDefinition;
     _.forIn(lockedProperties, function(type, property) {
       assert(options.properties[property] === type,
-             "Type of property: '" + property + "' referenced in " +
-             "partition/row key cannot be changed during migration!");
+        'Type of property: \'' + property + '\' referenced in ' +
+             'partition/row key cannot be changed during migration!');
     });
   }
 
@@ -434,7 +431,7 @@ Entity.configure = function(options) {
 
         // Hash [uint32 - len(value)] [bytes - value]
         var len;
-        if (typeof(value) === 'string') {
+        if (typeof value === 'string') {
           len = Buffer.byteLength(value, 'utf8');
         } else {
           len = value.length;
@@ -462,7 +459,7 @@ Entity.configure = function(options) {
   if (options.version === 1) {
     // If version is 1, we just assert that an deserialize properties
     subClass.prototype.__deserialize = function(entity) {
-      assert(entity.Version === 1, "entity.Version isn't 1");
+      assert(entity.Version === 1, 'entity.Version isn\'t 1');
       var cryptoKey  = this.__cryptoKey;
       var properties = {};
       _.forIn(mapping, function(type, property) {
@@ -471,14 +468,14 @@ Entity.configure = function(options) {
       if (sign) {
         var signature = new Buffer(entity.Signature, 'base64');
         if (!fixedTimeComparison(signature, sign.call(this, properties))) {
-          throw new Error("Signature validation failed!");
+          throw new Error('Signature validation failed!');
         }
       }
       return properties;
     };
   } else {
     assert(options.migrate instanceof Function,
-           "`migrate` must be specified for version > 1");
+      '`migrate` must be specified for version > 1');
     // if version is > 1, then we remember the deserializer from version - 1
     // if version of the entity we get is < version, then we call the old
     // `deserialize` method (hence, why we keep a reference to it).
@@ -486,7 +483,7 @@ Entity.configure = function(options) {
     subClass.prototype.__deserialize = function(entity) {
       // Validate version
       assert(entity.Version <= options.version,
-             "entity.Version is greater than configured version!");
+        'entity.Version is greater than configured version!');
       // Migrate, if necessary
       if (entity.Version < options.version) {
         let migrated = options.migrate.call(this, deserialize.call(this, entity));
@@ -504,7 +501,7 @@ Entity.configure = function(options) {
       if (sign) {
         var signature = new Buffer(entity.Signature, 'base64');
         if (!fixedTimeComparison(signature, sign.call(this, properties))) {
-          throw new Error("Signature validation failed!");
+          throw new Error('Signature validation failed!');
         }
       }
       return properties;
@@ -519,7 +516,7 @@ Entity.configure = function(options) {
     var entity = {
       PartitionKey: subClass.prototype.__partitionKey.exact(properties),
       RowKey:       subClass.prototype.__rowKey.exact(properties),
-      Version:      subClass.prototype.__version
+      Version:      subClass.prototype.__version,
     };
     var cryptoKey = this.__cryptoKey;
     _.forIn(mapping, function(type, property) {
@@ -535,7 +532,6 @@ Entity.configure = function(options) {
   // Return subClass
   return subClass;
 };
-
 
 /**
  * Setup a subclass of `this` (`Entity` or subclass thereof) for use, with
@@ -602,9 +598,10 @@ Entity.setup = function(options) {
   // Validate options
   assert(options,                             'options must be given');
   assert(options.table,                       'options.table must be given');
-  assert(typeof(options.table) === 'string',  'options.table isn\'t a string');
+  assert(typeof options.table === 'string',  'options.table isn\'t a string');
   if (options.account === 'inMemory') {
-    assert(options.hasOwnProperty('credentials'), 'credentials should be specified even with inMemory, but can be null');
+    assert(options.hasOwnProperty('credentials'),
+      'credentials should be specified even with inMemory, but can be null');
   } else {
     assert(options.credentials, 'credentials are required unless using in-memory tables');
   }
@@ -618,7 +615,7 @@ Entity.setup = function(options) {
   options = _.defaults({}, options, {
     context:          {},
     agent:            undefined,
-    minSASAuthExpiry: 15 * 60 * 1000
+    minSASAuthExpiry: 15 * 60 * 1000,
   });
 
   // Identify the parent class, that is always `this` so we can use it on
@@ -642,7 +639,7 @@ Entity.setup = function(options) {
     subClass.prototype.__deserialize  &&
     subClass.prototype.__partitionKey &&
     subClass.prototype.__rowKey,
-    "Must be configured first, see `Entity.configure`"
+    'Must be configured first, see `Entity.configure`'
   );
 
   // Don't allow setup to run twice, there is no reasons for this. In particular
@@ -653,7 +650,7 @@ Entity.setup = function(options) {
     subClass.prototype.__filterBuilder === undefined &&
     subClass.prototype.__table         === undefined &&
     subClass.prototype.__signingKey    === undefined,
-    "This `Entity` subclass is already setup!"
+    'This `Entity` subclass is already setup!'
   );
 
   // Define access properties, we do this here, as doing it in Entity.configure
@@ -663,48 +660,48 @@ Entity.setup = function(options) {
     // Define property for accessing underlying shadow object
     Object.defineProperty(subClass.prototype, property, {
       enumerable: true,
-      get:        function() {return this._properties[property];}
+      get:        function() {return this._properties[property];},
     });
   });
 
   // Validate that we have all context properties required
   subClass.prototype.__context.forEach(function(key) {
-    assert(options.context[key] !== undefined, "Context key '" + key +
-           "' must be specified!");
+    assert(options.context[key] !== undefined, 'Context key \'' + key +
+           '\' must be specified!');
   });
 
   // Set properties from options.context
   _.forIn(options.context, function(val, key) {
     assert(subClass.prototype.__context.indexOf(key) !== -1,
-           "context key '" + key + "' was not declared in Entity.configure");
+      'context key \'' + key + '\' was not declared in Entity.configure');
     subClass.prototype[key] = val;
   });
 
   // Set encryption key if needed
   if (subClass.prototype.__hasEncrypted) {
-    assert(typeof(options.cryptoKey) === 'string',
-           "cryptoKey is required when a property is encrypted in any " +
-           "of the schema versions.");
+    assert(typeof options.cryptoKey === 'string',
+      'cryptoKey is required when a property is encrypted in any ' +
+           'of the schema versions.');
     var secret  = new Buffer(options.cryptoKey, 'base64');
-    assert(secret.length === 32, "cryptoKey must be 32 bytes in base64");
+    assert(secret.length === 32, 'cryptoKey must be 32 bytes in base64');
     subClass.prototype.__cryptoKey = secret;
   } else {
-    assert(!options.cryptoKey, "Don't specify options.cryptoKey when " +
-                                   "there aren't any encrypted properties!");
+    assert(!options.cryptoKey, 'Don\'t specify options.cryptoKey when ' +
+                                   'there aren\'t any encrypted properties!');
   }
 
   // Set signing key if needed
   if (subClass.prototype.__hasSigning) {
-    assert(typeof(options.signingKey) === 'string',
-           "signingKey is required when {signEntities: true} is set in " +
-           "one of the versions of the Entity versions");
+    assert(typeof options.signingKey === 'string',
+      'signingKey is required when {signEntities: true} is set in ' +
+           'one of the versions of the Entity versions');
     subClass.prototype.__signingKey = new Buffer(options.signingKey, 'utf8');
   } else {
-    assert(!options.signingKey, "Don't specify options.signingKey when "  +
-                                "entities aren't signed!");
+    assert(!options.signingKey, 'Don\'t specify options.signingKey when '  +
+                                'entities aren\'t signed!');
   }
 
-  if (options.account == "inMemory") {
+  if (options.account == 'inMemory') {
     if (!inmemory) {
       inmemory = require('./inmemory'); // lazy-loaded
     }
@@ -723,12 +720,12 @@ Entity.setup = function(options) {
   var client = null;
   if (options.account) {
     // If we're setting up to fetch credentials for auth.taskcluster.net
-    assert(typeof(options.account) === 'string',
-           "Expected options.account to be a string, or undefined");
+    assert(typeof options.account === 'string',
+      'Expected options.account to be a string, or undefined');
     // Create auth client to fetch SAS from auth.taskcluster.net
     var auth = new taskcluster.Auth({
       credentials:    options.credentials,
-      baseUrl:        options.authBaseUrl
+      baseUrl:        options.authBaseUrl,
     });
     // Create azure table client with logic for fetch SAS
     client = new azure.Table({
@@ -744,20 +741,20 @@ Entity.setup = function(options) {
         ).then(function(result) {
           return result.sas;
         });
-      }
+      },
     });
   } else {
     // Create client using credentials already present
-    assert(options.credentials.accountName, "Missing accountName");
+    assert(options.credentials.accountName, 'Missing accountName');
     assert(options.credentials.accountKey ||
-           options.credentials.sas,         "Missing accountKey or sas");
+           options.credentials.sas,         'Missing accountKey or sas');
     // Create azure table client with accessKey
     client = new azure.Table({
       timeout:      AZURE_TABLE_TIMEOUT,
       agent:        options.agent,
       accountId:    options.credentials.accountName,
       accessKey:    options.credentials.accountKey,
-      sas:          options.credentials.sas
+      sas:          options.credentials.sas,
     });
   }
 
@@ -776,7 +773,7 @@ Entity.setup = function(options) {
     'queryEntities',
     'insertEntity',
     'updateEntity',
-    'deleteEntity'
+    'deleteEntity',
   ].forEach(function(name) {
     // Bind table name
     var method = client[name].bind(client, options.table);
@@ -787,14 +784,14 @@ Entity.setup = function(options) {
       return method.apply(client, arguments).then(function(result) {
         var d = process.hrtime(start);
         if (options.monitor) {
-          options.monitor.measure(name + '.success', d[0] * 1000 + (d[1] / 1000000));
+          options.monitor.measure(name + '.success', d[0] * 1000 + d[1] / 1000000);
           options.monitor.count(name + '.success');
         }
         return result;
       }, function(err) {
         var d = process.hrtime(start);
         if (options.monitor) {
-          options.monitor.measure(name + '.error', d[0] * 1000 + (d[1] / 1000000));
+          options.monitor.measure(name + '.error', d[0] * 1000 + d[1] / 1000000);
           options.monitor.count(name + '.error');
         }
         throw err;
@@ -826,7 +823,7 @@ Entity.ensureTable = function() {
       throw err;
     }
   }).catch(rethrowDebug(
-    "ensureTable: Failed to create table '%s' with err: %j",
+    'ensureTable: Failed to create table \'%s\' with err: %j',
     ClassProps.__table
   ));
 };
@@ -841,7 +838,7 @@ Entity.removeTable = function() {
   var ClassProps  = Class.prototype;
 
   return ClassProps.__aux.deleteTable().catch(rethrowDebug(
-    "deleteTable: Failed to delete table '%s' with err: %j",
+    'deleteTable: Failed to delete table \'%s\' with err: %j',
     ClassProps.__table
   ));
 };
@@ -853,7 +850,7 @@ Entity.removeTable = function() {
 Entity.create = function(properties, overwriteIfExists) {
   var Class       = this;
   var ClassProps  = Class.prototype;
-  assert(properties, "Properties is required");
+  assert(properties, 'Properties is required');
 
   // Serialize entity
   var entity = ClassProps.__serialize(properties);
@@ -865,13 +862,13 @@ Entity.create = function(properties, overwriteIfExists) {
   } else {
     inserted = ClassProps.__aux.updateEntity(entity, {
       mode: 'replace',
-      eTag: null
+      eTag: null,
     });
   }
 
   // Create entity
   return inserted
-    .catch(rethrowDebug("Failed to insert entity err: %j"))
+    .catch(rethrowDebug('Failed to insert entity err: %j'))
     .then(function(etag) {
       entity['odata.etag'] = etag;
       return entity;
@@ -906,7 +903,6 @@ Entity.load = function(properties, ignoreIfNotExists) {
   });
 };
 
-
 /**
  * Remove entity without loading it. Using this method you cannot quantify about
  * the remote state you're deleting. Using `Entity.prototype.remove` removal
@@ -925,7 +921,7 @@ Entity.remove = function(properties, ignoreIfNotExists) {
   var rowKey        = ClassProps.__rowKey.exact(properties);
 
   return ClassProps.__aux.deleteEntity(partitionKey, rowKey, {
-    eTag: '*'
+    eTag: '*',
   }).then(function() {
     return true;
   }, function(err) {
@@ -934,20 +930,19 @@ Entity.remove = function(properties, ignoreIfNotExists) {
       throw err;
     }
     return false;
-  }).catch(rethrowDebug("Failed to delete entity, err: %j"));
+  }).catch(rethrowDebug('Failed to delete entity, err: %j'));
 };
-
 
 /** Remove entity if not modified, unless `ignoreChanges` is set */
 Entity.prototype.remove = function(ignoreChanges, ignoreIfNotExists) {
   return this.__aux.deleteEntity(this._partitionKey, this._rowKey, {
-    eTag:     (ignoreChanges ? '*' : this._etag)
+    eTag:     ignoreChanges ? '*' : this._etag,
   }).catch(function(err) {
     // Re-throw error if we're not supposed to ignore it
     if (!ignoreIfNotExists || !err || err.code !== 'ResourceNotFound') {
       throw err;
     }
-  }).catch(rethrowDebug("Failed to delete entity, err: %j"));
+  }).catch(rethrowDebug('Failed to delete entity, err: %j'));
 };
 
 /**
@@ -1049,7 +1044,7 @@ Entity.prototype.modify = function(modifier) {
 
         // Check for changes
         if (!isChanged) {
-          debug("Return modify trivially, as no changes was made by modifier");
+          debug('Return modify trivially, as no changes was made by modifier');
           return self;
         }
 
@@ -1057,7 +1052,7 @@ Entity.prototype.modify = function(modifier) {
         if (self.__sign) {
           entityChanges['Signature@odata.type'] = 'Edm.Binary';
           entityChanges['Signature'] = self.__sign(self._properties)
-                                           .toString('base64');
+            .toString('base64');
         }
       } else {
         // If we have a schema version upgrade replace all properties
@@ -1066,12 +1061,11 @@ Entity.prototype.modify = function(modifier) {
         entityChanges = self.__serialize(self._properties);
       }
 
-
       // Check for key modifications
       assert(self._partitionKey === self.__partitionKey.exact(self._properties),
-             "You can't modify elements of the partitionKey");
+        'You can\'t modify elements of the partitionKey');
       assert(self._rowKey === self.__rowKey.exact(self._properties),
-             "You can't modify elements of the rowKey");
+        'You can\'t modify elements of the rowKey');
 
       // Set rowKey and partition key
       entityChanges.PartitionKey  = self._partitionKey;
@@ -1080,7 +1074,7 @@ Entity.prototype.modify = function(modifier) {
       // Update entity with changes
       return self.__aux.updateEntity(entityChanges, {
         mode:   mode,
-        eTag:   self._etag
+        eTag:   self._etag,
       }).then(function(eTag) {
         self._etag = eTag;
         return self;
@@ -1095,15 +1089,15 @@ Entity.prototype.modify = function(modifier) {
 
       // rethrow error, if it's not caused by optimistic concurrency
       if (!err || err.code !== 'UpdateConditionNotSatisfied') {
-        debug("Update of entity failed unexpected, err: %j", err, err.stack);
+        debug('Update of entity failed unexpected, err: %j', err, err.stack);
         throw err;
       }
 
       // Decrement number of attempts left
       attemptsLeft -= 1;
       if (attemptsLeft === 0) {
-        debug("ERROR: MAX_MODIFY_ATTEMPTS exhausted, we might have congestion");
-        var err = new Error("MAX_MODIFY_ATTEMPTS exhausted, check for congestion");
+        debug('ERROR: MAX_MODIFY_ATTEMPTS exhausted, we might have congestion');
+        var err = new Error('MAX_MODIFY_ATTEMPTS exhausted, check for congestion');
         err.code = 'EntityWriteCongestionError';
         err.originalEntity = properties;
         err.modifiedEntity = modifiedEntity;
@@ -1122,7 +1116,6 @@ Entity.prototype.modify = function(modifier) {
   return attemptModify();
 };
 
-
 /** Encode continuation token as single string using tilde as separator */
 var encodeContinuationToken = function(result) {
   if (!result.nextPartitionKey && !result.nextRowKey) {
@@ -1140,18 +1133,18 @@ var decodeContinuationToken = function(token) {
   if (token === undefined || token === null) {
     return {
       nextPartitionKey: undefined,
-      nextRowKey:       undefined
+      nextRowKey:       undefined,
     };
   }
-  assert(typeof(token) === 'string', "Continuation token must be a string if " +
-                                     "not undefined");
+  assert(typeof token === 'string', 'Continuation token must be a string if ' +
+                                     'not undefined');
   // Split at tilde (~)
   token = token.split('~');
-  assert(token.length === 2, "Expected an encoded continuation token with " +
-                             "a single tilde as separator");
+  assert(token.length === 2, 'Expected an encoded continuation token with ' +
+                             'a single tilde as separator');
   return {
     nextPartitionKey: decodeURIComponent(token[0]),
-    nextRowKey:       decodeURIComponent(token[1])
+    nextRowKey:       decodeURIComponent(token[1]),
   };
 };
 
@@ -1234,23 +1227,23 @@ Entity.scan = function(conditions, options) {
     matchPartition:   'none',
     handler:          null,
     limit:            undefined,
-    continuation:     undefined
+    continuation:     undefined,
   });
   conditions = conditions || {};
   var Class       = this;
   var ClassProps  = Class.prototype;
   assert(VALID_PARTITION_MATCH.indexOf(options.matchPartition) !== -1,
-         "Valid values for 'matchPartition' are: none, exact")
+    'Valid values for \'matchPartition\' are: none, exact');
   assert(VALID_ROW_MATCH.indexOf(options.matchRow) !== -1,
-         "Valid values for 'matchRow' are: none, partial, exact");
+    'Valid values for \'matchRow\' are: none, partial, exact');
   assert(!options.handler || options.handler instanceof Function,
-         "If options.handler is given it must be a function");
+    'If options.handler is given it must be a function');
   assert(options.limit === undefined ||
-         typeof(options.limit) === 'number', "options.limit must be a number");
+         typeof options.limit === 'number', 'options.limit must be a number');
 
   // Declare partitionKey, rowKey and covered as list of keys covered by either
   // partitionKey or rowKey
-  var partitionKey  = undefined
+  var partitionKey  = undefined;
   var rowKey        = undefined;
   var covered       = [];
 
@@ -1271,7 +1264,7 @@ Entity.scan = function(conditions, options) {
     //       CompositeKey, because ~ is the last character outputted by
     //       encodeStringKey. Also remember to append keys covered to the
     //       covered variable.
-    throw new Error("Partial matches on rowKey is not implemented yet!");
+    throw new Error('Partial matches on rowKey is not implemented yet!');
   }
 
   // Create a $filter string builder to abstract away joining with 'and'
@@ -1282,13 +1275,13 @@ Entity.scan = function(conditions, options) {
   var azOps = azure.Table.Operators;
   if (partitionKey !== undefined) {
     filter = appendFilter(filter,
-            new Entity.types.String("PartitionKey"),
-            Entity.op.equal(partitionKey));
+      new Entity.types.String('PartitionKey'),
+      Entity.op.equal(partitionKey));
   }
   if (rowKey !== undefined) {
     filter = appendFilter(filter,
-            new Entity.types.String("RowKey"),
-            Entity.op.equal(rowKey));
+      new Entity.types.String('RowKey'),
+      Entity.op.equal(rowKey));
   }
 
   // Construct query from conditions using operators
@@ -1302,8 +1295,8 @@ Entity.scan = function(conditions, options) {
     // Find and check that we have a type
     var type = ClassProps.__mapping[property];
     if (!type) {
-      throw new Error("Property: '" + property +
-                      "' used in query is not defined!");
+      throw new Error('Property: \'' + property +
+                      '\' used in query is not defined!');
     }
 
     // Ensure that we have an operator, we just assume anything specified
@@ -1322,13 +1315,13 @@ Entity.scan = function(conditions, options) {
       filter:           filter,
       top:              Math.min(options.limit, 1000),
       nextPartitionKey: continuation.nextPartitionKey,
-      nextRowKey:       continuation.nextRowKey
+      nextRowKey:       continuation.nextRowKey,
     }).then(function(data) {
       return {
         entries:      data.entities.map(function(entity) {
-                        return new Class(entity);
-                      }),
-        continuation: encodeContinuationToken(data)
+          return new Class(entity);
+        }),
+        continuation: encodeContinuationToken(data),
       };
     });
   };
@@ -1379,7 +1372,6 @@ Entity.query = function(conditions, options) {
 
   return Entity.scan.call(this, conditions, options);
 };
-
 
 /** Utility method for node making util.inspect print properties */
 Entity.prototype.inspect = function(depth) {

@@ -1,4 +1,4 @@
-var subject = require("../lib/entity")
+var subject = require('../lib/entity');
 var assert  = require('assert');
 var slugid  = require('slugid');
 var _       = require('lodash');
@@ -6,20 +6,20 @@ var Promise = require('promise');
 var debug   = require('debug')('test:entity:query');
 var helper  = require('./helper');
 
-helper.contextualSuites("Entity (query)", [
+helper.contextualSuites('Entity (query)', [
   {
-    context: "Azure",
+    context: 'Azure',
     options: {
       credentials:  helper.cfg.azure,
       table:        helper.cfg.tableName,
     },
   }, {
-    context: "In-Memory",
+    context: 'In-Memory',
     options: {
-      account: "inMemory",
-      table:   "items",
+      account: 'inMemory',
+      table:   'items',
       credentials: null,
-    }
+    },
   },
 ], function(context, options) {
 
@@ -33,8 +33,8 @@ helper.contextualSuites("Entity (query)", [
       count:          subject.types.Number,
       tag:            subject.types.String,
       time:           subject.types.Date,
-      active:         subject.types.Boolean
-    }
+      active:         subject.types.Boolean,
+    },
   }).setup(_.defaults(options));
 
   setup(function() {
@@ -51,7 +51,7 @@ helper.contextualSuites("Entity (query)", [
           count:  1,
           tag:    'tag1',
           time:   new Date(0),
-          active: true
+          active: true,
         }),
         Item.create({
           id:     id,
@@ -59,7 +59,7 @@ helper.contextualSuites("Entity (query)", [
           count:  2,
           tag:    'tag2',
           time:   new Date(1),
-          active: false
+          active: false,
         }),
         Item.create({
           id:     id,
@@ -67,13 +67,13 @@ helper.contextualSuites("Entity (query)", [
           count:  3,
           tag:    'tag1',   // same tag as item1
           time:   new Date(1000000000000),
-          active: true
-        })
+          active: true,
+        }),
       ]);
     });
   });
 
-  test("Query a partition", function() {
+  test('Query a partition', function() {
     return Item.query({id: id}).then(function(data) {
       assert(data.entries.length === 3);
       var sum = 0;
@@ -84,9 +84,9 @@ helper.contextualSuites("Entity (query)", [
     });
   });
 
-  test("Query a partition (with Entity.op.equal)", function() {
+  test('Query a partition (with Entity.op.equal)', function() {
     return Item.query({
-      id:     subject.op.equal(id)
+      id:     subject.op.equal(id),
     }).then(function(data) {
       assert(data.entries.length === 3);
       var sum = 0;
@@ -97,23 +97,23 @@ helper.contextualSuites("Entity (query)", [
     });
   });
 
-  test("Can't query without partition-key", function() {
+  test('Can\'t query without partition-key', function() {
     return Promise.resolve().then(function() {
-     return Item.query({
+      return Item.query({
         name:   'item1',
         count:  1,
-        tag:    'tag1'
+        tag:    'tag1',
       });
     }).then(function() {
-      assert(false, "Expected an error");
+      assert(false, 'Expected an error');
     }, function(err) {
-      debug("Caught expected error: %j", err)
+      debug('Caught expected error: %j', err);
     });
   });
 
-  test("Query a partition (with limit 2)", function() {
+  test('Query a partition (with limit 2)', function() {
     return Item.query({id: id}, {
-      limit:      2
+      limit:      2,
     }).then(function(data) {
       console.log(data);
       assert(data.entries.length === 2);
@@ -122,7 +122,7 @@ helper.contextualSuites("Entity (query)", [
       // Fetch next
       return Item.query({id: id}, {
         limit:          2,
-        continuation:   data.continuation
+        continuation:   data.continuation,
       }).then(function(data) {
         assert(data.entries.length === 1);
         assert(!data.continuation);
@@ -130,16 +130,16 @@ helper.contextualSuites("Entity (query)", [
     });
   });
 
-  test("Query a partition (with handler)", function() {
+  test('Query a partition (with handler)', function() {
     var sum = 0;
     return Item.query({id: id}, {
-      handler:      function(item) { sum += item.count; }
+      handler:      function(item) { sum += item.count; },
     }).then(function() {
       assert(sum === 6);
     });
   });
 
-  test("Query a partition (with async handler)", function() {
+  test('Query a partition (with async handler)', function() {
     var sum = 0;
     return Item.query({id: id}, {
       handler:      function(item) {
@@ -149,23 +149,23 @@ helper.contextualSuites("Entity (query)", [
             accept();
           }, 150);
         });
-      }
+      },
     }).then(function() {
       assert(sum === 6);
     });
   });
 
-  test("Query a partition (with handler and limit 2)", function() {
+  test('Query a partition (with handler and limit 2)', function() {
     var sum = 0;
     return Item.query({id: id}, {
       limit:        2,
-      handler:      function(item) { sum += item.count; }
+      handler:      function(item) { sum += item.count; },
     }).then(function() {
       assert(sum === 6);
     });
   });
 
-  test("Query a partition (with async handler and limit 2)", function() {
+  test('Query a partition (with async handler and limit 2)', function() {
     var sum = 0;
     return Item.query({id: id}, {
       limit:        2,
@@ -176,17 +176,17 @@ helper.contextualSuites("Entity (query)", [
             accept();
           }, 150);
         });
-      }
+      },
     }).then(function() {
       assert(sum === 6);
     });
   });
 
-  test("Filter by tag", function() {
+  test('Filter by tag', function() {
     var sum = 0;
     return Item.query({
       id:     id,
-      tag:    'tag1'
+      tag:    'tag1',
     }).then(function(data) {
       assert(data.entries.length === 2);
       data.entries.forEach(function(item) {
@@ -195,66 +195,66 @@ helper.contextualSuites("Entity (query)", [
     });
   });
 
-  test("Filter by tag (with handler)", function() {
+  test('Filter by tag (with handler)', function() {
     var sum = 0;
     return Item.query({
       id:     id,
-      tag:    'tag1'
+      tag:    'tag1',
     }, {
-      handler:      function(item) { sum += item.count; }
+      handler:      function(item) { sum += item.count; },
     }).then(function() {
       assert(sum === 4);
     });
   });
 
-  test("Filter by time == Date(1)", function() {
+  test('Filter by time == Date(1)', function() {
     var sum = 0;
     return Item.query({
       id:       id,
-      time:     new Date(1)
+      time:     new Date(1),
     }).then(function(data) {
       assert(data.entries.length === 1);
       assert(data.entries[0].name == 'item2');
     });
   });
 
-  test("Filter by time < Date(1)", function() {
+  test('Filter by time < Date(1)', function() {
     var sum = 0;
     return Item.query({
       id:       id,
-      time:     subject.op.lessThan(new Date(1))
+      time:     subject.op.lessThan(new Date(1)),
     }).then(function(data) {
       assert(data.entries.length === 1);
       assert(data.entries[0].name == 'item1');
     });
   });
 
-  test("Filter by time < Date(100)", function() {
+  test('Filter by time < Date(100)', function() {
     var sum = 0;
     return Item.query({
       id:       id,
-      time:     subject.op.lessThan(new Date(100))
+      time:     subject.op.lessThan(new Date(100)),
     }).then(function(data) {
       assert(data.entries.length === 2);
     });
   });
 
-  test("Filter by time > Date(100)", function() {
+  test('Filter by time > Date(100)', function() {
     var sum = 0;
     return Item.query({
       id:       id,
-      time:     subject.op.greaterThan(new Date(100))
+      time:     subject.op.greaterThan(new Date(100)),
     }).then(function(data) {
       assert(data.entries.length === 1);
       assert(data.entries[0].name == 'item3');
     });
   });
 
-  test("Filter by active == true", function() {
+  test('Filter by active == true', function() {
     var sum = 0;
     return Item.query({
       id:       id,
-      active:   true
+      active:   true,
     }).then(function(data) {
       assert(data.entries.length === 2);
       data.entries.forEach(function(item) {
@@ -263,11 +263,11 @@ helper.contextualSuites("Entity (query)", [
     });
   });
 
-  test("Filter by active == false", function() {
+  test('Filter by active == false', function() {
     var sum = 0;
     return Item.query({
       id:       id,
-      active:   false
+      active:   false,
     }).then(function(data) {
       assert(data.entries.length === 1);
       assert(data.entries[0].name == 'item2');
@@ -277,10 +277,10 @@ helper.contextualSuites("Entity (query)", [
     });
   });
 
-  test("Filter by count < 3", function() {
+  test('Filter by count < 3', function() {
     return Item.query({
       id:       id,
-      count:    subject.op.lessThan(3)
+      count:    subject.op.lessThan(3),
     }).then(function(data) {
       assert(data.entries.length === 2);
       data.entries.forEach(function(item) {
@@ -289,12 +289,12 @@ helper.contextualSuites("Entity (query)", [
     });
   });
 
-  test("Query for specific row (matchRow: exact)", function() {
+  test('Query for specific row (matchRow: exact)', function() {
     return Item.query({
       id:     id,
-      name:   'item2'
+      name:   'item2',
     }, {
-      matchRow:   'exact'
+      matchRow:   'exact',
     }).then(function(data) {
       assert(data.entries.length === 1);
       data.entries.forEach(function(item) {
@@ -303,17 +303,17 @@ helper.contextualSuites("Entity (query)", [
     });
   });
 
-  test("Can't use matchRow: exact without row-key", function() {
+  test('Can\'t use matchRow: exact without row-key', function() {
     return Promise.resolve().then(function() {
       return Item.query({
         id:     id,
       }, {
-        matchRow:   'exact'
+        matchRow:   'exact',
       });
     }).then(function() {
-      assert(false, "Expected an error");
+      assert(false, 'Expected an error');
     }, function(err) {
-      debug("Caught expected error: %j", err);
+      debug('Caught expected error: %j', err);
     });
   });
 });

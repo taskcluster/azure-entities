@@ -1,4 +1,3 @@
-"use strict";
 
 var util            = require('util');
 var assert          = require('assert');
@@ -18,10 +17,10 @@ var checkType = function(name, property, value, types) {
   if (!(types instanceof Array)) {
     types = [types];
   }
-  if (types.indexOf(typeof(value)) === -1) {
-    debug("%s '%s' expected %j got: %j", name, property, types, value);
-    throw new Error(name + " '" + property + "' expected one of type(s): '" +
-                    types.join(',') + "' got type: '" + typeof(value) + "'");
+  if (types.indexOf(typeof value) === -1) {
+    debug('%s \'%s\' expected %j got: %j', name, property, types, value);
+    throw new Error(name + ' \'' + property + '\' expected one of type(s): \'' +
+                    types.join(',') + '\' got type: \'' + typeof value + '\'');
   }
 };
 
@@ -65,7 +64,7 @@ BaseType.prototype.isEncrypted = false;
  * encrypted the data with `cryptoKey` before saving it to target.
  */
 BaseType.prototype.serialize = function(target, value, cryptoKey) {
-  throw new Error("Not implemented");
+  throw new Error('Not implemented');
 };
 
 /** Compare the two values (deep comparison if necessary) */
@@ -73,7 +72,7 @@ BaseType.prototype.equal = function(value1, value2) {
   // Compare using serialize(), this works because serialize(), must be
   // implemented, but it might not be the cheapest implementation
   var target1 = {},
-      target2 = {};
+    target2 = {};
   this.serialize(target1, value1);
   this.serialize(target2, value2);
   return _.isEqual(target1, target2);
@@ -88,17 +87,17 @@ BaseType.prototype.clone = function(value) {
 
 /** Construct $filter string with operator */
 BaseType.prototype.filterCondition = function(op) {
-  throw new Error("Not implemented");
+  throw new Error('Not implemented');
 };
 
 /** Apply the filter op in-memory */
 BaseType.prototype.compare = function(entity, op) {
-  throw new Error("Not implemented");
+  throw new Error('Not implemented');
 };
 
 /** Get a string representation for key generation (optional) */
 BaseType.prototype.string = function(value) {
-  throw new Error("Operation is not support for this data type");
+  throw new Error('Operation is not support for this data type');
 };
 
 /** Get a string or buffer representation for hash-key generation (optional) */
@@ -113,7 +112,7 @@ BaseType.prototype.hash = function(value) {
  * must decrypted the data with `cryptoKey` before deserializing it.
  */
 BaseType.prototype.deserialize = function(source, cryptoKey) {
-  throw new Error("Not implemented");
+  throw new Error('Not implemented');
 };
 
 // Export BaseType
@@ -134,7 +133,7 @@ BaseValueType.prototype.isComparable = true;
 
 /** Validate the type of the value */
 BaseValueType.prototype.validate = function(value) {
-  throw new Error("Not implemented");
+  throw new Error('Not implemented');
 };
 
 BaseValueType.prototype.serialize = function(target, value) {
@@ -256,7 +255,7 @@ NumberType.prototype.string = function(value) {
 NumberType.prototype.deserialize = function(source) {
   var value = source[this.property];
   if (source[this.property + '@odata.type'] === 'Edm.Int64') {
-    value = parseInt(value);
+    value = parseInt(value, 10);
   }
   this.validate(value);
   return value;
@@ -270,7 +269,6 @@ NumberType.prototype.filterCondition = function(op) {
 NumberType.prototype.compare = function(entity, op) {
   return op.compare(+entity[this.property], +op.operand);
 };
-
 
 // Export NumberType as Number
 exports.Number = NumberType;
@@ -288,16 +286,16 @@ util.inherits(PositiveIntegerType, NumberType);
 PositiveIntegerType.prototype.validate = function(value) {
   checkType('PositiveIntegerType', this.property, value, 'number');
   if (!isNaN(value) && value % 1  !== 0) {
-    throw new Error("PositiveIntegerType '" + this.property + "'" +
-                    " expected an integer got a float or NaN");
+    throw new Error('PositiveIntegerType \'' + this.property + '\'' +
+                    ' expected an integer got a float or NaN');
   }
   if (value < 0) {
-    throw new Error("PositiveIntegerType '" + this.property + "'" +
-                    " expected a positive integer, got less than zero");
+    throw new Error('PositiveIntegerType \'' + this.property + '\'' +
+                    ' expected a positive integer, got less than zero');
   }
   if (value > Math.pow(2, 32)) {
-    throw new Error("PositiveIntegerType '" + this.property + "'" +
-                    " expected an integer, got more than 2^32");
+    throw new Error('PositiveIntegerType \'' + this.property + '\'' +
+                    ' expected an integer, got more than 2^32');
   }
 };
 
@@ -319,8 +317,8 @@ DateType.prototype.isComparable = true;
 
 DateType.prototype.validate = function(value) {
   if (!(value instanceof Date)) {
-    throw new Error("DateType '" + this.property +
-                    "' expected a date got type: " + typeof(value));
+    throw new Error('DateType \'' + this.property +
+                    '\' expected a date got type: ' + typeof value);
   }
 };
 
@@ -361,10 +359,8 @@ DateType.prototype.compare = function(entity, op) {
   return op.compare(new Date(entity[this.property]).getTime(), op.operand.getTime());
 };
 
-
 // Export DateType as Date
 exports.Date = DateType;
-
 
 /******************** UUID Type ********************/
 
@@ -384,7 +380,7 @@ var _uuidExpr = /^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i;
 UUIDType.prototype.validate = function(value) {
   checkType('UUIDType', this.property, value, 'string');
   if (!_uuidExpr.test(value)) {
-    throw new Error("UUIDType '" + this.property + "' expected a uuid got: "
+    throw new Error('UUIDType \'' + this.property + '\' expected a uuid got: '
                     + value);
   }
 };
@@ -409,12 +405,11 @@ UUIDType.prototype.filterCondition = function(op) {
 };
 
 UUIDType.prototype.compare = function(entity, op) {
-  throw new Error("Not implemented");
+  throw new Error('Not implemented');
 };
 
 // Export UUIDType as UUID
 exports.UUID = UUIDType;
-
 
 /******************** SlugId Type ********************/
 
@@ -433,9 +428,9 @@ var _slugIdExpr = /^[A-Za-z0-9_-]{8}[Q-T][A-Za-z0-9_-][CGKOSWaeimquy26-][A-Za-z0
 
 SlugIdType.prototype.validate = function(value) {
   checkType('SlugIdType', this.property, value, 'string');
-  if(!_slugIdExpr.test(value)) {
-    throw new Error("SlugIdType '" + this.property +
-                    "' expected a slugid got: " + value);
+  if (!_slugIdExpr.test(value)) {
+    throw new Error('SlugIdType \'' + this.property +
+                    '\' expected a slugid got: ' + value);
   }
 };
 
@@ -456,9 +451,8 @@ SlugIdType.prototype.filterCondition = function(op) {
 };
 
 SlugIdType.prototype.compare = function(entity, op) {
-  throw new Error("Not implemented");
+  throw new Error('Not implemented');
 };
-
 
 // Export SlugIdType as SlugId
 exports.SlugId = SlugIdType;
@@ -482,20 +476,20 @@ BaseBufferType.prototype.isComparable = false;
 
 /** Transform value to buffer */
 BaseBufferType.prototype.toBuffer = function(value, cryptoKey) {
-  throw new Error("Not implemented");
+  throw new Error('Not implemented');
 };
 
 /** Transform value from buffer */
 BaseBufferType.prototype.fromBuffer = function(buffer, cryptoKey) {
-  throw new Error("Not implemented");
+  throw new Error('Not implemented');
 };
 
 BaseBufferType.prototype.serialize = function(target, value, cryptoKey) {
   value = this.toBuffer(value, cryptoKey);
-  assert(value.length <= 256 * 1024, "Can't store buffers > 256kb");
+  assert(value.length <= 256 * 1024, 'Can\'t store buffers > 256kb');
   // We have one chunk per 64kb
   var chunks = Math.ceil(value.length / (64 * 1024));
-  for(var i = 0; i < chunks; i++) {
+  for (var i = 0; i < chunks; i++) {
     var end   = Math.min((i + 1) * 64 * 1024, value.length);
     var chunk = value.slice(i * 64 * 1024, end);
     target['__buf' + i + '_' + this.property + '@odata.type'] = 'Edm.Binary';
@@ -513,20 +507,19 @@ BaseBufferType.prototype.deserialize = function(source, cryptoKey) {
   checkType('BaseBufferType', '__bufchunks_' + this.property, n, 'number');
 
   var chunks = [];
-  for(var i = 0; i < n; i++) {
+  for (var i = 0; i < n; i++) {
     chunks[i] = new Buffer(source['__buf' + i + '_' + this.property], 'base64');
   }
   return this.fromBuffer(Buffer.concat(chunks), cryptoKey);
 };
 
 BaseBufferType.prototype.filterCondition = function(op) {
-  throw new Error("Buffer based types are not comparable!");
+  throw new Error('Buffer based types are not comparable!');
 };
 
 SlugIdType.prototype.compare = function(entity, op) {
-  throw new Error("Buffer based types are not comparable!");
+  throw new Error('Buffer based types are not comparable!');
 };
-
 
 // Export BaseBufferType as BaseBufferType
 exports.BaseBufferType = BaseBufferType;
@@ -543,7 +536,7 @@ util.inherits(BlobType, BaseBufferType);
 
 BlobType.prototype.validate = function(value) {
   assert(Buffer.isBuffer(value),
-         "BlobType '" + this.property + "' expected a Buffer");
+    'BlobType \'' + this.property + '\' expected a Buffer');
 };
 
 BlobType.prototype.toBuffer = function(value) {
@@ -629,7 +622,7 @@ JSONType.prototype.validate = function(value) {
     'string',
     'number',
     'object',
-    'boolean'
+    'boolean',
   ]);
 };
 
@@ -677,8 +670,8 @@ exports.Schema = function(schema) {
       return;
     }
     let err = new Error(
-      "SchemaEnforcedType '" + this.property +
-      "' schema validation failed: " + ajv.errorsText(validate.errors)
+      'SchemaEnforcedType \'' + this.property +
+      '\' schema validation failed: ' + ajv.errorsText(validate.errors)
     );
     err.errors = validate.errors;
     err.value = value;
@@ -703,19 +696,19 @@ EncryptedBaseType.prototype.isEncrypted = true;
 
 /** Transform value to buffer */
 EncryptedBaseType.prototype.toPlainBuffer = function(value) {
-  throw new Error("Not implemented");
+  throw new Error('Not implemented');
 };
 
 /** Transform value from buffer */
 EncryptedBaseType.prototype.fromPlainBuffer = function(buffer) {
-  throw new Error("Not implemented");
+  throw new Error('Not implemented');
 };
 
 EncryptedBaseType.prototype.toBuffer = function(value, cryptoKey) {
   var plainBuffer = this.toPlainBuffer(value);
   // Need room for initialization vector and any padding
   assert(plainBuffer.length <= 256 * 1024 - 32,
-         "Can't store buffers > 256 * 1024 - 32 bytes");
+    'Can\'t store buffers > 256 * 1024 - 32 bytes');
   var iv          = crypto.randomBytes(16);
   var cipher      = crypto.createCipheriv('aes-256-cbc', cryptoKey, iv);
   var c1          = cipher.update(plainBuffer);
@@ -747,7 +740,7 @@ util.inherits(EncryptedBlobType, EncryptedBaseType);
 
 EncryptedBlobType.prototype.validate = function(value) {
   assert(Buffer.isBuffer(value),
-         "EncryptedBlobType '" + this.property + "' expected a Buffer");
+    'EncryptedBlobType \'' + this.property + '\' expected a Buffer');
 };
 
 EncryptedBlobType.prototype.toPlainBuffer = function(value) {
@@ -833,7 +826,7 @@ EncryptedJSONType.prototype.validate = function(value) {
     'string',
     'number',
     'object',
-    'boolean'
+    'boolean',
   ]);
 };
 
@@ -881,8 +874,8 @@ exports.EncryptedSchema = function(schema) {
       return;
     }
     let err = new Error(
-      "EncryptedSchemaEnforcedType '" + this.property +
-      "' schema validation failed: " + ajv.errorsText(validate.errors)
+      'EncryptedSchemaEnforcedType \'' + this.property +
+      '\' schema validation failed: ' + ajv.errorsText(validate.errors)
     );
     err.errors = validate.errors;
     err.value = value;
@@ -900,14 +893,14 @@ var SLUGID_SIZE = 128 / 8;
 // Convert slugid to buffer
 var slugIdToBuffer = function(slug) {
   var base64 = slug
-                  .replace(/-/g, '+')
-                  .replace(/_/g, '/')
+    .replace(/-/g, '+')
+    .replace(/_/g, '/')
                   + '==';
   return new Buffer(base64, 'base64');
 };
 
 // Convert buffer to slugId where `entryIndex` is the slugId entry index to retrieve
-var bufferToSlugId = function (bufferView, entryIndex) {
+var bufferToSlugId = function(bufferView, entryIndex) {
   return bufferView.toString('base64', entryIndex * SLUGID_SIZE, SLUGID_SIZE * (entryIndex + 1))
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
@@ -921,7 +914,9 @@ var SlugIdArray = function() {
   this.avail  = 32;
 };
 
-/** Retrieve all the entries added to the buffer in their original format i.e., before being turned into base64 slugIds */
+/** Retrieve all the entries added to the buffer in their original format
+ *  i.e., before being turned into base64 slugIds
+ */
 SlugIdArray.prototype.toArray = function() {
   const buffer = this.getBufferView();
   let result = [];
@@ -1057,7 +1052,7 @@ SlugIdArray.prototype.slice = function(begin, end) {
   if (end < 0) {
     end = this.length + end;
   } else {
-    end = (!end || this.length > end) ? this.length : end;
+    end = !end || this.length > end ? this.length : end;
   }
 
   // Return a copy of the array
@@ -1083,13 +1078,12 @@ SlugIdArray.prototype.clone = function() {
 
 /** Compare slugid arrays */
 SlugIdArray.prototype.equals = function(other) {
-  assert(other instanceof SlugIdArray, "Expected a SlugIdArray");
+  assert(other instanceof SlugIdArray, 'Expected a SlugIdArray');
   return buffertools.compare(
     this.getBufferView(),
     other.getBufferView()
   ) === 0;
 };
-
 
 /**
  * Get a buffer view for the internal structure, only use this for reading,
@@ -1116,8 +1110,8 @@ var SlugIdArrayType = function(property) {
 util.inherits(SlugIdArrayType, BaseBufferType);
 
 SlugIdArrayType.prototype.toBuffer = function(value) {
-  assert(value instanceof SlugIdArray, "SlugIdArrayType '" + this.property +
-         "' expected SlugIdArray, got: " + value);
+  assert(value instanceof SlugIdArray, 'SlugIdArrayType \'' + this.property +
+         '\' expected SlugIdArray, got: ' + value);
   return value.getBufferView();
 };
 
@@ -1126,22 +1120,22 @@ SlugIdArrayType.prototype.fromBuffer = function(value) {
 };
 
 SlugIdArrayType.prototype.equal = function(value1, value2) {
-  assert(value1 instanceof SlugIdArray, "SlugIdArrayType '" + this.property +
-         "' expected SlugIdArray, got: " + value1);
-  assert(value2 instanceof SlugIdArray, "SlugIdArrayType '" + this.property +
-         "' expected SlugIdArray, got: " + value2);
+  assert(value1 instanceof SlugIdArray, 'SlugIdArrayType \'' + this.property +
+         '\' expected SlugIdArray, got: ' + value1);
+  assert(value2 instanceof SlugIdArray, 'SlugIdArrayType \'' + this.property +
+         '\' expected SlugIdArray, got: ' + value2);
   return value1.equals(value2);
 };
 
 SlugIdArrayType.prototype.hash = function(value) {
-  assert(value instanceof SlugIdArray, "SlugIdArrayType '" + this.property +
-         "' expected SlugIdArray, got: " + value);
+  assert(value instanceof SlugIdArray, 'SlugIdArrayType \'' + this.property +
+         '\' expected SlugIdArray, got: ' + value);
   return value.getBufferView();
 };
 
 SlugIdArrayType.prototype.clone = function(value) {
-  assert(value instanceof SlugIdArray, "SlugIdArrayType '" + this.property +
-         "' expected SlugIdArray, got: " + value);
+  assert(value instanceof SlugIdArray, 'SlugIdArrayType \'' + this.property +
+         '\' expected SlugIdArray, got: ' + value);
   return value.clone();
 };
 

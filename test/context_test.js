@@ -1,4 +1,4 @@
-var subject = require("../lib/entity")
+var subject = require('../lib/entity');
 var assert  = require('assert');
 var slugid  = require('slugid');
 var _       = require('lodash');
@@ -6,9 +6,9 @@ var Promise = require('promise');
 var debug   = require('debug')('test:entity:context');
 var helper  = require('./helper');
 
-suite("Entity (context)", function() {
+suite('Entity (context)', function() {
 
-  test("Entity.configure().setup()", function() {
+  test('Entity.configure().setup()', function() {
     subject.configure({
       version:          1,
       partitionKey:     subject.keys.StringKey('id'),
@@ -16,15 +16,15 @@ suite("Entity (context)", function() {
       properties: {
         id:             subject.types.String,
         name:           subject.types.String,
-        count:          subject.types.Number
-      }
+        count:          subject.types.Number,
+      },
     }).setup({
       credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName
+      table:        helper.cfg.tableName,
     });
   });
 
-  test("Entity.configure().setup() with context", function() {
+  test('Entity.configure().setup() with context', function() {
     subject.configure({
       version:          1,
       partitionKey:     subject.keys.StringKey('id'),
@@ -32,19 +32,19 @@ suite("Entity (context)", function() {
       properties: {
         id:             subject.types.String,
         name:           subject.types.String,
-        count:          subject.types.Number
+        count:          subject.types.Number,
       },
-      context:          ['config']
+      context:          ['config'],
     }).setup({
       credentials:  helper.cfg.azure,
       table:        helper.cfg.tableName,
       context: {
-        config:     "My config object"
-      }
+        config:     'My config object',
+      },
     });
   });
 
-  test("Entity.create() with context", function() {
+  test('Entity.create() with context', function() {
     var Item = subject.configure({
       version:          1,
       partitionKey:     subject.keys.StringKey('id'),
@@ -52,30 +52,30 @@ suite("Entity (context)", function() {
       properties: {
         id:             subject.types.String,
         name:           subject.types.String,
-        count:          subject.types.Number
+        count:          subject.types.Number,
       },
-      context:          ['config', 'maxCount']
+      context:          ['config', 'maxCount'],
     }).setup({
       credentials:  helper.cfg.azure,
       table:        helper.cfg.tableName,
       context: {
-        config:     "My config object",
-        maxCount:   10
-      }
+        config:     'My config object',
+        maxCount:   10,
+      },
     });
     return Item.ensureTable().then(function() {
       return Item.create({
         id:     slugid.v4(),
         name:   'my-test-item',
-        count:  1
+        count:  1,
       });
     }).then(function(item) {
-      assert(item.config === "My config object", "Missing 'cfg' from context");
-      assert(item.maxCount === 10, "Missing 'maxCount' from context");
+      assert(item.config === 'My config object', 'Missing \'cfg\' from context');
+      assert(item.maxCount === 10, 'Missing \'maxCount\' from context');
     });
   });
 
-  test("Entity migration with context", function() {
+  test('Entity migration with context', function() {
     var Item = subject.configure({
       version:          1,
       partitionKey:     subject.keys.StringKey('id'),
@@ -83,16 +83,16 @@ suite("Entity (context)", function() {
       properties: {
         id:             subject.types.String,
         name:           subject.types.String,
-        count:          subject.types.Number
+        count:          subject.types.Number,
       },
-      context:          ['config', 'maxCount']
+      context:          ['config', 'maxCount'],
     }).configure({
       version:          2,
       properties: {
         id:             subject.types.String,
         name:           subject.types.String,
         count:          subject.types.Number,
-        reason:         subject.types.String
+        reason:         subject.types.String,
       },
       context:          ['maxCount'],
       migrate: function(item) {
@@ -100,29 +100,29 @@ suite("Entity (context)", function() {
           id:           item.id,
           name:         item.name,
           count:        item.count,
-          reason:       "no-reason"
+          reason:       'no-reason',
         };
-      }
+      },
     }).setup({
       credentials:  helper.cfg.azure,
       table:        helper.cfg.tableName,
       context: {
-        maxCount:  11
-      }
+        maxCount:  11,
+      },
     });
     return Item.ensureTable().then(function() {
       return Item.create({
         id:       slugid.v4(),
         name:     'my-test-item',
         count:    1,
-        reason:   'i-said-so'
+        reason:   'i-said-so',
       });
     }).then(function(item) {
-      assert(item.maxCount === 11, "Missing 'maxCount' from context");
+      assert(item.maxCount === 11, 'Missing \'maxCount\' from context');
     });
   });
 
-  test("Entity.configure().setup() with undeclared context", function() {
+  test('Entity.configure().setup() with undeclared context', function() {
     try {
       subject.configure({
         version:          1,
@@ -131,25 +131,24 @@ suite("Entity (context)", function() {
         properties: {
           id:             subject.types.String,
           name:           subject.types.String,
-          count:          subject.types.Number
+          count:          subject.types.Number,
         },
-        context:          ['config']
+        context:          ['config'],
       }).setup({
         credentials:  helper.cfg.azure,
         table:        helper.cfg.tableName,
         context: {
-          config:         "My config object",
-          undeclaredKey:  19
-        }
+          config:         'My config object',
+          undeclaredKey:  19,
+        },
       });
-    }
-    catch(err) {
+    } catch (err) {
       return; // Expected error
     }
-    assert(false, "Expected an error");
+    assert(false, 'Expected an error');
   });
 
-  test("Entity.configure().setup() with missing context", function() {
+  test('Entity.configure().setup() with missing context', function() {
     try {
       subject.configure({
         version:          1,
@@ -158,18 +157,17 @@ suite("Entity (context)", function() {
         properties: {
           id:             subject.types.String,
           name:           subject.types.String,
-          count:          subject.types.Number
+          count:          subject.types.Number,
         },
-        context:          ['config']
+        context:          ['config'],
       }).setup({
         credentials:  helper.cfg.azure,
         table:        helper.cfg.tableName,
-        context:      {}
+        context:      {},
       });
-    }
-    catch(err) {
+    } catch (err) {
       return; // Expected error
     }
-    assert(false, "Expected an error");
+    assert(false, 'Expected an error');
   });
 });

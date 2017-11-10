@@ -1,4 +1,3 @@
-"use strict";
 
 var util            = require('util');
 var assert          = require('assert');
@@ -32,8 +31,8 @@ var valueFromOpOrValue = function(opOrValue) {
  */
 var encodeStringKey = function(str) {
   // Check for empty string
-  if (str === "") {
-    return "!";
+  if (str === '') {
+    return '!';
   }
   // 1. URL encode
   // 2. URL encode all exclamation marks (replace ! with %21)
@@ -42,16 +41,16 @@ var encodeStringKey = function(str) {
   //    do prefix matching
   // 4. Replace % with exclamation marks for Azure compatibility
   return encodeURIComponent(str)
-            .replace(/!/g, '%21')
-            .replace(/~/g, '%7e')
-            .replace(/%/g, '!');
+    .replace(/!/g, '%21')
+    .replace(/~/g, '%7e')
+    .replace(/%/g, '!');
 };
 
 /** Decode string-key (opposite of encodeStringKey) */
 var decodeStringKey = function(key) {
   // Check for empty string
-  if (key === "!") {
-    return "";
+  if (key === '!') {
+    return '';
   }
   // 1. Replace exclamation marks with % to get URL encoded string
   // 2. URL decode (this handle step 1 and 2 from encoding process)
@@ -66,7 +65,7 @@ var StringKey = function(mapping, key) {
   this.key = key;
 
   // Set key type
-  assert(mapping[this.key], "key '" + key + "' is not defined in mapping");
+  assert(mapping[this.key], 'key \'' + key + '\' is not defined in mapping');
   this.type = mapping[this.key];
 
   // Set covers
@@ -78,7 +77,7 @@ StringKey.prototype.exact = function(properties) {
   // Get value
   var value = properties[this.key];
   // Check that value was given
-  assert(value !== undefined, "Unable to create key from properties");
+  assert(value !== undefined, 'Unable to create key from properties');
   // Return exact key
   return encodeStringKey(this.type.string(value));
 };
@@ -88,7 +87,7 @@ StringKey.prototype.exactFromConditions = function(properties) {
   // Get value
   var value = valueFromOpOrValue(properties[this.key]);
   // Check that value was given
-  assert(value !== undefined, "Unable to create key from properties");
+  assert(value !== undefined, 'Unable to create key from properties');
   // Return exact key
   return encodeStringKey(this.type.string(value));
 };
@@ -112,9 +111,9 @@ var DescendingIntegerKey = function(mapping, key) {
   this.key = key;
 
   // Set key type
-  assert(mapping[this.key], "key '" + key + "' is not defined in mapping");
+  assert(mapping[this.key], 'key \'' + key + '\' is not defined in mapping');
   assert(mapping[this.key] instanceof Types.PositiveInteger,
-         "key '" + key + "' must be a PositiveInteger type");
+    'key \'' + key + '\' must be a PositiveInteger type');
   this.type = mapping[this.key];
 
   // Set covers
@@ -126,7 +125,7 @@ DescendingIntegerKey.prototype.exact = function(properties) {
   // Get value
   var value = properties[this.key];
   // Check that value was given
-  assert(value !== undefined, "Unable to create key from properties");
+  assert(value !== undefined, 'Unable to create key from properties');
   // Return exact key
   return (MORE_NINES_THAN_INT - value).toString();
 };
@@ -136,7 +135,7 @@ DescendingIntegerKey.prototype.exactFromConditions = function(properties) {
   // Get value
   var value = valueFromOpOrValue(properties[this.key]);
   // Check that value was given
-  assert(value !== undefined, "Unable to create key from properties");
+  assert(value !== undefined, 'Unable to create key from properties');
   // Return exact key
   return (MORE_NINES_THAN_INT - value).toString();
 };
@@ -160,9 +159,9 @@ var AscendingIntegerKey = function(mapping, key) {
   this.key = key;
 
   // Set key type
-  assert(mapping[this.key], "key '" + key + "' is not defined in mapping");
+  assert(mapping[this.key], 'key \'' + key + '\' is not defined in mapping');
   assert(mapping[this.key] instanceof Types.PositiveInteger,
-         "key '" + key + "' must be a PositiveInteger type");
+    'key \'' + key + '\' must be a PositiveInteger type');
   this.type = mapping[this.key];
 
   // Set covers
@@ -174,9 +173,9 @@ AscendingIntegerKey.prototype.exact = function(properties) {
   // Get value
   var value = properties[this.key];
   // Check that value was given
-  assert(value !== undefined, "Unable to create key from properties");
+  assert(value !== undefined, 'Unable to create key from properties');
   // Return exact key
-  var str = value.toString()
+  var str = value.toString();
   return ASCENDING_KEY_PADDING.substring(
     0, ASCENDING_KEY_PADDING.length - str.length
   ) + str;
@@ -187,9 +186,9 @@ AscendingIntegerKey.prototype.exactFromConditions = function(properties) {
   // Get value
   var value = valueFromOpOrValue(properties[this.key]);
   // Check that value was given
-  assert(value !== undefined, "Unable to create key from properties");
+  assert(value !== undefined, 'Unable to create key from properties');
   // Return exact key
-  var str = value.toString()
+  var str = value.toString();
   return ASCENDING_KEY_PADDING.substring(
     0, ASCENDING_KEY_PADDING.length - str.length
   ) + str;
@@ -206,7 +205,7 @@ exports.AscendingIntegerKey = function(key) {
 
 /** Construct a ConstantKey */
 var ConstantKey = function(constant) {
-  assert(typeof(constant) === 'string', "ConstantKey takes a string!");
+  assert(typeof constant === 'string', 'ConstantKey takes a string!');
 
   // Set constant
   this.constant = constant;
@@ -225,12 +224,11 @@ ConstantKey.prototype.exactFromConditions = function(properties) {
 };
 
 exports.ConstantKey = function(constant) {
-  assert(typeof(constant) === 'string', "ConstantKey takes a string!");
+  assert(typeof constant === 'string', 'ConstantKey takes a string!');
   return function(mapping) {
     return new ConstantKey(constant);
   };
 };
-
 
 /******************** Composite Key ********************/
 
@@ -241,16 +239,16 @@ var COMPOSITE_SEPARATOR = '~';
 
 /** Construct a CompositeKey */
 var CompositeKey = function(mapping, keys) {
-  assert(keys instanceof Array, "keys must be an array");
-  assert(keys.length > 0, "CompositeKey needs at least one key")
+  assert(keys instanceof Array, 'keys must be an array');
+  assert(keys.length > 0, 'CompositeKey needs at least one key');
 
   // Set keys
   this.keys = keys;
 
   // Set key types
   this.types = [];
-  for(var i = 0; i < keys.length; i++) {
-    assert(mapping[keys[i]], "key '" + keys[i] + "' is not defined in mapping");
+  for (var i = 0; i < keys.length; i++) {
+    assert(mapping[keys[i]], 'key \'' + keys[i] + '\' is not defined in mapping');
     this.types[i] = mapping[keys[i]];
   }
 
@@ -264,8 +262,8 @@ CompositeKey.prototype.exact = function(properties) {
     // Get value from key
     var value = properties[key];
     if (value === undefined) {
-      throw new Error("Unable to render CompositeKey from properties, " +
-                      "missing: '" + key + "'");
+      throw new Error('Unable to render CompositeKey from properties, ' +
+                      'missing: \'' + key + '\'');
     }
 
     // Encode as string
@@ -279,8 +277,8 @@ CompositeKey.prototype.exactFromConditions = function(properties) {
     // Get value from key
     var value = valueFromOpOrValue(properties[key]);
     if (value === undefined) {
-      throw new Error("Unable to render CompositeKey from properties, " +
-                      "missing: '" + key + "'");
+      throw new Error('Unable to render CompositeKey from properties, ' +
+                      'missing: \'' + key + '\'');
     }
 
     // Encode as string
@@ -291,7 +289,7 @@ CompositeKey.prototype.exactFromConditions = function(properties) {
 exports.CompositeKey = function() {
   var keys = Array.prototype.slice.call(arguments);
   keys.forEach(function(key) {
-    assert(typeof(key) === 'string', "CompositeKey takes strings as arguments");
+    assert(typeof key === 'string', 'CompositeKey takes strings as arguments');
   });
   return function(mapping) {
     return new CompositeKey(mapping, keys);
@@ -302,23 +300,23 @@ exports.CompositeKey = function() {
 
 // Check that crypto has support for sha512
 assert(crypto.getHashes().indexOf('sha512') !== -1,
-       "crypto doesn't support sha512, please upgrade OpenSSL");
+  'crypto doesn\'t support sha512, please upgrade OpenSSL');
 
 // Separator used to separate entries in hash key (don't change this)
 var HASH_KEY_SEPARATOR = ':';
 
 /** Construct a HashKey */
 var HashKey = function(mapping, keys) {
-  assert(keys instanceof Array, "keys must be an array");
-  assert(keys.length > 0, "HashKey needs at least one key")
+  assert(keys instanceof Array, 'keys must be an array');
+  assert(keys.length > 0, 'HashKey needs at least one key');
 
   // Set keys
   this.keys = keys;
 
   // Set key types
   this.types = [];
-  for(var i = 0; i < keys.length; i++) {
-    assert(mapping[keys[i]], "key '" + keys[i] + "' is not defined in mapping");
+  for (var i = 0; i < keys.length; i++) {
+    assert(mapping[keys[i]], 'key \'' + keys[i] + '\' is not defined in mapping');
     this.types[i] = mapping[keys[i]];
   }
 
@@ -335,8 +333,8 @@ HashKey.prototype.exact = function(properties) {
     // Get value from key
     var value = properties[key];
     if (value === undefined) {
-      throw new Error("Unable to render HashKey from properties, " +
-                      "missing: '" + key + "'");
+      throw new Error('Unable to render HashKey from properties, ' +
+                      'missing: \'' + key + '\'');
     }
 
     // Find hash value and update the hashsum
@@ -360,8 +358,8 @@ HashKey.prototype.exactFromConditions = function(properties) {
     // Get value from key
     var value = valueFromOpOrValue(properties[key]);
     if (value === undefined) {
-      throw new Error("Unable to render HashKey from properties, " +
-                      "missing: '" + key + "'");
+      throw new Error('Unable to render HashKey from properties, ' +
+                      'missing: \'' + key + '\'');
     }
 
     // Find hash value and update the hashsum
@@ -379,7 +377,7 @@ HashKey.prototype.exactFromConditions = function(properties) {
 exports.HashKey = function() {
   var keys = Array.prototype.slice.call(arguments);
   keys.forEach(function(key) {
-    assert(typeof(key) === 'string', "HashKey takes strings as arguments");
+    assert(typeof key === 'string', 'HashKey takes strings as arguments');
   });
   return function(mapping) {
     return new HashKey(mapping, keys);

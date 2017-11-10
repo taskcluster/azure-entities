@@ -6,10 +6,10 @@ exports.cfg = config({});
 exports.contextualSuites = function(name, contexts, suiteFunc) {
   _.forEach(contexts, function(ctx) {
     var options = ctx.options;
-    if (typeof options === "function") {
+    if (typeof options === 'function') {
       options = options();
     }
-    suite(name + " (" + ctx.context + ")", function() {
+    suite(name + ' (' + ctx.context + ')', function() {
       suiteFunc.bind(this)(ctx.context, options);
     });
   });
@@ -18,26 +18,26 @@ exports.contextualSuites = function(name, contexts, suiteFunc) {
 exports.makeContexts = function(Item, setupOptions) {
   return [
     {
-      context: "Azure",
+      context: 'Azure',
       options: function() {
         return {
           Item: Item.setup(_.defaults({}, setupOptions, {
             credentials:  exports.cfg.azure,
-            table:        exports.cfg.tableName
-          }))
+            table:        exports.cfg.tableName,
+          })),
         };
-      }
+      },
     }, {
-      context: "In-Memory",
+      context: 'In-Memory',
       options: function() {
         return {
           Item: Item.setup(_.defaults({}, setupOptions, {
-            account: "inMemory",
+            account: 'inMemory',
             table:   'items',
             credentials: null,
-          }))
+          })),
         };
-      }
-    }
+      },
+    },
   ];
-}
+};

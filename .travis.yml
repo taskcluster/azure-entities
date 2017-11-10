@@ -1,9 +1,8 @@
 language: node_js
 sudo: false
 node_js:
-- '4'
-- '6'
 - '7'
+- '8'
 addons:
   apt:
     sources:
@@ -13,7 +12,7 @@ addons:
 env:
   global:
   - CXX=g++-4.8
-  - DEBUG='* -superagent -express:* -mocha:* -babel -nock*'
+  - DEBUG='* -superagent -express:* -mocha:* -babel -nock* -eslint*'
   - secure: CFHtd3es0aG0YgsA5OBVgdLZlIrdHdEhayvyJSCWo0AooyVe1zxbBtAPLWysm3UeaK5iqDAPZXrH/M+GXiLFE+yiSkJk+O7q6Fx7rM3oO3J1AZLbseuCbdjJGe/2NXDDzadfeV/4Z9aDYf6f17jxYNlq33XZvNHLBr2BbXw5DzZrcIp4qa8wZym/3Gmp9un9rR3+Pij5iNItaTRpjYQYug12GQsueMaB9dgqCpKVAWzGfOE5zDH1ilyyq9O1xdaRDEeFaPmMzh47a1nCBJ/OcCra21PRDa3BKjnemrGM3TQhTdX2JN5QZTKcDvg9XiapafsIMisbsG8U2GHB61y0T64HZzHLa3lhq0LVfj8aPH7x8cruDMIibB4mKeScgN1/VSxJqwdisPJMYnfX8z4N/7WI53a+nfaVjd7q7kbBQRzmI8zQVdMFzJ2pcl2aISGyl6ZD8EFjQLJQzPJixMpbAPz++0PeBJ76yBYJvD1NshJTLFwjPken+5bQT0ltKS2KuYgkXxS0dVX4nXsJFuUXqBtqEm8vuqh0+tQqjMY6GDsGk6DC6KCHaKfEPhYSWapVhO4F15PArydm1APQ6EhJLB7I0tm1LV0FAcj884J8vWPmwGCakqJ09SmxXTtIyepzvkPCAaDiSxoQY5a0qchRjlWPEshwXHi+x8Gg9L5IL6M=
   - secure: MDr12e/VPN/3rM/maEXXtLb9HEpYIz0qp3grx4upJnR0samcwuiOmO/8TkIRY4oxGwLl7sfE51b5P+2LiEhGInQqWl4EkTKtDjFLuGsakIFK6NUzLBN1K76tmVL0RGfIU+Abo4Y+LWyIBRn3mlp1KlIQlXZo0tHPACEfloHgDlw3YFpJM3kNWK5XlvsxetL2yudG7zTpJbAuJ37h4J38tIAs62x+b5bTaMOz7E0i+DdS8lm9XtIjiwQq6bMIBMFc/xkbfNf6u3MSJ/3Lbi5P0+rTCoVXC6byyzLBqrtYfu8+RLA7K2G/3/guZwQe7ERJgogIJN4rHhR83akUxvfNRutRN5/IwVVS9MKaVAzxQMn11io/Ju5EDBP0Kx7P6ZenJi816UCrew/1sC3cyElJ95zlCAga2pehZ9XumL0V5mwUuAKFu2DsncCh/q/Ci/gNK6OWoSVKekdjFFpeWPXLnriasRWeKmkGNPCHQIQeR747GPSqbS2o4TMh+0H4KzCJQV6p0vu8iH3D/up/QVzIAjb0KLrDXzZUZypk1z1KmHx9lcBRKMzIiyNLkKG35Shb6zhw13lACHlHYKoWwLpJ91Qn5kxr++BSC1JTlNdc8/s/Creqwpz50a4OwgroOZ+tGtnXOd1QCMfMQCHC+NlCnK8LYYkd54v02+LTdVFDMZo=
 notifications:
