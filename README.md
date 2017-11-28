@@ -111,6 +111,9 @@ The following types are encrypted, and require additional arguments to the
   * `EncryptedJSON`
   * `EncryptedSchema(s)` -- JSON matching the JSON schema `s`
 
+Note that all entity types have a maximum stored size of 256k.  Do not store
+values of unbounded size in a single row.
+
 #### Keys
 
 The `partitionKey` and `rowKey` options are used to describe how the Azure
