@@ -115,7 +115,6 @@ helper.contextualSuites('Entity (query)', [
     return Item.query({id: id}, {
       limit:      2,
     }).then(function(data) {
-      console.log(data);
       assert(data.entries.length === 2);
       assert(data.continuation);
 
