@@ -397,3 +397,20 @@ workers.
 If you use `Entity.query` you don't run the risk of executing a full table
 scan. But depending on the size of your partitions it may still be a lengthy
 operation. Always query with care.
+
+# Development
+
+To work on the `azure-entities` library itself, you will need an Azure account.
+Azure provides a ["free tier"](https://azure.microsoft.com/en-us/free/), or you
+may contact the Taskcluster developers to get a testing credential for the
+Taskcluster account.
+
+If you are setting up your own account, you will need to create a storage
+account and create an access key for it.
+
+Set the environment variables `AZURE_ACCOUNT_KEY` and `AZURE_ACCOUNT_NAME`
+appropriately before running the tests.
+
+To get started developing, install [yarn](http://yarnpkg.com/) and the newest
+major version of Node, and run `yarn` in the root of the repository to install
+dependencies.  Then run `yarn test` to start the tests.
