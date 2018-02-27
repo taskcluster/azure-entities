@@ -159,6 +159,7 @@ suite('Entity (SAS from auth.taskcluster.net)', function() {
         accessToken:      'test-token',
       },
       authBaseUrl:  'http://localhost:23244',
+      minSASAuthExpiry: 15 * 60 * 1000 - 1000,
     });
     return Item2.create({
       id:     id,
@@ -166,7 +167,7 @@ suite('Entity (SAS from auth.taskcluster.net)', function() {
       count:  1,
     }).then(function() {
       assert(callCount === 1, 'We should only have called once!');
-      return testing.sleep(200);
+      return testing.sleep(1500);
     }).then(function() {
       return Item2.load({
         id:     id,
