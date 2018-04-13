@@ -1116,6 +1116,10 @@ Entity.prototype.modify = function(modifier) {
   return attemptModify();
 };
 
+// a regular expression matching a continuation token; callers can use this to
+// pre-screen invalid continuation tokens and offer a suitable error.
+Entity.continuationTokenPattern = /^[a-zA-Z0-9_.!*'()%-]*~[a-zA-Z0-9_.!*'()%-]*$/;
+
 /** Encode continuation token as single string using tilde as separator */
 var encodeContinuationToken = function(result) {
   if (!result.nextPartitionKey && !result.nextRowKey) {
