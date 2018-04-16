@@ -117,6 +117,7 @@ helper.contextualSuites('Entity (query)', [
     }).then(function(data) {
       assert(data.entries.length === 2);
       assert(data.continuation);
+      assert(Entity.continuationTokenPattern.test(data.continuation));
 
       // Fetch next
       return Item.query({id: id}, {

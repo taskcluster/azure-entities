@@ -381,9 +381,11 @@ If the conditions doesn't specify enough equality constraints to build the
 exact row-key, and error will be thrown. This allows you to reason about
 expected performance.
 
-**Continuation token**, if using `Entity.scan` without a handler, you receive
-a continuation token with your results. You can use this to continue the table
-scan. A continuation token is a a string (that's all you need to know).
+**Continuation token**, if using `Entity.scan` without a handler, you receive a
+continuation token in the `continuation` property of the return value. You can
+use this to continue the table scan. A continuation token is a a string that
+matches `Entity.continuationTokenPattern`.  You can use this pattern to detect
+invalid continuation tokens from your users and offer a suitable error message.
 
 The `query` method is exactly the same as `Entity.scan` except
 `matchPartition` is set to to `'exact'`. This means that conditions
