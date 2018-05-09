@@ -24,9 +24,7 @@
     "json-stable-stringify": "^1.0.0",
     "lodash": "^4.17.4",
     "promise": "^8.0.1",
-    "slugid": "^1.0.3",
-    "taskcluster-client": "^3.0.3",
-    "taskcluster-lib-testing": "^2.0.2"
+    "slugid": "^1.0.3"
   },
   "devDependencies": {
     "azure-table-node": "^1.4.1",
@@ -39,6 +37,7 @@
     "taskcluster-lib-api": "^3.2.3",
     "taskcluster-lib-app": "^2.0.3",
     "taskcluster-lib-monitor": "^4.6.3",
+    "taskcluster-lib-testing": "^2.0.2",
     "taskcluster-lib-validate": "^3.0.1",
     "typed-env-config": "^1.1.0"
   },

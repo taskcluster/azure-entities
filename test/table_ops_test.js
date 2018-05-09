@@ -25,7 +25,7 @@ helper.contextualSuites('Entity (modify)', [
         Item: Item.setup({
           credentials:  helper.cfg.azure,
           // randomize table names, as azure takes a while to delete a table
-          table:        helper.cfg.tableName + Math.floor(Math.random() * 20),
+          tableName:    helper.cfg.tableName + Math.floor(Math.random() * 20),
         }),
       };
     },
@@ -34,9 +34,8 @@ helper.contextualSuites('Entity (modify)', [
     options: function() {
       return {
         Item: Item.setup({
-          account:  'inMemory',
-          table:    'items',
-          credentials: null,
+          tableName: 'items',
+          credentials: 'inMemory',
         }),
       };
     },

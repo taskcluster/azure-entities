@@ -13,40 +13,10 @@ suite('Config', function() {
     },
   });
 
-  test('inMemory with credentials', function() {
+  test('inMemory', function() {
     Item.setup({
-      account:   'inMemory',
-      table:    'items',
-      credentials: {clientId: 'foo', accountToken: 'bar'},
-    });
-  });
-
-  test('inMemory with no credentials', function() {
-    try {
-      Item.setup({
-        account:   'inMemory',
-        table:    'items',
-      });
-      assert(false, 'Should have thrown an error!');
-    } catch (e) {
-      assert(e.name === 'AssertionError' || e.code === 'ERR_ASSERTION');
-      assert(e.message === 'credentials should be specified even with inMemory, but can be null');
-    }
-  });
-
-  test('inMemory with null credentials', function() {
-    Item.setup({
-      account:   'inMemory',
-      table:    'items',
-      credentials: null,
-    });
-  });
-
-  test('inMemory with undefined credentials', function() {
-    Item.setup({
-      account:   'inMemory',
-      table:    'items',
-      credentials: undefined,
+      tableName: 'items',
+      credentials: 'inMemory',
     });
   });
 });

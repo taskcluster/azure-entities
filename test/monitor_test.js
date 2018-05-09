@@ -30,7 +30,7 @@ suite('Monitoring Integration', function() {
     });
     Item = ItemV1.setup({
       credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName,
+      tableName:    helper.cfg.tableName,
       monitor:      monitor,
     }),
     id = slugid.v4();

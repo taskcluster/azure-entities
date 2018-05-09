@@ -151,18 +151,12 @@ configuration keys and constants for use in Entity instance methods.
 The `setup` method creates a new subclass of `this` (`Entity` or subclass
 thereof) that is ready for use, with the following options:
 
+
 ```js
 {
-  // Azure connection details for use with SAS from auth.taskcluster.net
-  account:           "...",              // Azure storage account name
-  table:             "AzureTableName",   // Azure table name
-  // TaskCluster credentials
-  credentials: {
-    clientId:        "...",              // TaskCluster clientId
-    accessToken:     "...",              // TaskCluster accessToken
-  },
+  credentials:       ...                 // see below
+  tableName:         "AzureTableName",   // Azure table name
   agent:             https.Agent,        // Agent to use (default a global)
-  authBaseUrl:       "...",              // baseUrl for auth (optional)
   signingKey:        "...",              // Key for HMAC signing entities
   cryptoKey:         "...",              // Key for encrypted properties
   drain:             base.stats.Influx,  // Statistics drain (optional)
@@ -171,45 +165,6 @@ thereof) that is ready for use, with the following options:
   context:           {...}               // Extend prototype (optional)
 }
 ```
-
-Using the `options` format provided above a shared-access-signature will be
-fetched from auth.taskcluster.net. The goal with this is to reduce secret
-configuration and reduce exposure of our Azure `accountKey`. To fetch the
-shared-access-signature the following scope is required:
-`auth:azure-table:read-write:<accountName>/<table>`. If you use this option,
-you do not need to ensure the table exists later, as taskcluster-auth will
-do that for you.
-
-If you have the azure credentials, you can also specify the options
-as follows:
-
-```js
-{
-  // Azure connection details
-  table:             "AzureTableName",   // Azure table name
-  // Azure credentials
-  credentials: {
-    accountName:     "...",              // Azure account name
-    accountKey:      "...",              // Azure account key
-  },
-}
-```
-
-To use an in-memory, testing-oriented table, use the special accountName
-`inMemory`.  Credentials are not required. The field `credentials` must
-be specified, but can be null.
-
-```js
-{
-  account:     "inMemory",
-  table:       "AzureTableName"
-  credentials: null,
-}
-```
-
-This testing implementation is largely true to Azure, but is intended only for
-testing, and only in combination with integration tests against Azure to reveal
-any unknown inconsistencies.
 
 In `Entity.configure` the `context` options is a list of property names,
 these properties **must** be specified in when `Entity.setup` is called.
@@ -221,6 +176,77 @@ Once you have configured properties, version, migration, keys, using
 will again create a new subclass that is ready for use, with azure credentials,
 etc. This new subclass cannot be configured further, nor can `setup` be
 called again.
+
+#### Credentials
+
+Credentials can be specified to this library in a variety of ways.  Note that
+these match those of the
+[fast-azure-storage](https://github.com/taskcluster/fast-azure-storage)
+library, except for `inMemory`.
+
+##### Raw Azure credentials
+
+Given an accountName and accompanying account key, configure access like this:
+
+```js
+{
+  // Azure connection details
+  tableName: "AzureTableName",
+  // Azure credentials
+  credentials: {
+    accountId: "...",
+    accessKey: "...",
+  },
+}
+```
+
+##### SAS Function
+
+The underlying
+[fast-azure-storage](https://github.com/taskcluster/fast-azure-storage) library
+allows use of SAS credentials, including dynamic generation of SAS credentials
+as needed. That support can be used transparently from this library:
+
+```js
+{
+  tableName: 'AzureTableName',
+  credentials: {
+    accountId: '...',
+    sas: sas   // sas in querystring form: "se=...&sp=...&sig=..."
+  };
+}
+```
+
+or
+
+```js
+{
+  tableName: 'AzureTableName',
+  credentials: {
+    accountId: '...',
+    sas: function() {
+      return new Promise(/* fetch SAS from somewhere */);
+    },
+    minSASAuthExpiry:   15 * 60 * 1000 // time before refreshing the SAS
+  };
+}
+```
+
+##### Testing
+
+To use an in-memory, testing-oriented table, use the special credential
+`inMemory`. 
+
+```js
+{
+  tableName:       "AzureTableName"
+  credentials: "inMemory",
+}
+```
+
+This testing implementation is largely true to Azure, but is intended only for
+testing, and only in combination with integration tests against Azure to reveal
+any unknown inconsistencies.
 
 ### Table Operations
 

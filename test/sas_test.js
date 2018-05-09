@@ -7,16 +7,12 @@ var azureTable  = require('azure-table-node');
 var helper      = require('./helper');
 
 suite('Entity (Shared-Access-Signatures)', function() {
-
-  var credentials = helper.cfg.azure;
-
-  credentials = _.defaults({}, credentials, {
-    accountUrl: [
-      'https://',
-      credentials.accountName,
-      '.table.core.windows.net/',
-    ].join(''),
-  });
+  // azure-table-node takes different credentials format...
+  const credentials = {
+    accountName: helper.cfg.azure.accountId,
+    accountKey: helper.cfg.azure.accessKey,
+    accountUrl: `'https://${helper.cfg.azure.accountId}.table.core.windows.net/`,
+  };
   var client = azureTable.createClient(credentials);
   var sas = client.generateSAS(
     helper.cfg.tableName,
@@ -38,10 +34,10 @@ suite('Entity (Shared-Access-Signatures)', function() {
     },
   }).setup({
     credentials: {
-      accountName:    helper.cfg.azure.accountName,
+      accountId:      helper.cfg.azure.accountId,
       sas:            sas,
     },
-    table:            helper.cfg.tableName,
+    tableName:        helper.cfg.tableName,
   });
 
   test('ensureTable doesn\'t fail', async function() {
