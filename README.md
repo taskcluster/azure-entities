@@ -436,7 +436,7 @@ Taskcluster account.
 If you are setting up your own account, you will need to create a storage
 account and create an access key for it.
 
-Set the environment variables `AZURE_ACCOUNT_KEY` and `AZURE_ACCOUNT_NAME`
+Set the environment variables `AZURE_ACCOUNT_KEY` and `AZURE_ACCOUNT_ID`
 appropriately before running the tests.
 
 To get started developing, install [yarn](http://yarnpkg.com/) and the newest
