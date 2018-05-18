@@ -42,11 +42,11 @@ helper.contextualSuites('Entity (create/load)', [
       return {
         Item: ItemV1.setup({
           credentials:  helper.cfg.azure,
-          table:        helper.cfg.tableName,
+          tableName:    helper.cfg.tableName,
         }),
         Item2: ItemV2.setup({
           credentials:  helper.cfg.azure,
-          table:        helper.cfg.tableName,
+          tableName:    helper.cfg.tableName,
         }),
       };
     },
@@ -55,14 +55,12 @@ helper.contextualSuites('Entity (create/load)', [
     options: function() {
       return {
         Item: ItemV1.setup({
-          account:  'inMemory',
-          table:    'items',
-          credentials: null,
+          tableName: 'items',
+          credentials: 'inMemory',
         }),
         Item2: ItemV2.setup({
-          account:  'inMemory',
-          table:    'items',
-          credentials: null,
+          tableName: 'items',
+          credentials: 'inMemory',
         }),
       };
     },

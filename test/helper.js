@@ -23,7 +23,7 @@ exports.makeContexts = function(Item, setupOptions) {
         return {
           Item: Item.setup(_.defaults({}, setupOptions, {
             credentials:  exports.cfg.azure,
-            table:        exports.cfg.tableName,
+            tableName:    exports.cfg.tableName,
           })),
         };
       },
@@ -32,9 +32,8 @@ exports.makeContexts = function(Item, setupOptions) {
       options: function() {
         return {
           Item: Item.setup(_.defaults({}, setupOptions, {
-            account: 'inMemory',
-            table:   'items',
-            credentials: null,
+            tableName: 'items',
+            credentials: 'inMemory',
           })),
         };
       },

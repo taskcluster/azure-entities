@@ -29,7 +29,7 @@ suite('Entity (encrypted properties)', function() {
   test('Item = ItemV1.setup', function() {
     Item = ItemV1.setup({
       credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName,
+      tableName:    helper.cfg.tableName,
       cryptoKey:    ENCRYPTION_KEY,
     });
   });
@@ -38,7 +38,7 @@ suite('Entity (encrypted properties)', function() {
     try {
       ItemV1.setup({
         credentials:  helper.cfg.azure,
-        table:        helper.cfg.tableName,
+        tableName:    helper.cfg.tableName,
       });
     } catch (err) {
       return; // Expected error
@@ -50,7 +50,7 @@ suite('Entity (encrypted properties)', function() {
     try {
       ItemV1.setup({
         credentials:  helper.cfg.azure,
-        table:        helper.cfg.tableName,
+        tableName:    helper.cfg.tableName,
         cryptoKey:    crypto.randomBytes(31).toString('base64'),
       });
     } catch (err) {
@@ -63,7 +63,7 @@ suite('Entity (encrypted properties)', function() {
     try {
       ItemV1.setup({
         credentials:  helper.cfg.azure,
-        table:        helper.cfg.tableName,
+        tableName:    helper.cfg.tableName,
         cryptoKey:    crypto.randomBytes(33).toString('base64'),
       });
     } catch (err) {
@@ -76,7 +76,7 @@ suite('Entity (encrypted properties)', function() {
     try {
       ItemV1.setup({
         credentials:  helper.cfg.azure,
-        table:        helper.cfg.tableName,
+        tableName:    helper.cfg.tableName,
         // Notice: ! below
         cryptoKey:    'CNcj2aOozdo7Pn+HEkAIixwninIwKnbYc6JPS9mNxZ!=',
       });
@@ -129,7 +129,7 @@ suite('Entity (encrypted properties)', function() {
   test('Item.load (invalid cryptoKey)', function() {
     var BadKeyItem = ItemV1.setup({
       credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName,
+      tableName:    helper.cfg.tableName,
       cryptoKey:    crypto.randomBytes(32).toString('base64'),
     });
     return BadKeyItem.load({
@@ -164,7 +164,7 @@ suite('Entity (encrypted properties)', function() {
   test('Item2 = ItemV2.setup', function() {
     Item2 = ItemV2.setup({
       credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName,
+      tableName:    helper.cfg.tableName,
       cryptoKey:    ENCRYPTION_KEY,
     });
   });
@@ -173,7 +173,7 @@ suite('Entity (encrypted properties)', function() {
     try {
       ItemV2.setup({
         credentials:  helper.cfg.azure,
-        table:        helper.cfg.tableName,
+        tableName:    helper.cfg.tableName,
       });
     } catch (err) {
       return; // Expected error
@@ -193,7 +193,7 @@ suite('Entity (encrypted properties)', function() {
   test('Item2.load (invalid cryptoKey)', function() {
     var BadKeyItem2 = ItemV2.setup({
       credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName,
+      tableName:    helper.cfg.tableName,
       cryptoKey:    crypto.randomBytes(32).toString('base64'),
     });
     return BadKeyItem2.load({
@@ -257,7 +257,7 @@ suite('Entity (encrypted properties)', function() {
   test('Item3 = ItemV3.setup', function() {
     Item3 = ItemV3.setup({
       credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName,
+      tableName:    helper.cfg.tableName,
       cryptoKey:    ENCRYPTION_KEY,
     });
   });
@@ -291,7 +291,7 @@ suite('Entity (encrypted properties)', function() {
   test('Item3.load (invalid cryptoKey)', function() {
     var BadKeyItem3 = ItemV3.setup({
       credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName,
+      tableName:    helper.cfg.tableName,
       cryptoKey:    crypto.randomBytes(32).toString('base64'),
     });
     return BadKeyItem3.load({

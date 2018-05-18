@@ -11,14 +11,13 @@ helper.contextualSuites('Entity (query)', [
     context: 'Azure',
     options: {
       credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName,
+      tableName:    helper.cfg.tableName,
     },
   }, {
     context: 'In-Memory',
     options: {
-      account: 'inMemory',
-      table:   'items',
-      credentials: null,
+      tableName: 'items',
+      credentials: 'inMemory',
     },
   },
 ], function(context, options) {

@@ -538,13 +538,8 @@ Entity.configure = function(options) {
  * the following options:
  * {
  *   // Azure connection details for use with SAS from auth.taskcluster.net
- *   account:           "...",              // Azure storage account name
- *   table:             "AzureTableName",   // Azure table name
- *   // TaskCluster credentials
- *   credentials: {
- *     clientId:        "...",              // TaskCluster clientId
- *     accessToken:     "...",              // TaskCluster accessToken
- *   },
+ *   tableName:         "AzureTableName",   // Azure table name
+ *   credentials:                           // See README
  *   agent:             https.Agent,        // Agent to use (default a global)
  *   authBaseUrl:       "...",              // baseUrl for auth (optional)
  *   signingKey:        "...",              // Key for HMAC signing entities
@@ -552,36 +547,6 @@ Entity.configure = function(options) {
  *   monitor:           await require('taskcluster-lib-monitor')({...}),
  *   context:           {...}               // Extend prototype (optional)
  * }
- *
- * Using the `options` format provided above a shared-access-signature will be
- * fetched from auth.taskcluster.net. The goal with this is to reduce secret
- * configuration and reduce exposure of our Azure `accountKey`. To fetch the
- * shared-access-signature the following scope is required:
- *   `auth:azure-table:read-write:<accountName>/<table>`
- *
- * If you have the azure credentials, you can also specify the options
- * as follows:
- * {
- *   // Azure connection details
- *   table:             "AzureTableName",   // Azure table name
- *   // Azure credentials
- *   credentials: {
- *     accountName:     "...",              // Azure account name
- *     accountKey:      "...",              // Azure account key
- *   },
- * }
- *
- * To use an in-memory, testing-oriented table, use the special accountName
- * `inMemory`.  Credentials are not required.
- * {
- *   account:     "inMemory,
- *   table:       "AzureTableName"
- *   credentials: null,
- * }
- *
- * This implementation is largely true to Azure, but is intended only for
- * testing, and only in combination with integration tests against Azure to
- * reveal any unknown inconsistencies.
  *
  * In `Entity.configure` the `context` options is a list of property names,
  * these properties **must** be specified in when `Entity.setup` is called.
@@ -596,15 +561,14 @@ Entity.configure = function(options) {
  */
 Entity.setup = function(options) {
   // Validate options
-  assert(options,                             'options must be given');
-  assert(options.table,                       'options.table must be given');
-  assert(typeof options.table === 'string',  'options.table isn\'t a string');
-  if (options.account === 'inMemory') {
-    assert(options.hasOwnProperty('credentials'),
-      'credentials should be specified even with inMemory, but can be null');
-  } else {
-    assert(options.credentials, 'credentials are required unless using in-memory tables');
-  }
+  assert(options, 'options must be given');
+  assert(!options.account, 'options.account is no longer allowed');
+  assert(!options.table, 'options.table is now options.tableName');
+  assert(!options.authBaseUrl, 'options.authBaseUrl is no longer allowed');
+  assert(!options.credentials.clientId, 'Taskcluster credentials are no longer allowed');
+  assert(options.tableName, 'options.tableName must be given');
+  assert(typeof options.tableName === 'string', 'options.tableName isn\'t a string');
+  assert(options.credentials, 'credentials are required');
   if (options.drain || options.component || options.process) {
     console.log('taskcluster-lib-stats is now deprecated!\n' +
                 'Use the `monitor` option rather than `drain`.\n' +
@@ -701,62 +665,26 @@ Entity.setup = function(options) {
                                 'entities aren\'t signed!');
   }
 
-  if (options.account == 'inMemory') {
+  if (options.credentials == 'inMemory') {
     if (!inmemory) {
       inmemory = require('./inmemory'); // lazy-loaded
     }
-    subClass.prototype.__table = options.table;
+    subClass.prototype.__table = options.tableName;
     subClass.prototype.__filterBuilder = inmemory.appendFilter;
-    subClass.prototype.__aux = new inmemory.InMemoryWrapper(options.table);
+    subClass.prototype.__aux = new inmemory.InMemoryWrapper(options.tableName);
     subClass.prototype.__client = {};
 
     return subClass;
   }
 
   // Set azure table name
-  subClass.prototype.__table = options.table;
+  subClass.prototype.__table = options.tableName;
 
   // Create an azure table client
-  var client = null;
-  if (options.account) {
-    // If we're setting up to fetch credentials for auth.taskcluster.net
-    assert(typeof options.account === 'string',
-      'Expected options.account to be a string, or undefined');
-    // Create auth client to fetch SAS from auth.taskcluster.net
-    var auth = new taskcluster.Auth({
-      credentials:    options.credentials,
-      baseUrl:        options.authBaseUrl,
-    });
-    // Create azure table client with logic for fetch SAS
-    client = new azure.Table({
-      timeout:          AZURE_TABLE_TIMEOUT,
-      agent:            options.agent,
-      accountId:        options.account,
-      minSASAuthExpiry: options.minSASAuthExpiry,
-      sas: function() {
-        return auth.azureTableSAS(
-          options.account,
-          options.table,
-          'read-write'  // TODO: If we need it, we can make this an option
-        ).then(function(result) {
-          return result.sas;
-        });
-      },
-    });
-  } else {
-    // Create client using credentials already present
-    assert(options.credentials.accountName, 'Missing accountName');
-    assert(options.credentials.accountKey ||
-           options.credentials.sas,         'Missing accountKey or sas');
-    // Create azure table client with accessKey
-    client = new azure.Table({
-      timeout:      AZURE_TABLE_TIMEOUT,
-      agent:        options.agent,
-      accountId:    options.credentials.accountName,
-      accessKey:    options.credentials.accountKey,
-      sas:          options.credentials.sas,
-    });
-  }
+  const client = new azure.Table(_.defaults({
+    timeout:          AZURE_TABLE_TIMEOUT,
+    agent:            options.agent,
+  }, options.credentials));
 
   // Store reference to azure table client
   subClass.prototype.__client = client;
@@ -776,7 +704,7 @@ Entity.setup = function(options) {
     'deleteEntity',
   ].forEach(function(name) {
     // Bind table name
-    var method = client[name].bind(client, options.table);
+    var method = client[name].bind(client, options.tableName);
 
     // Record statistics
     subClass.prototype.__aux[name] = function() {

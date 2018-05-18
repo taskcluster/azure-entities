@@ -19,8 +19,8 @@ suite('Entity (context)', function() {
         count:          subject.types.Number,
       },
     }).setup({
-      credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName,
+      credentials: helper.cfg.azure,
+      tableName: helper.cfg.tableName,
     });
   });
 
@@ -37,7 +37,7 @@ suite('Entity (context)', function() {
       context:          ['config'],
     }).setup({
       credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName,
+      tableName:    helper.cfg.tableName,
       context: {
         config:     'My config object',
       },
@@ -57,7 +57,7 @@ suite('Entity (context)', function() {
       context:          ['config', 'maxCount'],
     }).setup({
       credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName,
+      tableName:    helper.cfg.tableName,
       context: {
         config:     'My config object',
         maxCount:   10,
@@ -105,7 +105,7 @@ suite('Entity (context)', function() {
       },
     }).setup({
       credentials:  helper.cfg.azure,
-      table:        helper.cfg.tableName,
+      tableName:    helper.cfg.tableName,
       context: {
         maxCount:  11,
       },
@@ -136,7 +136,7 @@ suite('Entity (context)', function() {
         context:          ['config'],
       }).setup({
         credentials:  helper.cfg.azure,
-        table:        helper.cfg.tableName,
+        tableName:    helper.cfg.tableName,
         context: {
           config:         'My config object',
           undeclaredKey:  19,
@@ -162,7 +162,7 @@ suite('Entity (context)', function() {
         context:          ['config'],
       }).setup({
         credentials:  helper.cfg.azure,
-        table:        helper.cfg.tableName,
+        tableName:    helper.cfg.tableName,
         context:      {},
       });
     } catch (err) {
