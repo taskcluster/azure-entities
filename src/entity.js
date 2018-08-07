@@ -580,7 +580,14 @@ Entity.setup = function(options) {
     context:          {},
     agent:            undefined,
     minSASAuthExpiry: 15 * 60 * 1000,
+    operationReportThreshold: 10 * 1000, // We should log details about any long running queries
+    operationReportChance: null, // By default we won't log any queries other than long-running ones
   });
+
+  if (options.operationReportChance) {
+    assert(options.operationReportChance >= 0.0 && options.operationReportChance <= 1.0,
+      'options.operationReportChance must be between 0.0 and 1.0 inclusive!');
+  }
 
   // Identify the parent class, that is always `this` so we can use it on
   // subclasses
@@ -706,22 +713,29 @@ Entity.setup = function(options) {
     // Bind table name
     var method = client[name].bind(client, options.tableName);
 
+    const report = (start, status) => {
+      status = `${name}.${status}`;
+      let d = process.hrtime(start);
+      d = d[0] * 1000 + d[1] / 1000000; // Transform into milliseconds
+      if (d > options.operationReportThreshold ||
+        options.operationReportChance && options.operationReportChance > Math.random()) {
+        // TODO: This is a great place for structured logging!
+        debug(`TIMING: ${name} on ${options.tableName} took ${d} milliseconds.`);
+      }
+      if (options.monitor) {
+        options.monitor.measure(status, d);
+        options.monitor.count(status);
+      }
+    };
+
     // Record statistics
     subClass.prototype.__aux[name] = function() {
       var start = process.hrtime();
       return method.apply(client, arguments).then(function(result) {
-        var d = process.hrtime(start);
-        if (options.monitor) {
-          options.monitor.measure(name + '.success', d[0] * 1000 + d[1] / 1000000);
-          options.monitor.count(name + '.success');
-        }
+        report(start, 'success');
         return result;
       }, function(err) {
-        var d = process.hrtime(start);
-        if (options.monitor) {
-          options.monitor.measure(name + '.error', d[0] * 1000 + d[1] / 1000000);
-          options.monitor.count(name + '.error');
-        }
+        report(start, 'error');
         throw err;
       });
     };

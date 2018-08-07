@@ -163,6 +163,8 @@ thereof) that is ready for use, with the following options:
   component:         '<name>',           // Component in stats (if drain)
   process:           'server',           // Process in stats (if drain)
   context:           {...}               // Extend prototype (optional)
+  operationReportChance: 0.0,            // Chance that an arbitrary transaction will be logged
+  operationReportThreshold: 10 * 1000,   // Time in milliseconds over which a transaction will be logged
 }
 ```
 

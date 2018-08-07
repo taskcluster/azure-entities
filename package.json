@@ -28,6 +28,8 @@
     "eslint-config-taskcluster": "^3.0.0",
     "express": "^4.16.2",
     "mocha": "^4.0.1",
+    "rewire": "^4.0.1",
+    "sinon": "^6.1.4",
     "taskcluster-lib-monitor": "^4.6.3",
     "typed-env-config": "^1.1.0"
   },
