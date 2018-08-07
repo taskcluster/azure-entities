@@ -42,7 +42,7 @@ helper.contextualSuites('Entity (BlobType)', helper.makeContexts(Item),
 
     test('small blob', function() {
       var id  = slugid.v4();
-      var buf = new Buffer([0, 1, 2, 3]);
+      var buf = Buffer.from([0, 1, 2, 3]);
       return Item.create({
         id:     id,
         name:   'my-test-item',

@@ -388,7 +388,7 @@ helper.contextualSuites('Entity (create/load/modify DataTypes)', [
       var id = slugid.v4();
       return Item.create({
         id:     id,
-        blob:   new Buffer([1, 2, 3, 4, 5, 6, 7, 8]),
+        blob:   Buffer.from([1, 2, 3, 4, 5, 6, 7, 8]),
         data:   sample1,
       }).then(function(itemA) {
         return Item.load({
@@ -431,7 +431,7 @@ helper.contextualSuites('Entity (create/load/modify DataTypes)', [
       var id = slugid.v4();
       return Item.create({
         id:     id,
-        blob:   new Buffer([1, 2, 3, 4, 5, 6, 7, 8]),
+        blob:   Buffer.from([1, 2, 3, 4, 5, 6, 7, 8]),
         data:   sample1,
       }).then(function(itemA) {
         return Item.load({
