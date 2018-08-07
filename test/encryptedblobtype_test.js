@@ -1,4 +1,4 @@
-var subject = require('../lib/entity');
+var subject = require('../src/entity');
 var assert  = require('assert');
 var slugid  = require('slugid');
 var _       = require('lodash');
@@ -43,7 +43,7 @@ helper.contextualSuites('Entity (EncryptedBlobType)', helper.makeContexts(Item, 
 
   test('small blob', function() {
     var id  = slugid.v4();
-    var buf = new Buffer([0, 1, 2, 3]);
+    var buf = Buffer.from([0, 1, 2, 3]);
     return Item.create({
       id:     id,
       name:   'my-test-item',

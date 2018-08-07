@@ -2,7 +2,7 @@
 var util            = require('util');
 var assert          = require('assert');
 var _               = require('lodash');
-var debug           = require('debug')('base:entity:types');
+var debug           = require('debug')('entity:types');
 var slugid          = require('slugid');
 var stringify       = require('json-stable-stringify');
 var buffertools     = require('buffertools');
@@ -508,7 +508,7 @@ BaseBufferType.prototype.deserialize = function(source, cryptoKey) {
 
   var chunks = [];
   for (var i = 0; i < n; i++) {
-    chunks[i] = new Buffer(source['__buf' + i + '_' + this.property], 'base64');
+    chunks[i] = Buffer.from(source['__buf' + i + '_' + this.property], 'base64');
   }
   return this.fromBuffer(Buffer.concat(chunks), cryptoKey);
 };
@@ -563,7 +563,7 @@ BlobType.prototype.equal = function(value1, value2) {
 
 BlobType.prototype.clone = function(value) {
   this.validate(value);
-  return new Buffer(value);
+  return Buffer.from(value);
 };
 
 // Export BlobType as Blob
@@ -585,7 +585,7 @@ TextType.prototype.validate = function(value) {
 
 TextType.prototype.toBuffer = function(value) {
   this.validate(value);
-  return new Buffer(value, 'utf8');
+  return Buffer.from(value, 'utf8');
 };
 
 TextType.prototype.fromBuffer = function(value) {
@@ -628,7 +628,7 @@ JSONType.prototype.validate = function(value) {
 
 JSONType.prototype.toBuffer = function(value) {
   this.validate(value);
-  return new Buffer(JSON.stringify(value), 'utf8');
+  return Buffer.from(JSON.stringify(value), 'utf8');
 };
 
 JSONType.prototype.fromBuffer = function(value) {
@@ -767,7 +767,7 @@ EncryptedBlobType.prototype.equal = function(value1, value2) {
 
 EncryptedBlobType.prototype.clone = function(value) {
   this.validate(value);
-  return new Buffer(value);
+  return Buffer.from(value);
 };
 
 // Export EncryptedBlobType as EncryptedBlob
@@ -789,7 +789,7 @@ EncryptedTextType.prototype.validate = function(value) {
 
 EncryptedTextType.prototype.toPlainBuffer = function(value) {
   this.validate(value);
-  return new Buffer(value, 'utf8');
+  return Buffer.from(value, 'utf8');
 };
 
 EncryptedTextType.prototype.fromPlainBuffer = function(value) {
@@ -832,7 +832,7 @@ EncryptedJSONType.prototype.validate = function(value) {
 
 EncryptedJSONType.prototype.toPlainBuffer = function(value) {
   this.validate(value);
-  return new Buffer(JSON.stringify(value), 'utf8');
+  return Buffer.from(JSON.stringify(value), 'utf8');
 };
 
 EncryptedJSONType.prototype.fromPlainBuffer = function(value) {
@@ -896,7 +896,7 @@ var slugIdToBuffer = function(slug) {
     .replace(/-/g, '+')
     .replace(/_/g, '/')
                   + '==';
-  return new Buffer(base64, 'base64');
+  return Buffer.from(base64, 'base64');
 };
 
 // Convert buffer to slugId where `entryIndex` is the slugId entry index to retrieve
@@ -909,7 +909,7 @@ var bufferToSlugId = function(bufferView, entryIndex) {
 
 /** Array of slugids packed into a buffer for space and speed */
 var SlugIdArray = function() {
-  this.buffer = new Buffer(SLUGID_SIZE * 32);
+  this.buffer = Buffer.alloc(SLUGID_SIZE * 32);
   this.length = 0;
   this.avail  = 32;
 };
@@ -941,7 +941,7 @@ SlugIdArray.prototype.push = function(slug) {
 /** Allocate more space if needed, and less space if below threshold */
 SlugIdArray.prototype.realloc = function() {
   if (this.avail === 0 && this.length === 0) {
-    this.buffer = new Buffer(SLUGID_SIZE * 32);
+    this.buffer = Buffer.alloc(SLUGID_SIZE * 32);
     this.length = 0;
     this.avail = 32;
 
@@ -950,7 +950,7 @@ SlugIdArray.prototype.realloc = function() {
 
   // Allocate more space, if needed, we this by doubling the underlying buffer
   if (this.avail === 0) {
-    var buffer = new Buffer(this.length * 2 * SLUGID_SIZE);
+    var buffer = Buffer.alloc(this.length * 2 * SLUGID_SIZE);
     this.buffer.copy(buffer);
     this.buffer = buffer;
     this.avail = this.length;
@@ -959,7 +959,7 @@ SlugIdArray.prototype.realloc = function() {
 
   // Shrink the buffer if it is less than 1/3 full
   if (this.avail > this.length * 2 && this.buffer.length > SLUGID_SIZE * 32) {
-    this.buffer = new Buffer(this.getBufferView());
+    this.buffer = Buffer.from(this.getBufferView());
     this.avail  = 0;
     return true;
   }
@@ -1070,7 +1070,7 @@ SlugIdArray.prototype.slice = function(begin, end) {
 /** Clone the slugid array */
 SlugIdArray.prototype.clone = function() {
   var clone = new SlugIdArray();
-  clone.buffer  = new Buffer(this.buffer);
+  clone.buffer  = Buffer.from(this.buffer);
   clone.length  = this.length;
   clone.avail   = this.avail;
   return clone;

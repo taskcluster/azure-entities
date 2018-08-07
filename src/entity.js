@@ -417,7 +417,7 @@ Entity.configure = function(options) {
     var keys = _.keys(mapping).sort();
     sign = function(properties) {
       var hash  = crypto.createHmac('sha512', this.__signingKey);
-      var buf   = new Buffer(4);
+      var buf   = Buffer.alloc(4);
       var n     = keys.length;
       for (var i = 0; i < n; i++) {
         var property  = keys[i];
@@ -466,7 +466,7 @@ Entity.configure = function(options) {
         properties[property] = type.deserialize(entity, cryptoKey);
       });
       if (sign) {
-        var signature = new Buffer(entity.Signature, 'base64');
+        var signature = Buffer.from(entity.Signature, 'base64');
         if (!fixedTimeComparison(signature, sign.call(this, properties))) {
           throw new Error('Signature validation failed!');
         }
@@ -499,7 +499,7 @@ Entity.configure = function(options) {
         properties[property] = type.deserialize(entity, cryptoKey);
       });
       if (sign) {
-        var signature = new Buffer(entity.Signature, 'base64');
+        var signature = Buffer.from(entity.Signature, 'base64');
         if (!fixedTimeComparison(signature, sign.call(this, properties))) {
           throw new Error('Signature validation failed!');
         }
@@ -580,7 +580,14 @@ Entity.setup = function(options) {
     context:          {},
     agent:            undefined,
     minSASAuthExpiry: 15 * 60 * 1000,
+    operationReportThreshold: 10 * 1000, // We should log details about any long running queries
+    operationReportChance: null, // By default we won't log any queries other than long-running ones
   });
+
+  if (options.operationReportChance) {
+    assert(options.operationReportChance >= 0.0 && options.operationReportChance <= 1.0,
+      'options.operationReportChance must be between 0.0 and 1.0 inclusive!');
+  }
 
   // Identify the parent class, that is always `this` so we can use it on
   // subclasses
@@ -646,7 +653,7 @@ Entity.setup = function(options) {
     assert(typeof options.cryptoKey === 'string',
       'cryptoKey is required when a property is encrypted in any ' +
            'of the schema versions.');
-    var secret  = new Buffer(options.cryptoKey, 'base64');
+    var secret  = Buffer.from(options.cryptoKey, 'base64');
     assert(secret.length === 32, 'cryptoKey must be 32 bytes in base64');
     subClass.prototype.__cryptoKey = secret;
   } else {
@@ -659,7 +666,7 @@ Entity.setup = function(options) {
     assert(typeof options.signingKey === 'string',
       'signingKey is required when {signEntities: true} is set in ' +
            'one of the versions of the Entity versions');
-    subClass.prototype.__signingKey = new Buffer(options.signingKey, 'utf8');
+    subClass.prototype.__signingKey = Buffer.from(options.signingKey, 'utf8');
   } else {
     assert(!options.signingKey, 'Don\'t specify options.signingKey when '  +
                                 'entities aren\'t signed!');
@@ -706,22 +713,29 @@ Entity.setup = function(options) {
     // Bind table name
     var method = client[name].bind(client, options.tableName);
 
+    const report = (start, status) => {
+      status = `${name}.${status}`;
+      let d = process.hrtime(start);
+      d = d[0] * 1000 + d[1] / 1000000; // Transform into milliseconds
+      if (d > options.operationReportThreshold ||
+        options.operationReportChance && options.operationReportChance > Math.random()) {
+        // TODO: This is a great place for structured logging!
+        debug(`TIMING: ${name} on ${options.tableName} took ${d} milliseconds.`);
+      }
+      if (options.monitor) {
+        options.monitor.measure(status, d);
+        options.monitor.count(status);
+      }
+    };
+
     // Record statistics
     subClass.prototype.__aux[name] = function() {
       var start = process.hrtime();
       return method.apply(client, arguments).then(function(result) {
-        var d = process.hrtime(start);
-        if (options.monitor) {
-          options.monitor.measure(name + '.success', d[0] * 1000 + d[1] / 1000000);
-          options.monitor.count(name + '.success');
-        }
+        report(start, 'success');
         return result;
       }, function(err) {
-        var d = process.hrtime(start);
-        if (options.monitor) {
-          options.monitor.measure(name + '.error', d[0] * 1000 + d[1] / 1000000);
-          options.monitor.count(name + '.error');
-        }
+        report(start, 'error');
         throw err;
       });
     };
