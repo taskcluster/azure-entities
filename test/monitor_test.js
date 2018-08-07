@@ -1,4 +1,4 @@
-var subject   = require('../lib/entity');
+var subject   = require('../src/entity');
 var helper    = require('./helper');
 var assert    = require('assert');
 var slugid    = require('slugid');

@@ -1,4 +1,4 @@
-var subject         = require('../lib/entity');
+var subject         = require('../src/entity');
 var assert          = require('assert');
 
 suite('Config', function() {
