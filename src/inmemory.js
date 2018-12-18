@@ -71,18 +71,22 @@ var updateTimestamp = function(entity) {
   entity['Timestamp@odata.type'] = 'Edm.Int32';
 };
 
+// wait a few ms before performing the operation; this helps catch
+// missed Promises in tests
+var pause = () => new Promise(resolve => setTimeout(resolve, 15));
+
 /**
  * Create table.
  *
  * @method createTable
  * @return {Promise} A promise that the table was created.
  */
-InMemoryWrapper.prototype.createTable = function() {
+InMemoryWrapper.prototype.createTable = async function() {
+  await pause();
   if (tables[this.table]) {
-    return Promise.reject(makeError(409, 'TableAlreadyExists'));
+    throw makeError(409, 'TableAlreadyExists');
   }
   tables[this.table] = {};
-  return Promise.resolve();
 };
 
 /**
@@ -91,12 +95,12 @@ InMemoryWrapper.prototype.createTable = function() {
  * @method deleteTable
  * @return {Promise} A promise that the table was marked for deletion.
  */
-InMemoryWrapper.prototype.deleteTable = function() {
+InMemoryWrapper.prototype.deleteTable = async function() {
+  await pause();
   if (!tables[this.table]) {
-    return Promise.reject(makeError(404, 'ResourceNotFound'));
+    throw makeError(404, 'ResourceNotFound');
   }
   delete tables[this.table];
-  return Promise.resolve();
 };
 
 /**
@@ -117,21 +121,21 @@ InMemoryWrapper.prototype.deleteTable = function() {
  * level configured and if `select` as employed. See Azure documentation for
  * details.
  */
-InMemoryWrapper.prototype.getEntity = function(partitionKey, rowKey, options) {
+InMemoryWrapper.prototype.getEntity = async function(partitionKey, rowKey, options) {
   options = options || {};
   // NOTE: azure-entities never uses these features:
   assert(!options.filter, 'filter is not supported for getEntity');
   assert(!options.select, 'select is not supported for getEntity');
   var key = makeKey(partitionKey, rowKey);
   if (!tables[this.table]) {
-    return Promise.reject(makeError(404, 'ResourceNotFound'));
+    throw makeError(404, 'ResourceNotFound');
   }
   if (tables[this.table][key]) {
     var res = _.clone(tables[this.table][makeKey(partitionKey, rowKey)]);
     res['odata.etag'] = entityEtag(res);
-    return Promise.resolve(res);
+    return res;
   }
-  return Promise.reject(makeError(404, 'ResourceNotFound'));
+  throw makeError(404, 'ResourceNotFound');
 };
 
 /**
@@ -165,12 +169,12 @@ InMemoryWrapper.prototype.getEntity = function(partitionKey, rowKey, options) {
  * }
  * ```
  */
-InMemoryWrapper.prototype.queryEntities = function(options) {
+InMemoryWrapper.prototype.queryEntities = async function(options) {
   options = options || {};
   assert(!options.select, 'select is not supported for queryEntities');
 
   if (!tables[this.table]) {
-    return Promise.reject(makeError(404, 'ResourceNotFound'));
+    throw makeError(404, 'ResourceNotFound');
   }
 
   var filterFunctionFor = function(filter) {
@@ -208,11 +212,11 @@ InMemoryWrapper.prototype.queryEntities = function(options) {
   }
 
   // Apply pagination
-  return Promise.resolve({
+  return {
     entities: entities,
     nextPartitionKey: nextPartitionKey,
     nextRowKey: nextRowKey,
-  });
+  };
 };
 
 /**
@@ -228,18 +232,19 @@ InMemoryWrapper.prototype.queryEntities = function(options) {
  * @return {Promise}
  * A promise for the `etag` of the inserted entity.
  */
-InMemoryWrapper.prototype.insertEntity = function(entity) {
+InMemoryWrapper.prototype.insertEntity = async function(entity) {
+  await pause();
   var key = makeKey(entity.PartitionKey, entity.RowKey);
   if (!tables[this.table]) {
-    return Promise.reject(makeError(404, 'ResourceNotFound'));
+    throw makeError(404, 'ResourceNotFound');
   }
   if (tables[this.table][key]) {
-    return Promise.reject(makeError(409, 'EntityAlreadyExists'));
+    throw makeError(409, 'EntityAlreadyExists');
   }
   entity = tables[this.table][key] = _.cloneDeep(entity);
   updateTimestamp(entity);
   var eTag = entity['odata.etag'] = entityEtag(entity);
-  return Promise.resolve(eTag);
+  return eTag;
 };
 
 /**
@@ -288,17 +293,18 @@ InMemoryWrapper.prototype.insertEntity = function(entity) {
  * ```
  * @return {Promise} A promise for `eTag` of the modified entity.
  */
-InMemoryWrapper.prototype.updateEntity = function(entity, options) {
+InMemoryWrapper.prototype.updateEntity = async function(entity, options) {
+  await pause();
   var key = makeKey(entity.PartitionKey, entity.RowKey);
   entity = _.cloneDeep(entity);
   entity['odata.etag'] = entityEtag(entity);
   if (!tables[this.table]) {
-    return Promise.reject(makeError(404, 'ResourceNotFound'));
+    throw makeError(404, 'ResourceNotFound');
   }
   if (tables[this.table][key]) {
     if (options.eTag != '*') {
       if (options.eTag && options.eTag != entityEtag(tables[this.table][key])) {
-        return Promise.reject(makeError(412, 'UpdateConditionNotSatisfied'));
+        throw makeError(412, 'UpdateConditionNotSatisfied');
       }
     }
     if (options.mode == 'replace') {
@@ -314,9 +320,9 @@ InMemoryWrapper.prototype.updateEntity = function(entity, options) {
   } else if (!options.eTag) {
     tables[this.table][key] = entity;
   } else if (options.eTag != '*') {
-    return Promise.reject(makeError(404, 'ResourceNotFound'));
+    throw makeError(404, 'ResourceNotFound');
   }
-  return Promise.resolve(entityEtag(entity));
+  return entityEtag(entity);
 };
 
 /**
@@ -342,22 +348,22 @@ InMemoryWrapper.prototype.updateEntity = function(entity, options) {
  * ```
  * @returns {Promise} A promise that the entity was deleted.
  */
-InMemoryWrapper.prototype.deleteEntity = function(partitionKey, rowKey, options) {
+InMemoryWrapper.prototype.deleteEntity = async function(partitionKey, rowKey, options) {
+  await pause();
   var key = makeKey(partitionKey, rowKey);
   if (!tables[this.table]) {
-    return Promise.reject(makeError(404, 'ResourceNotFound'));
+    throw makeError(404, 'ResourceNotFound');
   }
   var table = tables[this.table];
   if (!table[key]) {
-    return Promise.reject(makeError(404, 'ResourceNotFound'));
+    throw makeError(404, 'ResourceNotFound');
   }
   if (options.eTag != '*') {
     if (options.eTag != entityEtag(table[key])) {
-      return Promise.reject(makeError(412, 'UpdateConditionNotSatisfied'));
+      throw makeError(412, 'UpdateConditionNotSatisfied');
     }
   }
   delete table[key];
-  return Promise.resolve();
 };
 
 exports.InMemoryWrapper = InMemoryWrapper;
