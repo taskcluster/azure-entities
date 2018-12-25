@@ -7,7 +7,6 @@ const slugid    = require('slugid');
 const _         = require('lodash');
 const Promise   = require('promise');
 const debug     = require('debug')('test:entity:create_load');
-const _monitor  = require('taskcluster-lib-monitor');
 
 const ItemV1 = subject.configure({
   version:          1,
@@ -29,11 +28,7 @@ suite('Monitoring Integration', function() {
     oldbug = subject.__get__('debug');
     newbug = sinon.fake();
     subject.__set__('debug', newbug);
-    monitor = await _monitor({
-      project: 'azure-entities',
-      credentials: {},
-      mock: true,
-    });
+    monitor = new helper.MockMonitor();
   });
 
   teardown(function() {
@@ -61,7 +56,7 @@ suite('Monitoring Integration', function() {
       name:   'my-test-item',
     });
     assert(_.keys(monitor.counts).length >= 3, 'Should have more stats now!');
-    assert.equal(_.keys(monitor.counts)[0], 'azure-entities.createTable.error');
+    assert.equal(_.keys(monitor.counts)[0], 'createTable.error');
     assert.equal(item.count, 1);
     assert.equal(newbug.callCount, 3);
     assert(newbug.firstCall.args[0].startsWith('TIMING: createTable on azureEntityTests took'));
@@ -88,7 +83,7 @@ suite('Monitoring Integration', function() {
       name:   'my-test-item',
     });
     assert(_.keys(monitor.counts).length >= 3, 'Should have more stats now!');
-    assert.equal(_.keys(monitor.counts)[0], 'azure-entities.createTable.error');
+    assert.equal(_.keys(monitor.counts)[0], 'createTable.error');
     assert.equal(item.count, 1);
     assert.equal(newbug.callCount, 3);
     assert(newbug.firstCall.args[0].startsWith('TIMING: createTable on azureEntityTests took'));
@@ -114,7 +109,7 @@ suite('Monitoring Integration', function() {
       name:   'my-test-item',
     });
     assert(_.keys(monitor.counts).length >= 3, 'Should have more stats now!');
-    assert.equal(_.keys(monitor.counts)[0], 'azure-entities.createTable.error');
+    assert.equal(_.keys(monitor.counts)[0], 'createTable.error');
     assert.equal(item.count, 1);
     assert.equal(newbug.callCount, 0);
   });

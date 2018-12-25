@@ -30,7 +30,6 @@
     "mocha": "^4.0.1",
     "rewire": "^4.0.1",
     "sinon": "^6.1.4",
-    "taskcluster-lib-monitor": "^4.6.3",
     "typed-env-config": "^1.1.0"
   },
   "main": "./src/entity",
