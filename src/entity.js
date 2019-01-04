@@ -543,7 +543,7 @@ Entity.configure = function(options) {
  *   authBaseUrl:       "...",              // baseUrl for auth (optional)
  *   signingKey:        "...",              // Key for HMAC signing entities
  *   cryptoKey:         "...",              // Key for encrypted properties
- *   monitor:           await require('taskcluster-lib-monitor')({...}),
+ *   monitor:           new Monitor(..),    // monitor instance (optional)
  *   context:           {...}               // Extend prototype (optional)
  * }
  *
@@ -571,7 +571,6 @@ Entity.setup = function(options) {
   if (options.drain || options.component || options.process) {
     console.log('taskcluster-lib-stats is now deprecated!\n' +
                 'Use the `monitor` option rather than `drain`.\n' +
-                '`monitor` should be an instance of taskcluster-lib-monitor.\n' +
                 '`component` is no longer needed. Prefix your `monitor` before use.\n' +
                 '`process` is no longer needed. Prefix your `monitor` before use.');
   }

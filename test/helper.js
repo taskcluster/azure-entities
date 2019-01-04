@@ -1,5 +1,6 @@
 var _      = require('lodash');
 var config = require('typed-env-config');
+var assert = require('assert');
 
 exports.cfg = config({});
 
@@ -40,3 +41,21 @@ exports.makeContexts = function(Item, setupOptions) {
     },
   ];
 };
+
+class MockMonitor {
+  constructor() {
+    this.counts = {};
+    this.measures = {};
+  }
+
+  count(key) {
+    this.counts[key] = (this.counts[key] || 0) + 1;
+  }
+
+  measure(key, val) {
+    assert(typeof val === 'number', 'Measurement value must be a number');
+    this.measures[key] = (this.measures[key] || []).concat(val);
+  }
+}
+
+exports.MockMonitor = MockMonitor;

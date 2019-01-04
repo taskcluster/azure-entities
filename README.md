@@ -163,6 +163,7 @@ thereof) that is ready for use, with the following options:
   component:         '<name>',           // Component in stats (if drain)
   process:           'server',           // Process in stats (if drain)
   context:           {...}               // Extend prototype (optional)
+  monitor:           new Monitor(..),    // Monitor instance (optional)
   operationReportChance: 0.0,            // Chance that an arbitrary transaction will be logged
   operationReportThreshold: 10 * 1000,   // Time in milliseconds over which a transaction will be logged
 }
@@ -249,6 +250,19 @@ To use an in-memory, testing-oriented table, use the special credential
 This testing implementation is largely true to Azure, but is intended only for
 testing, and only in combination with integration tests against Azure to reveal
 any unknown inconsistencies.
+
+#### Monitoring
+
+The `setup` function takes an optional `monitor` argument, which if given
+should be an object with methods `monitor.measure(name, value)` and
+`monitor.count(name)` to measure a named value, and to count a named event,
+respectively.  These methods will be used to measure the duration and number of
+calls to each Azure API method (`getEntity`, etc.), using names of the form
+`<apiMethod>.<result>` where result is `error` or `success`.
+
+The `operationReportChance` and `operationReportThreshold` options control the
+frequency of debug logging about API method timing, and may be removed from the
+library soon.
 
 ### Table Operations
 
