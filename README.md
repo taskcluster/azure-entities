@@ -122,9 +122,18 @@ documentation contains more information on the semantics of partition and row
 keys.  The available types are:
 
   * `StringKey(prop)` -- use a single string property as the key
-  * `ConstantKey(const)` -- use a constant value as the key (common as partitionKey)
-  * `CompositeKey(props)` -- use a sequence of properties to create the key
-  * `CompositeKey(props)` -- use a hash of a sequence of properties to create the key
+  * `ConstantKey(const)` -- use a constant value as the key
+  * `CompositeKey(...props)` -- use a sequence of properties to create the key
+  * `HashKey(...props)` -- use a hash of a sequence of properties to create the key
+
+StringKey is the simplest option, and indicates that one property should be treated as the key.
+
+ConstantKey is useful to "ignore" a key field for tables that do not have enough columns to represent both a partition and row key.
+It is typically used as a rowKey, with a StringKey as the partitionKey, effectively storing each row in a unique partition and allowing Azure to distribute partitions across servers as needed.
+
+CompositeKey and HashKey are similar, and combine multiple properties into a single key.
+CompositeKey uses string concatenation and thus could conceivably support prefix matching, althoug this is not implemented.
+HashKey hashes the input properties to a fixed length and is useful for large or unbounded properties.
 
 #### Migrations
 

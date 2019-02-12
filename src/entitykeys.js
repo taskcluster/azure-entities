@@ -94,6 +94,9 @@ StringKey.prototype.exactFromConditions = function(properties) {
 
 /** Create StringKey builder */
 exports.StringKey = function(key) {
+  var keys = Array.prototype.slice.call(arguments);
+  assert(keys.length === 1, 'StringKey takes exactly one key argument');
+  assert(typeof key === 'string', 'StringKey takes a string as argument');
   return function(mapping) {
     return new StringKey(mapping, key);
   };
