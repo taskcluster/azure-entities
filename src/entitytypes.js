@@ -968,13 +968,13 @@ SlugIdArray.prototype.realloc = function() {
 /** Get indexOf of a slugid, -1 if it is not in the array */
 SlugIdArray.prototype.indexOf = function(slug) {
   var slug  = slugIdToBuffer(slug);
-  var index = this.buffer.indexOf( slug);
+  var index = this.buffer.indexOf(slug);
 
   while (index !== -1 && index < this.length * SLUGID_SIZE) {
     if (index % SLUGID_SIZE === 0) {
       return index / SLUGID_SIZE;
     }
-    index = this.buffer.indexOf( slug, index + 1);
+    index = this.buffer.indexOf(slug, index + 1);
   }
   return -1;
 };
