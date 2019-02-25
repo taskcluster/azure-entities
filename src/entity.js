@@ -3,7 +3,6 @@ var assert          = require('assert');
 var util            = require('util');
 var slugid          = require('slugid');
 var _               = require('lodash');
-var Promise         = require('promise');
 var debug           = require('debug')('base:entity');
 var azure           = require('fast-azure-storage');
 var https           = require('https');
