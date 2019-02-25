@@ -19,7 +19,7 @@
     "fast-azure-storage": "^2.3.1",
     "json-stable-stringify": "^1.0.0",
     "lodash": "^4.17.11",
-    "slugid": "^1.0.3"
+    "slugid": "^2.0.0"
   },
   "devDependencies": {
     "azure-table-node": "^1.4.1",
