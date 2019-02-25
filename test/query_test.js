@@ -40,7 +40,7 @@ helper.contextualSuites('Entity (query)', [
   });
 
   var id = slugid.v4();
-  before(function() {
+  suiteSetup(function() {
     return Item.ensureTable().then(function() {
       return Promise.all([
         Item.create({
