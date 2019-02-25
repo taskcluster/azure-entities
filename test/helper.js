@@ -1,8 +1,18 @@
 var _      = require('lodash');
-var config = require('typed-env-config');
 var assert = require('assert');
 
-exports.cfg = config({});
+exports.cfg = {
+  tableName: 'azureEntityTests',
+  azure: {
+    accountId: process.env.AZURE_ACCOUNT_ID,
+    accessKey: process.env.AZURE_ACCOUNT_KEY,
+  },
+};
+
+if (!exports.cfg.azure.accountId || !exports.cfg.azure.accessKey) {
+  console.error('set $AZURE_ACCOUNT_ID and $AZURE_ACCOUNT_KEY to a testing Azure storage account.');
+  process.exit(1);
+}
 
 exports.contextualSuites = function(name, contexts, suiteFunc) {
   _.forEach(contexts, function(ctx) {

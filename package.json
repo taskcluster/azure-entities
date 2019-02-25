@@ -27,8 +27,7 @@
     "express": "^4.16.2",
     "mocha": "^4.0.1",
     "rewire": "^4.0.1",
-    "sinon": "^6.1.4",
-    "typed-env-config": "^1.1.0"
+    "sinon": "^6.1.4"
   },
   "main": "./src/entity",
   "files": [
