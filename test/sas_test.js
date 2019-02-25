@@ -2,25 +2,24 @@ var subject = require('../src/entity');
 var assert      = require('assert');
 var slugid      = require('slugid');
 var _           = require('lodash');
-var azureTable  = require('azure-table-node');
+var azure       = require('fast-azure-storage');
 var helper      = require('./helper');
 
 suite('Entity (Shared-Access-Signatures)', function() {
-  // azure-table-node takes different credentials format...
-  const credentials = {
-    accountName: helper.cfg.azure.accountId,
-    accountKey: helper.cfg.azure.accessKey,
-    accountUrl: `'https://${helper.cfg.azure.accountId}.table.core.windows.net/`,
-  };
-  var client = azureTable.createClient(credentials);
-  var sas = client.generateSAS(
-    helper.cfg.tableName,
-    'raud',
-    new Date(Date.now() + 15 * 60 * 1000),
-    {
-      start:  new Date(Date.now() - 15 * 60 * 1000),
-    }
-  );
+  const table = new azure.Table({
+    accountId: helper.cfg.azure.accountId,
+    accessKey: helper.cfg.azure.accessKey,
+  });
+  const sas = table.sas(helper.cfg.tableName, {
+    start: new Date(Date.now() - 15 * 60 * 1000),
+    expiry: new Date(Date.now() + 15 * 60 * 1000),
+    permissions: {
+      read: true,
+      add: true,
+      update: true,
+      delete: true,
+    },
+  });
 
   var Item = subject.configure({
     version:          1,
