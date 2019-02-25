@@ -5,7 +5,6 @@ var _               = require('lodash');
 var debug           = require('debug')('entity:types');
 var slugid          = require('slugid');
 var stringify       = require('json-stable-stringify');
-var buffertools     = require('buffertools');
 var crypto          = require('crypto');
 var azure           = require('fast-azure-storage');
 var Ajv             = require('ajv');
@@ -558,7 +557,7 @@ BlobType.prototype.equal = function(value1, value2) {
   if (value1.length !== value2.length) {
     return false;
   }
-  return buffertools.compare(value1, value2) === 0;
+  return Buffer.compare(value1, value2) === 0;
 };
 
 BlobType.prototype.clone = function(value) {
@@ -762,7 +761,7 @@ EncryptedBlobType.prototype.equal = function(value1, value2) {
   if (value1.length !== value2.length) {
     return false;
   }
-  return buffertools.compare(value1, value2) === 0;
+  return Buffer.compare(value1, value2) === 0;
 };
 
 EncryptedBlobType.prototype.clone = function(value) {
@@ -969,13 +968,13 @@ SlugIdArray.prototype.realloc = function() {
 /** Get indexOf of a slugid, -1 if it is not in the array */
 SlugIdArray.prototype.indexOf = function(slug) {
   var slug  = slugIdToBuffer(slug);
-  var index = buffertools.indexOf(this.buffer, slug);
+  var index = this.buffer.indexOf(slug);
 
   while (index !== -1 && index < this.length * SLUGID_SIZE) {
     if (index % SLUGID_SIZE === 0) {
       return index / SLUGID_SIZE;
     }
-    index = buffertools.indexOf(this.buffer, slug, index + 1);
+    index = this.buffer.indexOf(slug, index + 1);
   }
   return -1;
 };
@@ -1079,7 +1078,7 @@ SlugIdArray.prototype.clone = function() {
 /** Compare slugid arrays */
 SlugIdArray.prototype.equals = function(other) {
   assert(other instanceof SlugIdArray, 'Expected a SlugIdArray');
-  return buffertools.compare(
+  return Buffer.compare(
     this.getBufferView(),
     other.getBufferView()
   ) === 0;
