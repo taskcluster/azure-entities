@@ -669,7 +669,7 @@ Entity.setup = function(options) {
                                 'entities aren\'t signed!');
   }
 
-  if (options.credentials == 'inMemory') {
+  if (options.credentials === 'inMemory') {
     if (!inmemory) {
       inmemory = require('./inmemory'); // lazy-loaded
     }

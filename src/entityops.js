@@ -20,8 +20,8 @@ Op.prototype.ordered = null;
 /********************* In-Memory *********************/
 
 var comparisonFuncs = {};
-comparisonFuncs[azTableOps.Equal] =              function(x, y) { return x == y; };
-comparisonFuncs[azTableOps.NotEqual] =           function(x, y) { return x != y; };
+comparisonFuncs[azTableOps.Equal] =              function(x, y) { return x === y; };
+comparisonFuncs[azTableOps.NotEqual] =           function(x, y) { return x !== y; };
 comparisonFuncs[azTableOps.GreaterThan] =        function(x, y) { return x > y; };
 comparisonFuncs[azTableOps.GreaterThanOrEqual] = function(x, y) { return x >= y; };
 comparisonFuncs[azTableOps.LessThan] =           function(x, y) { return x < y; };

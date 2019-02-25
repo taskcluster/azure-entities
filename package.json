@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "azure-table-node": "^1.4.1",
-    "eslint-config-taskcluster": "^3.0.0",
+    "eslint-config-taskcluster": "^4.0.0",
     "express": "^4.16.2",
     "mocha": "^4.0.1",
     "rewire": "^4.0.1",

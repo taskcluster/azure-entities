@@ -97,7 +97,7 @@ helper.contextualSuites('Entity (modify)', helper.makeContexts(Item),
         assert(false, 'Expected an error');
       }, function(err) {
         assert(err.code === 'ResourceNotFound', 'Expected ResourceNotFound');
-        assert(err.statusCode == 404, 'Expected 404');
+        assert(err.statusCode === 404, 'Expected 404');
       });
     });
 
