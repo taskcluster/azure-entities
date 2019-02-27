@@ -196,8 +196,8 @@ InMemoryWrapper.prototype.queryEntities = async function(options) {
     var rowKey = options.nextRowKey,
       partitionKey = options.nextPartitionKey;
     while (entities.length > 0 &&
-           (entities[0].PartitionKey != partitionKey ||
-            entities[0].RowKey != rowKey)) {
+           (entities[0].PartitionKey !== partitionKey ||
+            entities[0].RowKey !== rowKey)) {
       entities.shift();
     }
   }
@@ -302,12 +302,12 @@ InMemoryWrapper.prototype.updateEntity = async function(entity, options) {
     throw makeError(404, 'ResourceNotFound');
   }
   if (tables[this.table][key]) {
-    if (options.eTag != '*') {
-      if (options.eTag && options.eTag != entityEtag(tables[this.table][key])) {
+    if (options.eTag !== '*') {
+      if (options.eTag && options.eTag !== entityEtag(tables[this.table][key])) {
         throw makeError(412, 'UpdateConditionNotSatisfied');
       }
     }
-    if (options.mode == 'replace') {
+    if (options.mode === 'replace') {
       tables[this.table][key] = entity;
     } else {
       var existing = tables[this.table][key];
@@ -319,7 +319,7 @@ InMemoryWrapper.prototype.updateEntity = async function(entity, options) {
     }
   } else if (!options.eTag) {
     tables[this.table][key] = entity;
-  } else if (options.eTag != '*') {
+  } else if (options.eTag !== '*') {
     throw makeError(404, 'ResourceNotFound');
   }
   return entityEtag(entity);
@@ -358,8 +358,8 @@ InMemoryWrapper.prototype.deleteEntity = async function(partitionKey, rowKey, op
   if (!table[key]) {
     throw makeError(404, 'ResourceNotFound');
   }
-  if (options.eTag != '*') {
-    if (options.eTag != entityEtag(table[key])) {
+  if (options.eTag !== '*') {
+    if (options.eTag !== entityEtag(table[key])) {
       throw makeError(412, 'UpdateConditionNotSatisfied');
     }
   }

@@ -2,7 +2,6 @@ var subject = require('../src/entity');
 var assert  = require('assert');
 var slugid  = require('slugid');
 var _       = require('lodash');
-var Promise = require('promise');
 var debug   = require('debug')('test:entity:create_load');
 var helper  = require('./helper');
 
@@ -98,7 +97,7 @@ helper.contextualSuites('Entity (modify)', helper.makeContexts(Item),
         assert(false, 'Expected an error');
       }, function(err) {
         assert(err.code === 'ResourceNotFound', 'Expected ResourceNotFound');
-        assert(err.statusCode == 404, 'Expected 404');
+        assert(err.statusCode === 404, 'Expected 404');
       });
     });
 

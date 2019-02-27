@@ -2,7 +2,6 @@ var subject = require('../src/entity');
 var assert  = require('assert');
 var slugid  = require('slugid');
 var _       = require('lodash');
-var Promise = require('promise');
 var debug   = require('debug')('test:entity:query');
 var helper  = require('./helper');
 
@@ -41,7 +40,7 @@ helper.contextualSuites('Entity (query)', [
   });
 
   var id = slugid.v4();
-  before(function() {
+  suiteSetup(function() {
     return Item.ensureTable().then(function() {
       return Promise.all([
         Item.create({
@@ -206,14 +205,14 @@ helper.contextualSuites('Entity (query)', [
     });
   });
 
-  test('Filter by time == Date(1)', function() {
+  test('Filter by time === Date(1)', function() {
     var sum = 0;
     return Item.query({
       id:       id,
       time:     new Date(1),
     }).then(function(data) {
       assert(data.entries.length === 1);
-      assert(data.entries[0].name == 'item2');
+      assert(data.entries[0].name === 'item2');
     });
   });
 
@@ -224,7 +223,7 @@ helper.contextualSuites('Entity (query)', [
       time:     subject.op.lessThan(new Date(1)),
     }).then(function(data) {
       assert(data.entries.length === 1);
-      assert(data.entries[0].name == 'item1');
+      assert(data.entries[0].name === 'item1');
     });
   });
 
@@ -245,11 +244,11 @@ helper.contextualSuites('Entity (query)', [
       time:     subject.op.greaterThan(new Date(100)),
     }).then(function(data) {
       assert(data.entries.length === 1);
-      assert(data.entries[0].name == 'item3');
+      assert(data.entries[0].name === 'item3');
     });
   });
 
-  test('Filter by active == true', function() {
+  test('Filter by active === true', function() {
     var sum = 0;
     return Item.query({
       id:       id,
@@ -262,14 +261,14 @@ helper.contextualSuites('Entity (query)', [
     });
   });
 
-  test('Filter by active == false', function() {
+  test('Filter by active === false', function() {
     var sum = 0;
     return Item.query({
       id:       id,
       active:   false,
     }).then(function(data) {
       assert(data.entries.length === 1);
-      assert(data.entries[0].name == 'item2');
+      assert(data.entries[0].name === 'item2');
       data.entries.forEach(function(item) {
         assert(item.active === false);
       });

@@ -3,7 +3,6 @@ var assert          = require('assert');
 var util            = require('util');
 var slugid          = require('slugid');
 var _               = require('lodash');
-var Promise         = require('promise');
 var debug           = require('debug')('base:entity');
 var azure           = require('fast-azure-storage');
 var https           = require('https');
@@ -670,7 +669,7 @@ Entity.setup = function(options) {
                                 'entities aren\'t signed!');
   }
 
-  if (options.credentials == 'inMemory') {
+  if (options.credentials === 'inMemory') {
     if (!inmemory) {
       inmemory = require('./inmemory'); // lazy-loaded
     }

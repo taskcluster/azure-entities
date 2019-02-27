@@ -2,7 +2,6 @@ var subject = require('../src/entity');
 var assert  = require('assert');
 var slugid  = require('slugid');
 var _       = require('lodash');
-var Promise = require('promise');
 var debug   = require('debug')('test:entity:signEntities');
 var helper  = require('./helper');
 

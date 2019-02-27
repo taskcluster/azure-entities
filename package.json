@@ -14,22 +14,19 @@
     "url": "https://github.com/taskcluster/azure-entities.git"
   },
   "dependencies": {
-    "ajv": "^5.3.0",
-    "debug": "^3.1.0",
-    "fast-azure-storage": "^2.3.0",
+    "ajv": "^6.9.2",
+    "debug": "^4.1.1",
+    "fast-azure-storage": "^2.3.1",
     "json-stable-stringify": "^1.0.0",
-    "lodash": "^4.17.4",
-    "promise": "^8.0.1",
-    "slugid": "^1.0.3"
+    "lodash": "^4.17.11",
+    "slugid": "^2.0.0"
   },
   "devDependencies": {
-    "azure-table-node": "^1.4.1",
-    "eslint-config-taskcluster": "^3.0.0",
-    "express": "^4.16.2",
-    "mocha": "^4.0.1",
+    "eslint-config-taskcluster": "^4.0.0",
+    "express": "^4.16.4",
+    "mocha": "^6.0.1",
     "rewire": "^4.0.1",
-    "sinon": "^6.1.4",
-    "typed-env-config": "^1.1.0"
+    "sinon": "^7.2.4"
   },
   "main": "./src/entity",
   "files": [

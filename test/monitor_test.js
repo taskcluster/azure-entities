@@ -5,7 +5,6 @@ const helper    = require('./helper');
 const assert    = require('assert');
 const slugid    = require('slugid');
 const _         = require('lodash');
-const Promise   = require('promise');
 const debug     = require('debug')('test:entity:create_load');
 
 const ItemV1 = subject.configure({
