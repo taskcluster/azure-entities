@@ -22,11 +22,11 @@
     "slugid": "^2.0.0"
   },
   "devDependencies": {
-    "eslint-config-taskcluster": "^4.0.0",
-    "express": "^4.16.4",
-    "mocha": "^6.0.1",
-    "rewire": "^4.0.1",
-    "sinon": "^7.2.4"
+    "eslint-config-taskcluster": "4.0.0",
+    "express": "4.16.4",
+    "mocha": "6.0.1",
+    "rewire": "4.0.1",
+    "sinon": "7.2.4"
   },
   "main": "./src/entity",
   "files": [
