@@ -3,7 +3,7 @@ var assert          = require('assert');
 var util            = require('util');
 var slugid          = require('slugid');
 var _               = require('lodash');
-var debug           = require('debug')('base:entity');
+var debug           = require('debug');
 var azure           = require('fast-azure-storage');
 var https           = require('https');
 var crypto          = require('crypto');
@@ -94,6 +94,8 @@ var Entity = function(entity) {
   this._etag          = entity['odata.etag'];
 };
 
+Entity.debug = debug('base:entity');
+
 // Built-in type handlers
 Entity.types  = require('./entitytypes');
 
@@ -144,7 +146,7 @@ var rethrowDebug = function() {
   return function(err) {
     var params = Array.prototype.slice.call(args);
     params.push(err);
-    debug.apply(debug, params);
+    Entity.debug.apply(Entity.debug, params);
     throw err;
   };
 };
@@ -717,7 +719,7 @@ Entity.setup = function(options) {
       if (d > options.operationReportThreshold ||
         options.operationReportChance && options.operationReportChance > Math.random()) {
         // TODO: This is a great place for structured logging!
-        debug(`TIMING: ${name} on ${options.tableName} took ${d} milliseconds.`);
+        Entity.debug(`TIMING: ${name} on ${options.tableName} took ${d} milliseconds.`);
       }
       if (options.monitor) {
         options.monitor.measure(status, d);
@@ -983,7 +985,7 @@ Entity.prototype.modify = function(modifier) {
 
         // Check for changes
         if (!isChanged) {
-          debug('Return modify trivially, as no changes was made by modifier');
+          Entity.debug('Return modify trivially, as no changes was made by modifier');
           return self;
         }
 
@@ -1028,14 +1030,14 @@ Entity.prototype.modify = function(modifier) {
 
       // rethrow error, if it's not caused by optimistic concurrency
       if (!err || err.code !== 'UpdateConditionNotSatisfied') {
-        debug('Update of entity failed unexpected, err: %j', err, err.stack);
+        Entity.debug('Update of entity failed unexpected, err: %j', err, err.stack);
         throw err;
       }
 
       // Decrement number of attempts left
       attemptsLeft -= 1;
       if (attemptsLeft === 0) {
-        debug('ERROR: MAX_MODIFY_ATTEMPTS exhausted, we might have congestion');
+        Entity.debug('ERROR: MAX_MODIFY_ATTEMPTS exhausted, we might have congestion');
         var err = new Error('MAX_MODIFY_ATTEMPTS exhausted, check for congestion');
         err.code = 'EntityWriteCongestionError';
         err.originalEntity = properties;
