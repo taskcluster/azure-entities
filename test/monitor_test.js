@@ -1,6 +1,5 @@
-const rewire    = require('rewire');
 const sinon     = require('sinon');
-const subject   = rewire('../src/entity');
+const subject   = require('../src/entity');
 const helper    = require('./helper');
 const assert    = require('assert');
 const slugid    = require('slugid');
@@ -24,14 +23,14 @@ suite('Monitoring Integration', function() {
   let newbug = null;
 
   setup(async function() {
-    oldbug = subject.__get__('debug');
+    oldbug = subject.debug;
     newbug = sinon.fake();
-    subject.__set__('debug', newbug);
+    subject.debug = newbug;
     monitor = new helper.MockMonitor();
   });
 
   teardown(function() {
-    subject.__set__('debug', oldbug);
+    subject.debug = oldbug;
   });
 
   test('Item.load writes stats (report chance)', async function() {
