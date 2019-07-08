@@ -16,7 +16,7 @@
   "dependencies": {
     "ajv": "^6.9.2",
     "debug": "^4.1.1",
-    "fast-azure-storage": "^3.0.0",
+    "fast-azure-storage": "^3.0.1",
     "json-stable-stringify": "^1.0.0",
     "lodash": "^4.17.11",
     "slugid": "^2.0.0"
