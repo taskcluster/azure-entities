@@ -33,7 +33,11 @@ helper.contextualSuites('Entity (query)', [
       time:           subject.types.Date,
       active:         subject.types.Boolean,
     },
-  }).setup(_.defaults(options));
+  });
+
+  suiteSetup(function() {
+    Item = Item.setup(_.defaults(options));
+  });
 
   setup(function() {
     return Item.ensureTable();

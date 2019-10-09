@@ -19,7 +19,10 @@ var Item = subject.configure({
 helper.contextualSuites('Entity (EncryptedBlobType)', helper.makeContexts(Item, {
   cryptoKey:    'CNcj2aOozdo7Pn+HEkAIixwninIwKnbYc6JPS9mNxZk=',
 }), function(context, options) {
-  var Item = options.Item;
+  let Item;
+  suiteSetup(function() {
+    Item = options().Item;
+  });
 
   setup(function() {
     return Item.ensureTable();

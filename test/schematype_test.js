@@ -55,7 +55,11 @@ helper.contextualSuites('Entity', [
         name:           subject.types.String,
         data:           options.type,
       },
-    }).setup(_.defaults({}, config, options.config));
+    });
+
+    suiteSetup(function() {
+      Item = Item.setup(_.defaults({}, config, options.config));
+    });
 
     setup(function() {
       return Item.ensureTable();

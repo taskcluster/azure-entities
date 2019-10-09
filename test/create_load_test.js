@@ -65,8 +65,11 @@ helper.contextualSuites('Entity (create/load)', [
     },
   },
 ], function(context, options) {
-  var Item  = options.Item,
-    Item2 = options.Item2;
+  let Item, Item2;
+  suiteSetup(function() {
+    Item = options().Item;
+    Item2 = options().Item2;
+  });
   var id = slugid.v4();
 
   test('Item.ensureTable', function() {

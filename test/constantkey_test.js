@@ -17,7 +17,10 @@ var Item = subject.configure({
 
 helper.contextualSuites('Entity (ConstantKey)', helper.makeContexts(Item),
   function(context, options) {
-    var Item = options.Item;
+    let Item;
+    suiteSetup(function() {
+      Item = options().Item;
+    });
 
     setup(function() {
       return Item.ensureTable();
@@ -48,7 +51,10 @@ Item = subject.configure({
 
 helper.contextualSuites('Entity (ConstantKey + CompositeKey)', helper.makeContexts(Item),
   function(context, options) {
-    var Item = options.Item;
+    let Item;
+    suiteSetup(function() {
+      Item = options().Item;
+    });
 
     setup(function() {
       return Item.ensureTable();
