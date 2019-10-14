@@ -1,25 +1,39 @@
 var _      = require('lodash');
 var assert = require('assert');
+const taskcluster = require('taskcluster-client');
 
+const credentials = {};
 exports.cfg = {
   tableName: 'azureEntityTests',
-  azure: {
-    accountId: process.env.AZURE_ACCOUNT_ID,
-    accessKey: process.env.AZURE_ACCOUNT_KEY,
-  },
+  azure: credentials,
 };
 
-if (!exports.cfg.azure.accountId || !exports.cfg.azure.accessKey) {
-  console.error('set $AZURE_ACCOUNT_ID and $AZURE_ACCOUNT_KEY to a testing Azure storage account.');
+suiteSetup(async () => {
+  credentials.accountId = process.env.AZURE_ACCOUNT;
+  credentials.accessKey = process.env.AZURE_ACCOUNT_KEY;
+
+  if (credentials.accountId && credentials.accessKey) {
+    return;
+  }
+
+  // load credentials from the secret if running in CI
+  if (process.env.TASKCLUSTER_PROXY_URL) {
+    console.log('loading credentials from secret via TASKCLUSTER_PROXY_URL');
+    const client = new taskcluster.Secrets({rootUrl: process.env.TASKCLUSTER_PROXY_URL});
+    const res = await client.get('project/taskcluster/testing/azure');
+    console.log(res.secret);
+    credentials.accountId = res.secret.AZURE_ACCOUNT;
+    credentials.accessKey = res.secret.AZURE_ACCOUNT_KEY;
+    return;
+  }
+
+  console.error('set $AZURE_ACCOUNT and $AZURE_ACCOUNT_KEY to a testing Azure storage account.');
   process.exit(1);
-}
+});
 
 exports.contextualSuites = function(name, contexts, suiteFunc) {
   _.forEach(contexts, function(ctx) {
     var options = ctx.options;
-    if (typeof options === 'function') {
-      options = options();
-    }
     suite(name + ' (' + ctx.context + ')', function() {
       suiteFunc.bind(this)(ctx.context, options);
     });

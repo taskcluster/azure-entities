@@ -6,20 +6,7 @@ var azure       = require('fast-azure-storage');
 var helper      = require('./helper');
 
 suite('Entity (Shared-Access-Signatures)', function() {
-  const table = new azure.Table({
-    accountId: helper.cfg.azure.accountId,
-    accessKey: helper.cfg.azure.accessKey,
-  });
-  const sas = table.sas(helper.cfg.tableName, {
-    start: new Date(Date.now() - 15 * 60 * 1000),
-    expiry: new Date(Date.now() + 15 * 60 * 1000),
-    permissions: {
-      read: true,
-      add: true,
-      update: true,
-      delete: true,
-    },
-  });
+  let table, sas;
 
   var Item = subject.configure({
     version:          1,
@@ -30,12 +17,31 @@ suite('Entity (Shared-Access-Signatures)', function() {
       name:           subject.types.String,
       count:          subject.types.Number,
     },
-  }).setup({
-    credentials: {
-      accountId:      helper.cfg.azure.accountId,
-      sas:            sas,
-    },
-    tableName:        helper.cfg.tableName,
+  });
+  suiteSetup(function() {
+    table = new azure.Table({
+      accountId: helper.cfg.azure.accountId,
+      accessKey: helper.cfg.azure.accessKey,
+    });
+
+    sas = table.sas(helper.cfg.tableName, {
+      start: new Date(Date.now() - 15 * 60 * 1000),
+      expiry: new Date(Date.now() + 15 * 60 * 1000),
+      permissions: {
+        read: true,
+        add: true,
+        update: true,
+        delete: true,
+      },
+    });
+
+    Item = Item.setup({
+      credentials: {
+        accountId:      helper.cfg.azure.accountId,
+        sas:            sas,
+      },
+      tableName:        helper.cfg.tableName,
+    });
   });
 
   test('ensureTable doesn\'t fail', async function() {

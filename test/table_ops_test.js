@@ -40,7 +40,10 @@ helper.contextualSuites('Entity (modify)', [
     },
   },
 ], function(context, options) {
-  var Item = options.Item;
+  let Item;
+  suiteSetup(function() {
+    Item = options().Item;
+  });
 
   var cleanup = function() {
     // try to remove the table, ignoring errors (usually 404)

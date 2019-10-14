@@ -19,7 +19,10 @@ var Item = subject.configure({
 
 helper.contextualSuites('Entity (DescendingIntegerKey)',
   helper.makeContexts(Item), function(ctx, options) {
-    let {Item} = options;
+    let Item;
+    suiteSetup(function() {
+      Item = options().Item;
+    });
     let text = slugid.v4();
 
     setup(function() {
