@@ -670,7 +670,7 @@ exports.Schema = function(schema) {
     }
     let err = new Error(
       'SchemaEnforcedType \'' + this.property +
-      '\' schema validation failed: ' + ajv.errorsText(validate.errors)
+      '\' schema validation failed: ' + ajv.errorsText(validate.errors),
     );
     err.errors = validate.errors;
     err.value = value;
@@ -874,7 +874,7 @@ exports.EncryptedSchema = function(schema) {
     }
     let err = new Error(
       'EncryptedSchemaEnforcedType \'' + this.property +
-      '\' schema validation failed: ' + ajv.errorsText(validate.errors)
+      '\' schema validation failed: ' + ajv.errorsText(validate.errors),
     );
     err.errors = validate.errors;
     err.value = value;
@@ -1026,7 +1026,7 @@ SlugIdArray.prototype.remove = function(slug) {
     this.buffer.copy(
       this.buffer,
       index * SLUGID_SIZE,
-      (index + 1) * SLUGID_SIZE
+      (index + 1) * SLUGID_SIZE,
     );
     this.avail  += 1;
     this.length -= 1;
@@ -1080,7 +1080,7 @@ SlugIdArray.prototype.equals = function(other) {
   assert(other instanceof SlugIdArray, 'Expected a SlugIdArray');
   return Buffer.compare(
     this.getBufferView(),
-    other.getBufferView()
+    other.getBufferView(),
   ) === 0;
 };
 

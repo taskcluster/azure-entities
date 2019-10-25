@@ -341,7 +341,7 @@ Entity.configure = function(options) {
     subClass.prototype.__aux           === undefined &&
     subClass.prototype.__filterBuilder === undefined &&
     subClass.prototype.__table         === undefined,
-    'This `Entity` subclass is already setup!'
+    'This `Entity` subclass is already setup!',
   );
 
   // Check that version in incremented by 1
@@ -379,7 +379,7 @@ Entity.configure = function(options) {
   // and validate that they are present
   if (options.version === 1) {
     var propertiesToLock = subClass.prototype.__partitionKey.covers.concat(
-      subClass.prototype.__rowKey.covers
+      subClass.prototype.__rowKey.covers,
     );
     var lockedProperties = {};
     propertiesToLock.forEach(function(property) {
@@ -609,7 +609,7 @@ Entity.setup = function(options) {
     subClass.prototype.__deserialize  &&
     subClass.prototype.__partitionKey &&
     subClass.prototype.__rowKey,
-    'Must be configured first, see `Entity.configure`'
+    'Must be configured first, see `Entity.configure`',
   );
 
   // Don't allow setup to run twice, there is no reasons for this. In particular
@@ -620,7 +620,7 @@ Entity.setup = function(options) {
     subClass.prototype.__filterBuilder === undefined &&
     subClass.prototype.__table         === undefined &&
     subClass.prototype.__signingKey    === undefined,
-    'This `Entity` subclass is already setup!'
+    'This `Entity` subclass is already setup!',
   );
 
   // Define access properties, we do this here, as doing it in Entity.configure
@@ -765,7 +765,7 @@ Entity.ensureTable = function() {
     }
   }).catch(rethrowDebug(
     'ensureTable: Failed to create table \'%s\' with err: %j',
-    ClassProps.__table
+    ClassProps.__table,
   ));
 };
 
@@ -780,7 +780,7 @@ Entity.removeTable = function() {
 
   return ClassProps.__aux.deleteTable().catch(rethrowDebug(
     'deleteTable: Failed to delete table \'%s\' with err: %j',
-    ClassProps.__table
+    ClassProps.__table,
   ));
 };
 
@@ -835,7 +835,7 @@ Entity.load = function(properties, ignoreIfNotExists) {
 
   return ClassProps.__aux.getEntity(
     partitionKey,
-    rowKey
+    rowKey,
   ).then(wrapEntityClass(Class), function(err) {
     if (ignoreIfNotExists && err && err.code === 'ResourceNotFound') {
       return null; // Ignore entity that doesn't exists
@@ -896,7 +896,7 @@ Entity.prototype.reload = function() {
 
   return this.__aux.getEntity(
     this._partitionKey,
-    this._rowKey
+    this._rowKey,
   ).then(function(entity) {
     // Deserialize a shadow object from the entity
     self._properties    = self.__deserialize(entity);
@@ -964,7 +964,7 @@ Entity.prototype.modify = function(modifier) {
     // Invoke modifier
     return Promise.resolve(modifier.call(
       self._properties,
-      self._properties
+      self._properties,
     )).then(function() {
       var entityChanges = {};       // Track changes we have to upload
       var mode          = 'merge';  // Track update mode

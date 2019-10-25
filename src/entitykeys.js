@@ -180,7 +180,7 @@ AscendingIntegerKey.prototype.exact = function(properties) {
   // Return exact key
   var str = value.toString();
   return ASCENDING_KEY_PADDING.substring(
-    0, ASCENDING_KEY_PADDING.length - str.length
+    0, ASCENDING_KEY_PADDING.length - str.length,
   ) + str;
 };
 
@@ -193,7 +193,7 @@ AscendingIntegerKey.prototype.exactFromConditions = function(properties) {
   // Return exact key
   var str = value.toString();
   return ASCENDING_KEY_PADDING.substring(
-    0, ASCENDING_KEY_PADDING.length - str.length
+    0, ASCENDING_KEY_PADDING.length - str.length,
   ) + str;
 };
 
