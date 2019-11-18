@@ -788,7 +788,7 @@ Entity.removeTable = function() {
  * Create an entity on azure table with property and mapping.
  * Returns a promise for an instance of `this` (typically an Entity subclass)
  */
-Entity.create = function(properties, overwriteIfExists) {
+Entity.create = async function(properties, overwriteIfExists) {
   var Class       = this;
   var ClassProps  = Class.prototype;
   assert(properties, 'Properties is required');

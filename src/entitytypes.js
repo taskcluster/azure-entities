@@ -23,6 +23,16 @@ var checkType = function(name, property, value, types) {
   }
 };
 
+var checkSize = function(property, value, maxSize) {
+  if (value.length <= maxSize) {
+    return;
+  }
+  var err = new Error('Property ' + property + ' is larger than ' + maxSize +
+    ' bytes when encoded for storage');
+  err.code = 'PropertyTooLarge';
+  throw err;
+};
+
 /******************** Base Type ********************/
 
 /** Base class for all Entity serializable data types */
@@ -485,7 +495,7 @@ BaseBufferType.prototype.fromBuffer = function(buffer, cryptoKey) {
 
 BaseBufferType.prototype.serialize = function(target, value, cryptoKey) {
   value = this.toBuffer(value, cryptoKey);
-  assert(value.length <= 256 * 1024, 'Can\'t store buffers > 256kb');
+  checkSize(this.property, value, 256 * 1024);
   // We have one chunk per 64kb
   var chunks = Math.ceil(value.length / (64 * 1024));
   for (var i = 0; i < chunks; i++) {
@@ -706,8 +716,7 @@ EncryptedBaseType.prototype.fromPlainBuffer = function(buffer) {
 EncryptedBaseType.prototype.toBuffer = function(value, cryptoKey) {
   var plainBuffer = this.toPlainBuffer(value);
   // Need room for initialization vector and any padding
-  assert(plainBuffer.length <= 256 * 1024 - 32,
-    'Can\'t store buffers > 256 * 1024 - 32 bytes');
+  checkSize(this.property, plainBuffer, 256 * 1024 - 32);
   var iv          = crypto.randomBytes(16);
   var cipher      = crypto.createCipheriv('aes-256-cbc', cryptoKey, iv);
   var c1          = cipher.update(plainBuffer);
