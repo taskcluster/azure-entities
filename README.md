@@ -114,6 +114,8 @@ The following types are encrypted, and require additional arguments to the
 Note that all entity types have a maximum stored size of 256k.  Do not store
 values of unbounded size in a single row.
 
+Note that the arbitrary-sized property types, such as String and Blob, can result in an error with `err.code === 'PropertyTooLarge'` if the property is too large.
+
 #### Keys
 
 The `partitionKey` and `rowKey` options are used to describe how the Azure
@@ -328,6 +330,8 @@ await entity.modify(function(entity) {
   entity.property = "new value";
 });
 ```
+
+Note that the arbitrary-sized property types, such as String and Blob, can result in an error with `err.code === 'PropertyTooLarge'` on creation or modification if the property is too large.
 
 The `remove` method will remove a row.  This can be called either as a class
 method (in which case the row is not loaded) or as an instance method.  Both

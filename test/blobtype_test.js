@@ -94,7 +94,7 @@ helper.contextualSuites('Entity (BlobType)', helper.makeContexts(Item),
     });
 
     test('large blob (256k)', function() {
-      var id  = slugid.v4();7;
+      var id  = slugid.v4();
       var buf = crypto.pseudoRandomBytes(256 * 1024);
       return Item.create({
         id:     id,
@@ -108,5 +108,15 @@ helper.contextualSuites('Entity (BlobType)', helper.makeContexts(Item),
           assert(compareBuffers(itemA.data, itemB.data));
         });
       });
+    });
+
+    test('too-large blob (512k)', function() {
+      var id  = slugid.v4();
+      var buf = crypto.pseudoRandomBytes(512 * 1024);
+      return assert.rejects(() => Item.create({
+        id:     id,
+        name:   'my-test-item',
+        data:   buf,
+      }), err => err.code === 'PropertyTooLarge');
     });
   });
