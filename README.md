@@ -275,6 +275,26 @@ The `operationReportChance` and `operationReportThreshold` options control the
 frequency of debug logging about API method timing, and may be removed from the
 library soon.
 
+### Method Summary
+
+An entity class has the following "class methods", defined in the following
+sections:
+
+* `MyEntity.ensureTable()`
+* `MyEntity.removeTable()`
+* `MyEntity.create({properties}, overwrite)`
+* `MyEntity.remove({properties}, ignoreIfNotExists)`
+* `MyEntity.load({properties}, ignoreIfNotExists)`
+* `MyEntity.scan({conditions}, {options})`
+* `MyEntity.query({conditions}, {options})`
+
+An instance of this class, a row from the table, has the following methods,
+also defined below:
+
+* `entity.modify(modifier)`
+* `entity.remove(ignoreChanges, ignoreIfNotExists)`
+* `entity.reload()`
+
 ### Table Operations
 
 To ensure that the underlying Azure table actually exists, call
@@ -292,6 +312,8 @@ re-creation of a table until some time after the remove operation returns.
 
 ### Row Operations
 
+#### create
+
 The `create` method creates a new row.  Its first argument gives the
 properties for the new row.  If its second argument is true, it will overwrite
 any existing row with the same primary key.
@@ -303,13 +325,21 @@ await MyEntity.create({
 }, true);
 ```
 
+The `query` method returns an instance, just like `load`, which can be used for
+further operations such as `modify` or `remove`.
+
+If the second argument is false and the row already exists, the method fails
+with an error with `err.code === 'EntityAlreadyExists'`.
+
+#### modify
+
 The `modify` method modifies a row, given a modifier.  The modifier is a
 function that is called with a clone of the entity as `this` and first
 argument, it should apply modifications to `this` (or first argument).  This
 function shouldn't have side-effects (or these should be contained), as the
 `modifier` may be called more than once, if the update operation fails.
 
-This method will apply `modified` to a clone of the current data and attempt
+This method will apply `modifier` to a clone of the current data and attempt
 to save it. But if this fails because the entity have been updated by another
 process (the ETag is out of date), it'll reload the entity from the Azure
 table, invoke the modifier again, and try to save again. This model fits very
@@ -333,10 +363,13 @@ await entity.modify(function(entity) {
 
 Note that the arbitrary-sized property types, such as String and Blob, can result in an error with `err.code === 'PropertyTooLarge'` on creation or modification if the property is too large.
 
+#### remove
+
 The `remove` method will remove a row.  This can be called either as a class
 method (in which case the row is not loaded) or as an instance method.  Both
 methods have `ignoreIfNotExists` as a second argument, and if true this will
-cause the method to return successfully if the row is not present.
+cause the method to return successfully if the row is not present.  If false,
+the method will throw an error with `err.code === 'ResourceNotFound'`.
 
 ```js
 await MyEntity.remove({id: myThingId})
@@ -354,6 +387,8 @@ row.remove()
 
 ### Queries
 
+#### load
+
 The `load` method will turn a single existing entity, given enough properties
 to determine the row key and partition key.  The method will throw an error if
 the row does not exist, unless its second argument is true.
@@ -363,12 +398,19 @@ var entity = await MyEntity.load({id: myThingId});
 var maybe = await MyEntity.load({id: myThingId}, true);
 ```
 
+The error thrown when the entity does not exist has `err.code ===
+'ResourceNotFound'`.
+
+#### reload
+
 An existing row has a `reload` method which will load the properties from the
 table once more, and return true if anything has changed.
 
 ```js
 var updated = entity.reload();
 ```
+
+#### scan
 
 The `scan` method will scan the entire table, filtering on properties and
 possibly accelerated with partitionKey and rowKey indexes.
@@ -442,6 +484,8 @@ use this to continue the table scan. A continuation token is a a string that
 matches `Entity.continuationTokenPattern`.  You can use this pattern to detect
 invalid continuation tokens from your users and offer a suitable error message.
 
+#### query
+
 The `query` method is exactly the same as `Entity.scan` except
 `matchPartition` is set to to `'exact'`. This means that conditions
 **must** provide enough constraints for constructions of the partition-key.
@@ -454,6 +498,14 @@ workers.
 If you use `Entity.query` you don't run the risk of executing a full table
 scan. But depending on the size of your partitions it may still be a lengthy
 operation. Always query with care.
+
+### Errors
+
+This library can throw arbitrary errors from the underlying implementation libraries.  The three well-defined errors can be identified as follows:
+
+* `err.code === 'PropertyTooLarge'` - a property of the entity exceeds the allowable space.
+* `err.code === 'ResourceNotFound'` - an entry with the given partitionKey / rowKey does not exist in the table
+* `err.code === 'EntityAlreadyExists'` - an entity with the same partitionKey / rowKey already exists
 
 # Development
 
