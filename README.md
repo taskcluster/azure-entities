@@ -22,8 +22,8 @@ The configure call returns the class, and takes options:
 ```js
 {
   version:           2,                    // Version of the schema
-  partitionKey:      Entity.HashKey('prop1'), // Partition key, can be StringKey
-  rowKey:            Entity.StringKey('prop2', 'prop3'), // RowKey...
+  partitionKey:      Entity.keys.HashKey('prop1'), // Partition key, can be StringKey
+  rowKey:            Entity.keys.StringKey('prop2', 'prop3'), // RowKey...
   properties: {
     prop1:           Entity.types.Blob,    // Properties and types
     prop2:           Entity.types.String,
@@ -57,8 +57,8 @@ var Entity = require('azure-entities');
 // Create an abstract key-value pair
 var AbstractKeyValue = Entity.configure({
   version:     1,
-  partitionKey:    Entity.StringKey('key'),
-  rowKey:          Entity.ConstantKey('kv-pair'),
+  partitionKey:    Entity.keys.StringKey('key'),
+  rowKey:          Entity.keys.ConstantKey('kv-pair'),
   properties: {
     key:           Entity.types.String,
     value:         Entity.types.JSON
@@ -68,8 +68,8 @@ var AbstractKeyValue = Entity.configure({
 // Overwrite the previous definition AbstractKeyValue with a new version
 AbstractKeyValue = AbstractKeyValue.configure({
   version:         2,
-  partitionKey:    Entity.StringKey('key'),
-  rowKey:          Entity.ConstantKey('kv-pair'),
+  partitionKey:    Entity.keys.StringKey('key'),
+  rowKey:          Entity.keys.ConstantKey('kv-pair'),
   properties: {
     key:           Entity.types.String,
     date:          Entity.types.Date
