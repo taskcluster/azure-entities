@@ -3,6 +3,7 @@ var assert  = require('assert');
 var slugid  = require('slugid');
 var _       = require('lodash');
 var debug   = require('debug')('test:entity:signEntities');
+var azure   = require('fast-azure-storage');
 var helper  = require('./helper');
 
 helper.contextualSuites('Entity (signEntities)', [
@@ -284,6 +285,28 @@ helper.contextualSuites('Entity (signEntities)', [
       });
     });
   });
+
+  if (context === 'Azure') {
+    test('check for stable signature', async function() {
+      const id = 'ZqZrh4PeQp6eS6alJNANLg';
+      const name = 'stable entity';
+      await Item3.remove({id, name}, true);
+      const item = await Item3.create({id, name, count: 42});
+
+      const table = new azure.Table({
+        accountId: helper.cfg.azure.accountId,
+        accessKey: helper.cfg.azure.accessKey,
+      });
+
+      const row = await table.getEntity(
+        helper.cfg.tableName,
+        item._partitionKey,
+        item._rowKey,
+        {});
+      assert.equal(row.Signature,
+        'Ngc8HXokZRUuUJadEPtlYXbDPrV/C52eCR6aviiyLtaxvaV1LrWy0tFOjx0LzsiCd2Tq2dciEtL65cIfK8ohTQ==');
+    });
+  }
 
   test('Item3.load (invalid signature)', function() {
     var BadKeyItem3 = ItemV3.setup(_.defaults({}, options, {
