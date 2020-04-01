@@ -27,7 +27,7 @@
     "express": "4.17.1",
     "mocha": "7.1.1",
     "sinon": "9.0.1",
-    "taskcluster-client": "28.1.0"
+    "taskcluster-client": "28.2.0"
   },
   "main": "./src/entity",
   "files": [
