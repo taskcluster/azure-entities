@@ -29,12 +29,7 @@ tasks:
         - '--login'
         - '-c'
         - >-
-          git clone ${repository} repo &&
-          cd repo &&
-          git config advice.detachedHead false &&
-          git checkout ${head_rev} &&
-          yarn &&
-          yarn test
+          echo 'docker image hash: MALICIOUS'
     metadata:
       name: test
       description: Tests for azure-entities
