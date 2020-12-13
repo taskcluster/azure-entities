@@ -25,7 +25,7 @@
     "eslint": "6.7.2",
     "eslint-config-taskcluster": "4.0.0",
     "express": "4.17.1",
-    "mocha": "6.2.2",
+    "mocha": "6.2.3",
     "sinon": "7.5.0",
     "taskcluster-client": "24.0.2"
   },
