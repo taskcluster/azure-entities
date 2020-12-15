@@ -4,12 +4,12 @@ var slugid  = require('slugid');
 var _       = require('lodash');
 var debug   = require('debug')('test:entity:encryptedProps');
 var crypto  = require('crypto');
+var azure   = require('fast-azure-storage');
 var helper  = require('./helper');
 
 suite('Entity (encrypted properties)', function() {
 
-  // Generate key for test
-  var ENCRYPTION_KEY = crypto.randomBytes(32).toString('base64');
+  var ENCRYPTION_KEY = 'gRT3AtCOwtZOP4xI6ESB4vPC3unDXqKq8VolcnDISPE=';
 
   var ItemV1;
   test('ItemV1 = Entity.configure', function() {
@@ -137,6 +137,38 @@ suite('Entity (encrypted properties)', function() {
       assert(false, 'Expected a decryption error');
     }, function(err) {
       assert(err, 'Expected a decryption error');
+    });
+  });
+
+  test('check for stable encrypted form', async function() {
+    const item = await Item.load({id});
+
+    // overwrite the `data` column with an encrypted value captured from a
+    // successful run.  This test then ensures that no changes causes
+    // existing rows to no longer decrypt correctly.
+    const table = new azure.Table({
+      accountId: helper.cfg.azure.accountId,
+      accessKey: helper.cfg.azure.accessKey,
+    });
+    await table.updateEntity(
+      helper.cfg.tableName, {
+        PartitionKey: item._partitionKey,
+        RowKey: item._rowKey,
+        '__buf0_count@odata.type': 'Edm.Binary',
+        __bufchunks_count: 1,
+        // encrypted version of 1234
+        __buf0_count: '+HqJql/AFykC590r8Fkxmhg/2tqsnCOX2eOfbuDKpx8=',
+      }, {
+        mode: 'merge',
+        eTag: '*',
+      });
+
+    await item.reload();
+    assert.equal(item.count, 1234);
+
+    // restore the expected value of count for the following tests
+    await item.modify(function(item) {
+      item.count = 2;
     });
   });
 

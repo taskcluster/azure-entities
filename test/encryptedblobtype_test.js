@@ -1,5 +1,6 @@
 var subject = require('../src/entity');
 var assert  = require('assert');
+var azure   = require('fast-azure-storage');
 var slugid  = require('slugid');
 var _       = require('lodash');
 var crypto  = require('crypto');
@@ -59,6 +60,38 @@ helper.contextualSuites('Entity (EncryptedBlobType)', helper.makeContexts(Item, 
       });
     });
   });
+
+  if (context === 'Azure') {
+    test('check for stable encrypted form', async function() {
+      const id = slugid.v4();
+      const name = 'my-test-item';
+      const data = Buffer.from([9, 9, 9, 9]); // *not* 1, 2, 3, 4
+      const item = await Item.create({id, name, data});
+
+      // overwrite the `data` column with an encrypted value captured from a
+      // successful run.  This test then ensures that no changes causes
+      // existing rows to no longer decrypt correctly.
+      const table = new azure.Table({
+        accountId: helper.cfg.azure.accountId,
+        accessKey: helper.cfg.azure.accessKey,
+      });
+      await table.updateEntity(
+        helper.cfg.tableName, {
+          PartitionKey: item._partitionKey,
+          RowKey: item._rowKey,
+          '__buf0_data@odata.type': 'Edm.Binary',
+          __bufchunks_data: 1,
+          // encrypted version of [0, 1, 2, 3]
+          __buf0_data: '4uNlCrg5nvXMRpXC9Hz87of+M5KjrA69qFgh2/s3OfY=',
+        }, {
+          mode: 'merge',
+          eTag: '*',
+        });
+
+      await item.reload();
+      assert.deepEqual(item.data, Buffer.from([0, 1, 2, 3]));
+    });
+  }
 
   test('large blob (64k)', function() {
     var id  = slugid.v4();
